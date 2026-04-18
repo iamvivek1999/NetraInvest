@@ -73,3 +73,25 @@ export const updateCampaign = async (campaignId, updates) => {
   const { data } = await client.patch(`/campaigns/${campaignId}`, updates);
   return data.data.campaign;
 };
+
+// ─── Submit campaign for review ────────────────────────────────────────────────
+export const submitCampaign = async (campaignId) => {
+  const { data } = await client.post(`/campaigns/${campaignId}/submit`);
+  return data.data.campaign;
+};
+
+// ─── Milestone Operations ─────────────────────────────────────────────────────
+export const getMilestones = async (campaignId) => {
+  const { data } = await client.get(`/campaigns/${campaignId}/milestones`);
+  return data.data.milestones;
+};
+
+export const getMilestone = async (campaignId, milestoneId) => {
+  const { data } = await client.get(`/campaigns/${campaignId}/milestones/${milestoneId}`);
+  return data.data.milestone;
+};
+
+export const submitMilestoneProof = async (campaignId, milestoneId, payload) => {
+  const { data } = await client.patch(`/campaigns/${campaignId}/milestones/${milestoneId}/submit`, payload);
+  return data.data.milestone;
+};

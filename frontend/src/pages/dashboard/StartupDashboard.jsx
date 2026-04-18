@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect }     from 'react';
-import { Link }                    from 'react-router-dom';
+import { Link, useNavigate }       from 'react-router-dom';
 import useAuthStore                from '../../store/authStore';
 import { getMyStartupProfile }     from '../../api/startups.api';
 import { getMyCampaigns }          from '../../api/campaigns.api';
@@ -173,7 +173,7 @@ function MiniCompletenessBar({ score, label }) {
         }} />
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-        <Link to="/dashboard/profile" style={{ fontSize: '0.78rem', color: 'var(--color-primary)', fontWeight: 500 }}>
+        <Link to="/startup/onboarding" style={{ fontSize: '0.78rem', color: 'var(--color-primary)', fontWeight: 500 }}>
           Edit profile →
         </Link>
       </div>
@@ -183,7 +183,8 @@ function MiniCompletenessBar({ score, label }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function StartupDashboard() {
-  const { user } = useAuthStore();
+  const { user }   = useAuthStore();
+  const navigate   = useNavigate();
 
   const [profile,   setProfile]   = useState(undefined); // undefined = loading
   const [campaigns, setCampaigns] = useState(undefined);
@@ -211,8 +212,19 @@ export default function StartupDashboard() {
     return () => { cancelled = true; };
   }, []);
 
+  // Verification Guard
+  useEffect(() => {
+    if (profile) {
+      if (['pending', 'in_review', 'rejected', 'more_info_required'].includes(profile.verificationStatus)) {
+        navigate('/startup/pending-verification', { replace: true });
+      } else if (profile.verificationStatus === 'draft') {
+        navigate('/startup/onboarding', { replace: true });
+      }
+    }
+  }, [profile, navigate]);
+
   const isLoading      = profile === undefined;
-  const hasProfile     = !!profile;
+  const hasProfile     = !!profile && profile.verificationStatus === 'approved'; // Must be approved to proceed
   const score          = profile?.profileCompleteness ?? 0;
   const completenessLabel = profile?.completenessLabel ?? 'Incomplete';
 
@@ -264,8 +276,8 @@ export default function StartupDashboard() {
                 You need a startup profile before you can create fundraising campaigns.
               </p>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <Link to="/dashboard/profile" className="btn btn--primary btn--sm">
-                  🏢 Set Up Profile
+                <Link to="/startup/onboarding" className="btn btn--primary btn--sm">
+                  🏢 Complete Onboarding
                 </Link>
                 <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', alignSelf: 'center' }}>
                   Required to create campaigns
@@ -347,7 +359,7 @@ export default function StartupDashboard() {
                 🚀 Create Campaign
               </Link>
             ) : (
-              <Link to="/dashboard/profile" className="btn btn--secondary btn--sm">
+              <Link to="/startup/onboarding" className="btn btn--secondary btn--sm">
                 🏢 Set Up Profile First
               </Link>
             )}

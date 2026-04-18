@@ -38,3 +38,18 @@ export const toggleUserStatus = async (id, isActive) => {
   const response = await apiClient.patch(`/admin/users/${id}/status`, { isActive });
   return response.data;
 };
+
+export const toggleInvestorPremiumStatus = async (id, premiumStatus) => {
+  const response = await apiClient.patch(`/admin/investors/${id}/premium`, { premiumStatus });
+  return response.data;
+};
+
+export const getCampaignsForReview = async (params = {}) => {
+  const response = await apiClient.get('/admin/campaigns', { params });
+  return response.data;
+};
+
+export const updateCampaignStatus = async (id, status, adminReviewNotes = '') => {
+  const response = await apiClient.patch(`/admin/campaigns/${id}/status`, { status, adminReviewNotes });
+  return response.data;
+};

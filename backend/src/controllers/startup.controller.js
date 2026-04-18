@@ -14,6 +14,7 @@
 const StartupProfile = require('../models/StartupProfile');
 const sendResponse = require('../utils/sendResponse');
 const { ApiError } = require('../middleware/errorHandler');
+const { getStartupAccessState } = require('../services/startup.service');
 
 // ─── Helper: build safe update object ────────────────────────────────────────
 /**
@@ -21,10 +22,21 @@ const { ApiError } = require('../middleware/errorHandler');
  * Prevents clients from injecting userId, isVerified, or other protected fields.
  */
 const UPDATABLE_FIELDS = [
-  'startupName', 'tagline', 'description', 'industry',
-  'website', 'location', 'foundedYear', 'teamSize',
-  'fundingStage', 'teamMembers', 'documents', 'socialLinks', 'tags',
+  // Core identity
+  'startupName', 'legalCompanyName', 'companyLogo', 'tagline', 'description',
+  'pitchSummary', 'problemStatement', 'solutionDescription', 'targetMarket', 'tractionSummary',
+  // Categorization
+  'industry', 'tags', 'fundingStage',
+  // Business details
+  'website', 'location', 'foundedYear', 'teamSize', 'teamMembers', 'documents', 'socialLinks',
+  // Registration
+  'legalEntityType', 'mcaRegistrationNumber', 'panNumber', 'incorporationDate', 'registrationType',
+  // Financials + documents
+  'financialData', 'kycDocuments', 'businessVerificationDocuments',
 ];
+
+// Statuses that allow editing
+const EDITABLE_STATUSES = ['draft', 'rejected', 'more_info_required'];
 
 const pickUpdateFields = (body) => {
   return UPDATABLE_FIELDS.reduce((acc, field) => {
@@ -89,6 +101,14 @@ const updateProfile = async (req, res) => {
   // Ownership check — startup can only update their own profile
   if (profile.userId.toString() !== userId) {
     throw new ApiError('You are not authorized to update this profile.', 403);
+  }
+
+  // Check edit lock — cannot edit once submitted/pending/in_review/approved
+  if (!EDITABLE_STATUSES.includes(profile.verificationStatus)) {
+    throw new ApiError(
+      `Profile cannot be edited when status is '${profile.verificationStatus}'. Contact support to reopen.`,
+      403
+    );
   }
 
   const updates = pickUpdateFields(req.body);
@@ -238,10 +258,85 @@ const getAllProfiles = async (req, res) => {
   );
 };
 
+// ─── Submit Profile ──────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/v1/startups/submit
+ * Role: startup only
+ *
+ * Transitions the startup's profile from 'draft' (or 'rejected' resubmission)
+ * to 'submitted', then sets it to 'pending' for admin review.
+ *
+ * Business rules:
+ *   - Profile must exist
+ *   - Must be in EDITABLE_STATUSES (draft / rejected / more_info_required)
+ *   - Required fields checked before allowing submission
+ */
+const submitProfile = async (req, res) => {
+  const { userId } = req.user;
+
+  const profile = await StartupProfile.findOne({ userId });
+  if (!profile) {
+    throw new ApiError('No startup profile found. Please create one first.', 404);
+  }
+
+  if (!EDITABLE_STATUSES.includes(profile.verificationStatus)) {
+    throw new ApiError(
+      `Cannot submit: profile is currently '${profile.verificationStatus}'.`,
+      409
+    );
+  }
+
+  // Validate minimum required fields for submission
+  const missing = [];
+  if (!profile.startupName?.trim())    missing.push('Startup name');
+  if (!profile.description?.trim())    missing.push('Description (min 50 chars)');
+  if (!profile.industry)               missing.push('Industry');
+  if (!profile.teamMembers?.length)    missing.push('At least one team member');
+
+  if (missing.length > 0) {
+    throw new ApiError(
+      `Cannot submit — the following required fields are missing: ${missing.join(', ')}.`,
+      422
+    );
+  }
+
+  const updated = await StartupProfile.findByIdAndUpdate(
+    profile._id,
+    {
+      $set: {
+        verificationStatus: 'pending',
+        submittedAt:        new Date(),
+        rejectionReason:    null, // clear previous rejection reason on resubmit
+      },
+    },
+    { new: true }
+  ).populate('userId', 'fullName email');
+
+  sendResponse(res, 200, 'Profile submitted for verification. We will review it within 24–48 hours.', { profile: updated });
+};
+
+// ─── Verification Status ──────────────────────────────────────────────────────
+/**
+ * GET /api/v1/startups/verification-status
+ * 
+ * Returns the current verification state for the logged-in startup.
+ */
+const getVerificationStatus = async (req, res, next) => {
+  try {
+    const accessState = await getStartupAccessState(req.user.userId);
+    sendResponse(res, 200, 'Verification status fetched', accessState);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createProfile,
   updateProfile,
   getMyProfile,
   getProfile,
   getAllProfiles,
+  submitProfile,
+  getVerificationStatus,
 };

@@ -172,4 +172,22 @@ const linkWallet = async (req, res) => {
   sendResponse(res, 200, 'Wallet address linked successfully', { user: user.toPublicProfile() });
 };
 
-module.exports = { register, login, getMe, linkWallet };
+// ─── Logout ───────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/v1/auth/logout
+ * Protected route — requires valid JWT.
+ *
+ * JWT is stateless — actual token invalidation happens client-side.
+ * This endpoint provides a clean API contract and can be extended with
+ * a token blacklist (Redis) in the future for stricter security.
+ *
+ * The frontend should clear localStorage['enigma-auth'] on receipt.
+ */
+const logout = async (req, res) => {
+  // No server-side state to clear for stateless JWT.
+  // Future: add token to a Redis blacklist here.
+  sendResponse(res, 200, 'Logged out successfully. Please clear your local session.', {});
+};
+
+module.exports = { register, login, getMe, linkWallet, logout };

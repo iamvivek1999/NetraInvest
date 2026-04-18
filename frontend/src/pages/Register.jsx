@@ -105,7 +105,13 @@ export default function Register() {
       const { user, token } = await registerUser(form);
       setAuth(user, token);
       toast.success(`Account created! Welcome to ${APP_NAME}, ${user.fullName.split(' ')[0]}! 🎉`);
-      navigate('/dashboard', { replace: true });
+      if (user.role === 'investor') {
+        navigate('/setup/investor', { replace: true });
+      } else if (user.role === 'startup') {
+        navigate('/startup/welcome', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       setError(err?.response?.data?.message || 'Registration failed. Please try again.');
     } finally {

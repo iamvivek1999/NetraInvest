@@ -68,6 +68,22 @@ router.use('/payments', paymentRoutes);
 const adminRoutes = require('./admin.routes');
 router.use('/admin', adminRoutes);
 
+// Proof document routes
+// GET  /api/v1/milestones/:milestoneId/proof-summary
+// GET  /api/v1/milestones/:milestoneId/proof-documents
+// POST /api/v1/milestones/:milestoneId/proof-documents
+// PATCH /api/v1/milestones/:milestoneId/proof-documents/:docId/summary
+const proofDocumentRoutes = require('./proofDocument.routes');
+router.use('/milestones', proofDocumentRoutes);
+
+// Notification routes
+// GET  /api/v1/notifications
+// GET  /api/v1/notifications/unread-count
+// PATCH /api/v1/notifications/read-all
+// PATCH /api/v1/notifications/:id/read
+const notificationRoutes = require('./notification.routes');
+router.use('/notifications', notificationRoutes);
+
 // Progress update routes
 // const progressRoutes = require('./progress.routes');
 // router.use('/progress', progressRoutes);

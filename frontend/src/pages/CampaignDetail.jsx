@@ -510,10 +510,10 @@ export default function CampaignDetail() {
                     style={{ width: '100%', padding: '14px', fontSize: '1rem', justifyContent: 'center', background: 'var(--color-accent)', color: '#fff' }}
                     onClick={() => setInvestOpen(true)}
                   >
-                    Invest via Razorpay
+                    Simulate Investment
                   </button>
                   <p className="text-muted text-xs" style={{ textAlign: 'center', margin: 0 }}>
-                    Secure payments via Razorpay
+                    Instant simulated funding flow
                   </p>
                 </div>
               )}

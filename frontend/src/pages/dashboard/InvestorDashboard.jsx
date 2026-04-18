@@ -8,25 +8,26 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import useAuthStore from '../../store/authStore';
-import { getMyInvestments } from '../../api/investments.api';
+import { getInvestorDashboard } from '../../api/investor.api';
 import { formatINR } from '../../utils/formatters';
 
 export default function InvestorDashboard() {
   const { user } = useAuthStore();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['myInvestments', 'recent'],
-    queryFn: () => getMyInvestments({ limit: 4 }), // Fetch top 4 for the dashboard
+    queryKey: ['investorDashboard'],
+    queryFn: getInvestorDashboard,
   });
 
-  const investments = data?.investments || [];
-  const summary     = data?.summary     || { totalAmount: 0, campaignCount: 0 };
-  const txCount     = data?.meta?.total || 0;
+  const investments       = data?.recentInvestments || [];
+  const totalInvested     = data?.totalInvested     || 0;
+  const numberOfCampaigns = data?.numberOfCampaigns || 0;
+  const activeInvestments = data?.activeInvestments || 0;
 
   const stats = [
-    { emoji: '💰', value: formatINR(summary.totalAmount), label: 'Total Invested'    },
-    { emoji: '📈', value: `${summary.campaignCount}`,     label: 'Unique Campaigns'  },
-    { emoji: '✅', value: `${txCount}`,                   label: 'Total Transactions' },
+    { emoji: '💰', value: formatINR(totalInvested),     label: 'Total Invested'    },
+    { emoji: '📈', value: `${numberOfCampaigns}`,       label: 'Unique Campaigns'  },
+    { emoji: '💡', value: `${activeInvestments}`,       label: 'Active Investments' },
   ];
 
   return (

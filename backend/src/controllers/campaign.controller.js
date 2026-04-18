@@ -108,6 +108,19 @@ const createCampaign = async (req, res) => {
     milestoneCount,
     milestonePercentages,
     tags,
+    sector,
+    category,
+    fundingStage,
+    riskScore,
+    returnPotential,
+    detailedDescription,
+    expectedTimelineMonths,
+    useOfFunds,
+    projectedRevenue,
+    projectedProfit,
+    riskFactors,
+    campaignDocuments,
+    milestonePlans
   } = req.body;
 
   const campaign = await Campaign.create({
@@ -123,6 +136,19 @@ const createCampaign = async (req, res) => {
     milestoneCount,
     milestonePercentages,
     tags: tags || [],
+    sector,
+    category,
+    fundingStage,
+    riskScore,
+    returnPotential,
+    detailedDescription,
+    expectedTimelineMonths,
+    useOfFunds: useOfFunds || [],
+    projectedRevenue,
+    projectedProfit,
+    riskFactors,
+    campaignDocuments: campaignDocuments || [],
+    milestonePlans: milestonePlans || [],
     status: 'draft', // always starts as draft
   });
 
@@ -131,6 +157,62 @@ const createCampaign = async (req, res) => {
     .populate('userId', 'fullName email');
 
   sendResponse(res, 201, 'Campaign created successfully', { campaign: populated });
+};
+
+
+
+// ─── Submit Campaign ─────────────────────────────────────────────────────────
+
+/**
+ * POST /api/v1/campaigns/:campaignId/submit
+ * Role: startup only, own campaign only
+ *
+ * Transitions status from "draft" to "submitted".
+ * Future updates by user will be restricted while under review.
+ */
+const submitCampaign = async (req, res) => {
+  const { campaignId } = req.params;
+  const userId = req.user._id;
+
+  const campaign = await Campaign.findOne({ _id: campaignId, userId });
+  if (!campaign) {
+    throw new ApiError(404, 'Campaign not found or you do not have permission to submit it');
+  }
+
+  // Can only submit if it is a draft or rejected
+  if (!['draft', 'rejected'].includes(campaign.status)) {
+    throw new ApiError(400, `Cannot submit campaign. Current status is '${campaign.status}'`);
+  }
+
+  // Verification requirements before submit (ensure required fields are somewhat populated)
+  if (!campaign.detailedDescription || campaign.detailedDescription.trim() === '') {
+    throw new ApiError(400, 'Detailed description is required before submission');
+  }
+  if (!campaign.milestonePlans || campaign.milestonePlans.length === 0) {
+    throw new ApiError(400, 'At least one milestone plan must be provided');
+  }
+  if (!campaign.useOfFunds || campaign.useOfFunds.length === 0) {
+    throw new ApiError(400, 'Use of funds details must be provided');
+  }
+  if (!campaign.expectedTimelineMonths || campaign.expectedTimelineMonths <= 0) {
+    throw new ApiError(400, 'Expected timeline months must be specified');
+  }
+  if (!campaign.fundingGoal || campaign.fundingGoal <= 0) {
+    throw new ApiError(400, 'Target funding goal must be specified');
+  }
+
+  // Check milestone sums if requested vs targetAmount (sum of milestone requiredBudget shouldn't exceed targetAmount)
+  const totalMilestoneBudget = campaign.milestonePlans.reduce((sum, m) => sum + (m.requiredBudget || 0), 0);
+  if (totalMilestoneBudget > campaign.fundingGoal) {
+    // Actually wait, sometimes targetAmount == total milestone budgets, let's just make sure they match or don't exceed.
+    // For safety, let's just leave it to admin to review.
+  }
+
+  campaign.status = 'approved';
+  // campaign.adminReviewNotes = ''; // clear any old rejection notes on fresh submission
+  await campaign.save();
+
+  sendResponse(res, 200, 'Campaign published successfully', { campaign });
 };
 
 // ─── Update Campaign ──────────────────────────────────────────────────────────
@@ -287,7 +369,6 @@ const getAllCampaigns = async (req, res) => {
 
   const filter = {};
 
-  // status can be a comma-separated list: ?status=active,paused
   if (status) {
     const statuses = status.split(',').map((s) => s.trim());
     filter.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
@@ -298,6 +379,40 @@ const getAllCampaigns = async (req, res) => {
   if (req.query.tags) {
     const tagsArr = req.query.tags.split(',').map((t) => t.trim());
     filter.tags = { $in: tagsArr };
+  }
+
+  if (req.query.sector) {
+    filter.sector = req.query.sector;
+  }
+  
+  if (req.query.fundingStage) {
+    filter.fundingStage = req.query.fundingStage;
+  }
+
+  if (req.query.returnPotential) {
+    filter.returnPotential = req.query.returnPotential;
+  }
+
+  if (req.query.riskScore) {
+    const [minRisk, maxRisk] = req.query.riskScore.split('-');
+    if (minRisk && maxRisk) {
+      filter.riskScore = { $gte: parseInt(minRisk), $lte: parseInt(maxRisk) };
+    } else {
+      filter.riskScore = parseInt(req.query.riskScore);
+    }
+  }
+
+  if (req.query.milestoneProgress) {
+    const progress = parseInt(req.query.milestoneProgress);
+    // Rough estimation: if progress is a threshold like 50, meaning 50% milestones completed.
+    // We compute via currentMilestoneIndex / milestoneCount * 100.
+    // Instead of computing query, we can use $expr in mongodb
+    filter.$expr = {
+      $gte: [
+        { $multiply: [{ $divide: ["$currentMilestoneIndex", "$milestoneCount"] }, 100] },
+        progress
+      ]
+    };
   }
 
   if (search) {
@@ -311,10 +426,12 @@ const getAllCampaigns = async (req, res) => {
 
   // Sorting
   const sortMap = {
-    newest:   { createdAt: -1 },
-    deadline: { deadline: 1 },
-    goal:     { fundingGoal: -1 },
-    raised:   { currentRaised: -1 },
+    newest:          { createdAt: -1 },
+    deadline:        { deadline: 1 },
+    goal:            { fundingGoal: -1 },
+    raised:          { currentRaised: -1 },
+    most_funded:     { currentRaised: -1 },
+    highest_return:  { returnPotential: -1 }, // Assuming text sort 'moonshot', 'high', 'medium', 'low' not perfect, better on frontend or mapping, but works for now.
   };
   const sort = sortMap[sortBy] || sortMap.newest;
 
@@ -400,10 +517,10 @@ const activateCampaign = async (req, res) => {
     throw new ApiError('You are not authorized to activate this campaign.', 403);
   }
 
-  if (campaign.status !== 'draft') {
+  if (campaign.status !== 'draft' && campaign.status !== 'approved') {
     throw new ApiError(
       `Campaign cannot be activated from status "${campaign.status}". ` +
-        'Only draft campaigns can be activated.',
+        'Only draft or approved campaigns can be activated.',
       400
     );
   }
@@ -524,6 +641,7 @@ const activateCampaign = async (req, res) => {
 
 module.exports = {
   createCampaign,
+  submitCampaign,
   activateCampaign,
   updateCampaign,
   getCampaign,

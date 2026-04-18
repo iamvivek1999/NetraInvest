@@ -20,6 +20,8 @@ const UPDATABLE_FIELDS = [
   'firstName', 'lastName', 'bio',
   'linkedInUrl', 'twitterUrl',
   'preferredStages', 'preferredIndustries',
+  'phone', 'riskAppetite', 'preferredSectors',
+  'investmentRange', 'premiumStatus'
 ];
 
 const pickUpdateFields = (body) =>
@@ -100,6 +102,58 @@ const getMyProfile = async (req, res) => {
   });
 };
 
+// ─── Get Investor Dashboard ───────────────────────────────────────────────────
+
+/**
+ * GET /api/v1/investors/dashboard
+ * Role: investor only
+ *
+ * Returns:
+ * - total invested
+ * - number of campaigns
+ * - active investments count
+ * - recent investments (populated with campaign data)
+ */
+const getDashboard = async (req, res) => {
+  const { userId } = req.user;
+
+  // 1. Get summary aggregates
+  const summaryAgg = await Investment.aggregate([
+    { $match: { investorUserId: userId, status: { $in: ['confirmed', 'unverified'] } } },
+    {
+      $group: {
+        _id: null,
+        totalInvested: { $sum: '$amount' },
+        campaignCount: { $addToSet: '$campaignId' },
+        activeInvestments: { $sum: 1 },
+      },
+    },
+    { 
+      $project: { 
+        totalInvested: 1, 
+        campaignCount: { $size: '$campaignCount' },
+        activeInvestments: 1
+      } 
+    },
+  ]);
+
+  const summary = summaryAgg[0] || { totalInvested: 0, campaignCount: 0, activeInvestments: 0 };
+
+  // 2. Get recent investments
+  const recentInvestments = await Investment.find({ investorUserId: userId, status: { $in: ['confirmed', 'unverified'] } })
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .populate('campaignId', 'title sector category targetAmount currentRaised status');
+
+  sendResponse(res, 200, 'Investor dashboard retrieved', {
+    totalInvested: summary.totalInvested,
+    numberOfCampaigns: summary.campaignCount,
+    activeInvestments: summary.activeInvestments,
+    recentInvestments
+  });
+};
+
+
 // ─── Update Profile ───────────────────────────────────────────────────────────
 
 /**
@@ -153,4 +207,5 @@ module.exports = {
   getMyProfile,
   updateProfile,
   getProfile,
+  getDashboard,
 };

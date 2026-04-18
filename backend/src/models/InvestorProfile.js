@@ -58,12 +58,28 @@ const investorProfileSchema = new mongoose.Schema({
   
   documents: [documentSchema],
   
+  phone: { type: String }, // Added for InvestorProfile specifically
+  riskAppetite: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+  },
+  
   // Investment preferences (optional)
   preferredStages: [{
     type: String,
     enum: ['pre_seed', 'seed', 'series_a', 'series_b', 'growth'] // e.g., 'seed', 'series_a'
   }],
   preferredIndustries: [{ type: String }],
+  preferredSectors: [{ type: String }], // Keeping matching schema field for User requests
+  
+  investmentRange: {
+    min: { type: Number, default: 0 },
+    max: { type: Number, default: 0 }
+  },
+  premiumStatus: {
+    type: Boolean,
+    default: false
+  },
   
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -81,9 +97,12 @@ investorProfileSchema.virtual('profileCompleteness').get(function() {
   if (this.firstName && this.lastName) score += 20;
   if (this.bio) score += 20;
   if (this.linkedInUrl) score += 10;
-  if (this.preferredStages && this.preferredStages.length) score += 10;
-  if (this.preferredIndustries && this.preferredIndustries.length) score += 10;
-  if (this.documents && this.documents.length) score += 30;
+  if (this.preferredStages && this.preferredStages.length) score += 5;
+  if (this.preferredIndustries && this.preferredIndustries.length) score += 5;
+  if (this.preferredSectors && this.preferredSectors.length) score += 5;
+  if (this.riskAppetite) score += 5;
+  if (this.phone) score += 5;
+  if (this.documents && this.documents.length) score += 25;
   
   return Math.min(score, 100);
 });

@@ -133,4 +133,31 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
-module.exports = { protect, optionalAuth, authorize };
+// ─── requireStartupVerified ───────────────────────────────────────────────────
+/**
+ * Ensures the logged-in startup has an 'approved' StartupProfile.
+ * Use this on routes that allow startups to perform actions like creating campaigns.
+ */
+const { getStartupAccessState } = require('../services/startup.service');
+
+const requireStartupVerified = async (req, res, next) => {
+  if (!req.user) {
+    throw new ApiError('Authentication required.', 401);
+  }
+  if (req.user.role !== 'startup') {
+    throw new ApiError('Access denied. Only startups can perform this action.', 403);
+  }
+
+  const accessState = await getStartupAccessState(req.user.userId);
+  if (!accessState.canCreateCampaign) {
+    if (!accessState.startupProfileExists) {
+      throw new ApiError('Startup profile required. Please complete onboarding.', 403);
+    }
+    throw new ApiError(`Access denied. Startup profile status is '${accessState.verificationStatus}'.`, 403);
+  }
+
+  next();
+};
+
+module.exports = { protect, optionalAuth, authorize, requireStartupVerified };
+

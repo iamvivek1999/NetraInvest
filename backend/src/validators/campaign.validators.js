@@ -11,7 +11,7 @@
 const { body } = require('express-validator');
 
 const VALID_CURRENCIES = ['INR', 'ETH'];
-const VALID_STATUSES_FOR_UPDATE = ['draft', 'active', 'paused', 'cancelled'];
+const VALID_STATUSES_FOR_UPDATE = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'active', 'paused', 'cancelled'];
 // 'funded' and 'completed' are system-set — never allowed via client update
 
 // ─── Create Campaign Validation ───────────────────────────────────────────────
@@ -94,6 +94,28 @@ const createCampaignValidation = [
     .optional()
     .isString().trim()
     .isLength({ max: 30 }).withMessage('Each tag cannot exceed 30 characters'),
+
+  body('sector')
+    .notEmpty().withMessage('Sector is required')
+    .isString(),
+
+  body('category')
+    .notEmpty().withMessage('Category is required')
+    .isString(),
+
+  body('fundingStage')
+    .notEmpty().withMessage('Funding stage is required')
+    .isIn(['pre-seed', 'seed', 'series-a', 'series-b', 'series-c', 'growth'])
+    .withMessage('Invalid funding stage'),
+
+  body('riskScore')
+    .notEmpty().withMessage('Risk score is required')
+    .isInt({ min: 1, max: 10 }).withMessage('Risk score must be between 1 and 10'),
+
+  body('returnPotential')
+    .notEmpty().withMessage('Return potential is required')
+    .isIn(['low', 'medium', 'high', 'moonshot'])
+    .withMessage('Invalid return potential'),
 ];
 
 // ─── Update Campaign Validation ───────────────────────────────────────────────

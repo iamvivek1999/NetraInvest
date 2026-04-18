@@ -47,9 +47,10 @@ import InvestorDashboard  from './pages/dashboard/InvestorDashboard';
 import InvestorHistory    from './pages/dashboard/InvestorHistory';
 import StartupDashboard   from './pages/dashboard/StartupDashboard';
 import StartupProfilePage from './pages/dashboard/StartupProfile';
-import CreateCampaign     from './pages/dashboard/CreateCampaign';
+import CreateCampaignPage from './pages/dashboard/CreateCampaignPage';
 import CampaignManager   from './pages/dashboard/CampaignManager';
 import MyCampaigns       from './pages/dashboard/MyCampaigns';
+import MilestoneExecutionPage from './pages/dashboard/MilestoneExecutionPage';
 
 // Auth store (for redirect logic on auth pages)
 import useAuthStore from './store/authStore';
@@ -58,6 +59,13 @@ import AdminMilestones    from './pages/dashboard/AdminMilestones';
 import AdminLogin         from './pages/admin/AdminLogin';
 import AdminLayout        from './layouts/AdminLayout';
 import AdminDashboard     from './pages/admin/AdminDashboard';
+import InvestorProfileSetup from './pages/InvestorProfileSetup';
+import Notifications      from './pages/Notifications';
+
+// Startup onboarding pages
+import StartupWelcome               from './pages/startup/StartupWelcome';
+import StartupPendingVerification   from './pages/startup/StartupPendingVerification';
+import StartupOnboarding            from './pages/startup/StartupOnboarding';
 
 // ─── React Query client ───────────────────────────────────────────────────────
 
@@ -157,6 +165,17 @@ function AppRoutes() {
         <Route path="login"    element={<AuthPageGuard><RoleSelect /></AuthPageGuard>} />
         <Route path="register" element={<AuthPageGuard><RoleSelect /></AuthPageGuard>} />
 
+        {/* ── Profile Setup routes ───────────────────────────────────────── */}
+        <Route path="setup">
+          <Route path="investor" element={
+            <ProtectedRoute>
+              <RoleGuard role="investor">
+                <InvestorProfileSetup />
+              </RoleGuard>
+            </ProtectedRoute>
+          } />
+        </Route>
+
         {/* ── Protected dashboard ────────────────────────────────────────── */}
         <Route
           path="dashboard"
@@ -190,12 +209,22 @@ function AppRoutes() {
             }
           />
 
-          {/* Startup: create campaign — MUST be before /:campaignId */}
+          {/* Startup: request campaign — replaces old new flow */}
           <Route
             path="campaigns/new"
             element={
               <RoleGuard role="startup">
-                <CreateCampaign />
+                <CreateCampaignPage />
+              </RoleGuard>
+            }
+          />
+
+          {/* Edit existing campaign draft */}
+          <Route
+            path="campaigns/:campaignId/edit"
+            element={
+              <RoleGuard role="startup">
+                <CreateCampaignPage />
               </RoleGuard>
             }
           />
@@ -206,6 +235,16 @@ function AppRoutes() {
             element={
               <RoleGuard role="startup">
                 <CampaignManager />
+              </RoleGuard>
+            }
+          />
+
+          {/* Startup: milestone execution */}
+          <Route
+            path="campaigns/:campaignId/milestones/:milestoneId/execute"
+            element={
+              <RoleGuard role="startup">
+                <MilestoneExecutionPage />
               </RoleGuard>
             }
           />
@@ -221,6 +260,49 @@ function AppRoutes() {
           />
         </Route>
 
+
+        {/* Notifications — all authenticated users */}
+        <Route
+          path="notifications"
+          element={<ProtectedRoute><Notifications /></ProtectedRoute>}
+        />
+
+        {/* ── Startup onboarding routes ─────────────────────────────── */}
+        {/* Shown after new startup registers — before profile creation */}
+        <Route
+          path="startup/welcome"
+          element={
+            <ProtectedRoute>
+              <RoleGuard role="startup">
+                <StartupWelcome />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Shown when startup profile exists but is not yet approved */}
+        <Route
+          path="startup/pending-verification"
+          element={
+            <ProtectedRoute>
+              <RoleGuard role="startup">
+                <StartupPendingVerification />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Full multi-step onboarding form (create / edit / submit profile) */}
+        <Route
+          path="startup/onboarding"
+          element={
+            <ProtectedRoute>
+              <RoleGuard role="startup">
+                <StartupOnboarding />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />

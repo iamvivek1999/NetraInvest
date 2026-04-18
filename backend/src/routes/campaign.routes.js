@@ -28,6 +28,7 @@ const router = express.Router();
 
 const {
   createCampaign,
+  submitCampaign,
   activateCampaign,
   updateCampaign,
   getCampaign,
@@ -35,7 +36,7 @@ const {
   getMyCampaigns,
 } = require('../controllers/campaign.controller');
 
-const { protect, optionalAuth, authorize } = require('../middleware/auth');
+const { protect, optionalAuth, authorize, requireStartupVerified } = require('../middleware/auth');
 
 const {
   createCampaignValidation,
@@ -48,7 +49,7 @@ const { validate } = require('../validators/auth.validators');
 
 router
   .route('/')
-  .post(protect, authorize('startup'), createCampaignValidation, validate, createCampaign)
+  .post(protect, authorize('startup'), requireStartupVerified, createCampaignValidation, validate, createCampaign)
   .get(optionalAuth, getAllCampaigns);  // public read
 
 
@@ -65,6 +66,14 @@ router
   .route('/:campaignId')
   .get(optionalAuth, getCampaign)      // public read
   .patch(protect, authorize('startup'), updateCampaignValidation, validate, updateCampaign);
+
+// ── Submit Campaign (Request review) ──────────────────────────────────────────
+router.post(
+  '/:campaignId/submit',
+  protect,
+  authorize('startup'),
+  submitCampaign
+);
 
 
 // ── Activate Campaign (on-chain registration) ─────────────────────────────────

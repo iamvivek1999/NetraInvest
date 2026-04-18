@@ -4,7 +4,8 @@ import {
   updateVerificationStatus, 
   getDashboardStats, 
   getUsers, 
-  toggleUserStatus 
+  toggleUserStatus,
+  toggleInvestorPremiumStatus
 } from '../../api/admin.api';
 
 export default function AdminDashboard() {
@@ -48,8 +49,14 @@ export default function AdminDashboard() {
   const fetchCompliance = async () => {
     try {
       setComplianceLoading(true);
-      const res = await getVerifications(complianceSubTab);
-      setComplianceData(res.data || []);
+      setComplianceData([]);
+      if (complianceSubTab === 'startup') {
+        const res = await getVerifications('startup');
+        setComplianceData(res.data || []);
+      } else {
+        const res = await getVerifications('investor');
+        setComplianceData(res.data || []);
+      }
     } catch (err) {
       setError('Failed to fetch verification queue.');
     } finally {
@@ -113,13 +120,26 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleTogglePremium = async (userId, currentPremiumStatus) => {
+    try {
+      if (!window.confirm(`Are you sure you want to ${currentPremiumStatus ? 'remove' : 'grant'} premium status for this investor?`)) return;
+      await toggleInvestorPremiumStatus(userId, !currentPremiumStatus);
+      fetchUsers(); // Refresh list
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error updating premium status');
+    }
+  };
+
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   const statusColor = (status) => {
     switch (status) {
-      case 'approved': return '#10b981';
-      case 'pending': return '#fbbf24';
-      case 'in_review': return '#3b82f6';
+      case 'approved': 
+      case 'active': return '#10b981';
+      case 'pending': 
+      case 'submitted': return '#fbbf24';
+      case 'in_review': 
+      case 'under_review': return '#3b82f6';
       case 'rejected': return '#ef4444';
       case 'more_info_required': return '#f97316';
       default: return '#6b7280';
@@ -157,14 +177,14 @@ export default function AdminDashboard() {
 
   const ComplianceTab = () => (
     <div>
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
         <button 
           onClick={() => setComplianceSubTab('startup')}
-          style={{ ...subTabStyle, background: complianceSubTab === 'startup' ? 'rgba(239, 68, 68, 0.1)' : 'transparent', border: complianceSubTab === 'startup' ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)', color: complianceSubTab === 'startup' ? '#ef4444' : 'rgba(255,255,255,0.6)' }}
+          style={{ ...subTabStyle, background: complianceSubTab === 'startup' ? 'rgba(239, 68, 68, 0.1)' : 'transparent', border: complianceSubTab === 'startup' ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)', color: complianceSubTab === 'startup' ? '#ef4444' : 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap' }}
         >Startups</button>
         <button 
           onClick={() => setComplianceSubTab('investor')}
-          style={{ ...subTabStyle, background: complianceSubTab === 'investor' ? 'rgba(239, 68, 68, 0.1)' : 'transparent', border: complianceSubTab === 'investor' ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)', color: complianceSubTab === 'investor' ? '#ef4444' : 'rgba(255,255,255,0.6)' }}
+          style={{ ...subTabStyle, background: complianceSubTab === 'investor' ? 'rgba(239, 68, 68, 0.1)' : 'transparent', border: complianceSubTab === 'investor' ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)', color: complianceSubTab === 'investor' ? '#ef4444' : 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap' }}
         >Investors</button>
       </div>
 
@@ -186,8 +206,10 @@ export default function AdminDashboard() {
               complianceData.map(item => (
                 <tr key={item._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                   <td style={tdStyle}>
-                    <div style={{ fontWeight: 600, color: '#f8fafc' }}>{complianceSubTab === 'startup' ? item.companyName : `${item.firstName} ${item.lastName}`}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>{item.userId?.email || 'No Email'}</div>
+                      <>
+                        <div style={{ fontWeight: 600, color: '#f8fafc' }}>{complianceSubTab === 'startup' ? item.companyName : `${item.firstName} ${item.lastName}`}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>{item.userId?.email || 'No Email'}</div>
+                      </>
                   </td>
                   <td style={tdStyle}>
                     <span style={{
@@ -265,7 +287,20 @@ export default function AdminDashboard() {
                       {u.isActive ? 'ACTIVE' : 'DISABLED'}
                     </span>
                   </td>
-                  <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  <td style={{ ...tdStyle, textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                    {u.role === 'investor' && (
+                       <button 
+                         onClick={() => handleTogglePremium(u._id, u.premiumStatus)}
+                         style={{
+                           ...actionBtnStyle,
+                           background: u.premiumStatus ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
+                           color: u.premiumStatus ? '#f59e0b' : 'rgba(255,255,255,0.6)',
+                           border: u.premiumStatus ? '1px solid rgba(245, 158, 11, 0.2)' : '1px solid rgba(255,255,255,0.2)'
+                         }}
+                       >
+                         {u.premiumStatus ? 'Revoke Premium' : 'Grant Premium'}
+                       </button>
+                    )}
                     <button 
                       onClick={() => handleToggleActive(u._id, u.isActive)}
                       style={{
@@ -343,22 +378,49 @@ export default function AdminDashboard() {
               <button onClick={() => setIsComplianceModalOpen(false)} style={closeBtnStyle}>✕</button>
             </div>
             <div style={{ padding: '2rem' }}>
-               <h3 style={{ margin: '0 0 1rem 0', color: '#fff' }}>{complianceSubTab === 'startup' ? selectedEntity.companyName : `${selectedEntity.firstName} ${selectedEntity.lastName}`}</h3>
+               <h3 style={{ margin: '0 0 1rem 0', color: '#fff' }}>
+                 {complianceSubTab === 'campaign' 
+                    ? selectedEntity.title 
+                    : complianceSubTab === 'startup' 
+                        ? selectedEntity.companyName 
+                        : `${selectedEntity.firstName} ${selectedEntity.lastName}`}
+               </h3>
                
-               <div style={{ marginBottom: '1.5rem' }}>
-                 <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>Please verify the following documents carefully before approval.</p>
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {selectedEntity.documents?.map((doc, idx) => (
-                      <div key={idx} style={docItemStyle}>
-                        <div>
-                          <span style={{ display: 'block', color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}>{doc.documentType.toUpperCase()}</span>
-                          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{doc.fileName || 'document.pdf'}</span>
-                        </div>
-                        <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" style={viewDocLinkStyle}>View ↗</a>
+               {complianceSubTab === 'campaign' ? (
+                 <div style={{ marginBottom: '1.5rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
+                    <p><strong>Goal:</strong> {formatCurrency(selectedEntity.targetAmount)} | <strong>Min:</strong> {formatCurrency(selectedEntity.minimumInvestment)}</p>
+                    <p style={{ marginTop: '0.5rem', lineHeight: '1.5' }}><strong>Description:</strong> {selectedEntity.shortSummary}</p>
+                    {selectedEntity.campaignDocuments && selectedEntity.campaignDocuments.length > 0 && (
+                      <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                         <p style={{ margin: 0, fontWeight: 600 }}>Documents:</p>
+                         {selectedEntity.campaignDocuments.map((doc, idx) => (
+                           <div key={idx} style={docItemStyle}>
+                             <div>
+                               <span style={{ display: 'block', color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}>{doc.documentType.toUpperCase()}</span>
+                               <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{doc.fileName || 'document.pdf'}</span>
+                             </div>
+                             <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" style={viewDocLinkStyle}>View ↗</a>
+                           </div>
+                         ))}
                       </div>
-                    ))}
+                    )}
                  </div>
-               </div>
+               ) : (
+                 <div style={{ marginBottom: '1.5rem' }}>
+                   <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>Please verify the following documents carefully before approval.</p>
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      {selectedEntity.documents?.map((doc, idx) => (
+                        <div key={idx} style={docItemStyle}>
+                          <div>
+                            <span style={{ display: 'block', color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}>{doc.documentType.toUpperCase()}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{doc.fileName || 'document.pdf'}</span>
+                          </div>
+                          <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" style={viewDocLinkStyle}>View ↗</a>
+                        </div>
+                      ))}
+                   </div>
+                 </div>
+               )}
 
                <textarea 
                   value={rejectionReason}

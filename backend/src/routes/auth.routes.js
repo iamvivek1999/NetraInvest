@@ -15,7 +15,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login, getMe, linkWallet } = require('../controllers/auth.controller');
+const { register, login, getMe, linkWallet, logout } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth');
 const {
   registerValidation,
@@ -33,5 +33,6 @@ router.post('/login', loginValidation, validate, login);
 
 router.get('/me', protect, getMe);
 router.patch('/wallet', protect, walletValidation, validate, linkWallet);
+router.post('/logout', protect, logout);
 
 module.exports = router;

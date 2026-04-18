@@ -20,16 +20,21 @@ const {
   getMyProfile,
   updateProfile,
   getProfile,
+  getDashboard,
 } = require('../controllers/investor.controller');
 
 const { protect, authorize } = require('../middleware/auth');
+const { profileValidation, validate } = require('../validators/investor.validators');
 
 // ── Create profile ─────────────────────────────────────────────────────────────
-router.post('/', protect, authorize('investor'), createProfile);
+router.post('/', protect, authorize('investor'), profileValidation, validate, createProfile);
 
 // ── /me routes — MUST come before /:id ────────────────────────────────────────
 router.get('/me', protect, authorize('investor'), getMyProfile);
-router.patch('/me', protect, authorize('investor'), updateProfile);
+router.patch('/me', protect, authorize('investor'), profileValidation, validate, updateProfile);
+
+// ── Dashboard (investor only) ────────────────────────────────────────────────
+router.get('/dashboard', protect, authorize('investor'), getDashboard);
 
 // ── Single profile (public) ───────────────────────────────────────────────────
 router.get('/:id', protect, getProfile);

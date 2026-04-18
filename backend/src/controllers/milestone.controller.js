@@ -42,8 +42,10 @@
 
 const Campaign     = require('../models/Campaign');
 const Milestone    = require('../models/Milestone');
+const Investment   = require('../models/Investment');
 const sendResponse = require('../utils/sendResponse');
 const { ApiError } = require('../middleware/errorHandler');
+const notify       = require('../utils/notify');
 
 // ─── Shared: load campaign + verify ownership ─────────────────────────────────
 
@@ -247,6 +249,25 @@ const submitProof = async (req, res) => {
   sendResponse(res, 200, 'Proof submitted successfully. Awaiting admin review.', {
     milestone: updated,
   });
+
+  // Notify all investors who invested in this campaign about the milestone update (fire-and-forget)
+  setImmediate(async () => {
+    try {
+      const investorIds = await Investment.distinct('investorUserId', {
+        campaignId: updated.campaignId,
+        status: { $in: ['confirmed', 'unverified'] },
+      });
+      const msg = `Milestone "${updated.title}" in "${campaign.title}" has been updated.`;
+      for (const investorId of investorIds) {
+        await notify(investorId, 'milestone_updated', msg, {
+          campaignId: updated.campaignId,
+          milestoneId: updated._id,
+        });
+      }
+    } catch (e) {
+      console.error('[notify] milestone_updated fan-out error:', e.message);
+    }
+  });
 };
 
 // ─── Approve Milestone ────────────────────────────────────────────────────────
@@ -300,6 +321,14 @@ const approveMilestone = async (req, res) => {
     200,
     'Milestone approved. Mark as disbursed after transferring funds off-chain.',
     { milestone: updated }
+  );
+
+  // Notify startup their milestone was approved
+  notify(
+    campaign.userId,
+    'milestone_approved',
+    `Your milestone "${updated.title}" has been approved. Awaiting fund disbursal.`,
+    { campaignId: campaign._id, milestoneId: updated._id }
   );
 };
 
@@ -369,6 +398,16 @@ const markDisbursed = async (req, res) => {
   sendResponse(res, 200, message, {
     milestone: updated,
   });
+
+  // Notify startup their milestone was disbursed
+  notify(
+    campaign.userId,
+    'milestone_disbursed',
+    isFinalMilestone
+      ? `Final milestone "${updated.title}" disbursed. Campaign "${campaign.title}" is complete!`
+      : `Milestone "${updated.title}" funds have been disbursed. Next milestone is now unlocked.`,
+    { campaignId: campaign._id, milestoneId: updated._id }
+  );
 };
 
 // ─── Reject Milestone ─────────────────────────────────────────────────────────
@@ -411,6 +450,17 @@ const rejectMilestone = async (req, res) => {
   sendResponse(res, 200, 'Milestone rejected. Startup has been notified to resubmit.', {
     milestone: updated,
   });
+
+  // Notify startup their milestone was rejected (load campaign for userId)
+  const campaignForReject = await Campaign.findById(campaignId).select('userId title');
+  if (campaignForReject) {
+    notify(
+      campaignForReject.userId,
+      'milestone_rejected',
+      `Your milestone "${updated.title}" was rejected. Reason: ${rejectionReason ?? 'No reason provided'}. Please resubmit.`,
+      { campaignId, milestoneId: updated._id }
+    );
+  }
 };
 
 module.exports = {

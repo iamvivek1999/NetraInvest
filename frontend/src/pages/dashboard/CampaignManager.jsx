@@ -534,7 +534,7 @@ export default function CampaignManager() {
   if (!campaign) return null;
 
   const statusMeta    = STATUS_META[campaign.status] || STATUS_META.draft;
-  const isDraft       = campaign.status === 'draft';
+  const isDraft       = campaign.status === 'draft' || campaign.status === 'approved';
   const isActive      = campaign.status === 'active';
   const isEditable    = isDraft;
   const isTerminal    = ['completed', 'cancelled'].includes(campaign.status);
@@ -644,7 +644,7 @@ export default function CampaignManager() {
         </div>
       )}
 
-      {/* ── Activate panel (draft only) ────────────────────────────────────── */}
+      {/* ── Activate panel (draft/approved only) ────────────────────────────────────── */}
       {isDraft && (
         <div className="card" style={{ marginBottom: '1.25rem', borderColor: 'rgba(245,158,11,0.3)' }}>
           <SectionHeader
@@ -662,7 +662,7 @@ export default function CampaignManager() {
         </div>
       )}
 
-      {/* ── Edit panel (draft only) ────────────────────────────────────────── */}
+      {/* ── Edit panel (draft/approved only) ────────────────────────────────────────── */}
       {isEditable && (
         <div className="card" style={{ marginBottom: '1.25rem' }}>
           <div
@@ -674,7 +674,7 @@ export default function CampaignManager() {
           >
             <SectionHeader
               title="✏️ Edit Campaign"
-              subtitle={editOpen ? 'Click to collapse' : 'Title, summary, deadline and tags can be changed while draft.'}
+              subtitle={editOpen ? 'Click to collapse' : 'Title, summary, deadline and tags can be changed before activation.'}
             />
             <span style={{ fontSize: '1.1rem', color: 'var(--color-text-muted)' }}>{editOpen ? '▲' : '▼'}</span>
           </div>

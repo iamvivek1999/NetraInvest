@@ -59,14 +59,22 @@ const proofSubmissionSchema = new Schema(
     documents: {
       type: [
         {
-          label: { type: String, trim: true, maxlength: 100 },
-          url:   { type: String, required: true, trim: true },
+          label:            { type: String, trim: true, maxlength: 100 },
+          url:              { type: String, required: true, trim: true },
+          fileName:         { type: String, trim: true },
+          fileType:         { type: String, trim: true },
+          fileSize:         { type: Number },
+          mimeType:         { type: String, trim: true },
+          storagePath:      { type: String, trim: true },
+          archivePath:      { type: String, trim: true },
+          documentCategory: { type: String, trim: true },
+          uploadedAt:       { type: Date, default: Date.now }
         },
       ],
       default: [],
       validate: {
-        validator: (arr) => arr.length <= 5,
-        message: 'Cannot upload more than 5 supporting documents',
+        validator: (arr) => arr.length <= 15, // Expanded threshold to cover more upload types
+        message: 'Cannot upload more than 15 supporting documents',
       },
     },
 
@@ -157,6 +165,14 @@ const milestoneSchema = new Schema(
       type: Number,
       required: true,
       min: [0, 'Estimated amount cannot be negative'],
+    },
+
+    // Tracks current progress incrementally prior to submission
+    progressPercent: {
+      type: Number,
+      default: 0,
+      min: [0, 'Progress cannot be negative'],
+      max: [100, 'Progress cannot exceed 100'],
     },
 
     // ── Status ───────────────────────────────────────────────────────────────

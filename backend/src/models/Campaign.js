@@ -33,6 +33,36 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const useOfFundsSchema = new Schema(
+  {
+    category: { type: String, required: true },
+    percentage: { type: Number, required: true, min: 0, max: 100 },
+    amount: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const campaignDocumentSchema = new Schema(
+  {
+    label: { type: String, required: true, trim: true },
+    url: { type: String, required: true, trim: true },
+  },
+  { _id: false }
+);
+
+const milestonePlanSchema = new Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    expectedStartDate: { type: Date, required: true },
+    expectedEndDate: { type: Date, required: true },
+    requiredBudget: { type: Number, required: true },
+    expectedOutcome: { type: String, required: true },
+    sequenceNumber: { type: Number, required: true },
+  },
+  { _id: true }
+);
+
 const campaignSchema = new Schema(
   {
     // ── Ownership ────────────────────────────────────────────────────────────
@@ -63,6 +93,38 @@ const campaignSchema = new Schema(
       trim: true,
       minlength: [30, 'Summary must be at least 30 characters'],
       maxlength: [500, 'Summary cannot exceed 500 characters'],
+    },
+
+    detailedDescription: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+
+    // ── Discovery Fields ─────────────────────────────────────────────────────
+    sector: {
+      type: String,
+      required: [true, 'Sector is required'],
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+    },
+    fundingStage: {
+      type: String,
+      enum: ['pre-seed', 'seed', 'series-a', 'series-b', 'series-c', 'growth'],
+      required: [true, 'Funding stage is required'],
+    },
+    riskScore: {
+      type: Number,
+      min: 1,
+      max: 10,
+      required: [true, 'Risk score is required'],
+    },
+    returnPotential: {
+      type: String,
+      enum: ['low', 'medium', 'high', 'moonshot'],
+      required: [true, 'Return potential is required'],
     },
 
     // ── Funding Configuration ────────────────────────────────────────────────
@@ -98,25 +160,42 @@ const campaignSchema = new Schema(
       required: [true, 'Campaign deadline is required'],
     },
 
+    expectedTimelineMonths: {
+      type: Number,
+      min: [1, 'Timeline must be at least 1 month'],
+      default: null,
+    },
+
     // ── Status ───────────────────────────────────────────────────────────────
     /**
-     * Status values for MVP:
+     * Status values:
      *
-     *   draft      → Created but not yet published. Editable. Not visible to investors.
-     *   active     → Live and accepting investments. Contract will be deployed here.
-     *   paused     → Temporarily stopped by startup. No new investments accepted.
-     *   funded     → fundingGoal has been reached. System-set.
-     *   completed  → All milestones released and closed. System-set.
-     *   cancelled  → Permanently cancelled. Refunds triggered.
-     *
-     * Only startup can set: draft → active, active → paused, paused → active,
-     *                       active/paused → cancelled
-     * System-set only:      → funded, → completed
+     *   draft          → Editable. Not visible.
+     *   submitted      → Submitted by startup for admin review.
+     *   under_review   → Admin currently reviewing.
+     *   approved       → Admin approved. Ready to activate.
+     *   rejected       → Rejected by admin.
+     *   active         → Live and accepting investments. Contract deployed.
+     *   paused         → Temporarily stopped by startup.
+     *   funded         → fundingGoal reached. System-set.
+     *   completed      → All milestones released and closed.
+     *   cancelled      → Permanently cancelled.
      */
     status: {
       type: String,
       enum: {
-        values: ['draft', 'active', 'paused', 'funded', 'completed', 'cancelled'],
+        values: [
+          'draft',
+          'submitted',
+          'under_review',
+          'approved',
+          'rejected',
+          'active',
+          'paused',
+          'funded',
+          'completed',
+          'cancelled'
+        ],
         message: 'Invalid campaign status',
       },
       default: 'draft',
@@ -190,6 +269,45 @@ const campaignSchema = new Schema(
       type: Number,
       default: 0,
       // Incremented by the system after each milestone is released
+    },
+
+    // ── Pre-launch Planning ──────────────────────────────────────────────────
+    milestonePlans: {
+      type: [milestonePlanSchema],
+      default: [],
+    },
+
+    useOfFunds: {
+      type: [useOfFundsSchema],
+      default: [],
+    },
+    
+    projectedRevenue: {
+      type: Number,
+      default: null,
+      min: 0,
+    },
+
+    projectedProfit: {
+      type: Number,
+      default: null,
+    },
+
+    riskFactors: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+
+    campaignDocuments: {
+      type: [campaignDocumentSchema],
+      default: [],
+    },
+
+    adminReviewNotes: {
+      type: String,
+      trim: true,
+      default: '',
     },
 
     // ── Blockchain Integration (populated after Phase 2 deployment) ──────────
@@ -284,6 +402,12 @@ campaignSchema.index({ currency: 1 });
 
 // Compound: find active campaigns efficiently for discovery page
 campaignSchema.index({ status: 1, createdAt: -1 });
+
+// Indexes for common filters
+campaignSchema.index({ sector: 1 });
+campaignSchema.index({ riskScore: 1 });
+campaignSchema.index({ returnPotential: 1 });
+campaignSchema.index({ fundingStage: 1 });
 
 // Compound: find all campaigns for a startup (dashboard query)
 campaignSchema.index({ userId: 1, status: 1 });

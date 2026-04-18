@@ -69,7 +69,6 @@ const investmentSchema = new Schema(
      */
     txHash: {
       type: String,
-      default: null,
       match: [
         /^0x[a-fA-F0-9]{64}$/,
         'txHash must be a valid Ethereum transaction hash (0x + 64 hex chars)',

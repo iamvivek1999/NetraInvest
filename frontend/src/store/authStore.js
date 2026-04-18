@@ -14,6 +14,9 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import axios    from 'axios';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 const useAuthStore = create(
   persist(
@@ -50,14 +53,27 @@ const useAuthStore = create(
 
       /**
        * Clear all auth state. Called on logout or 401 response.
+       * Also fires POST /api/v1/auth/logout to the backend for audit/future blacklisting.
        */
-      logout: () =>
+      logout: () => {
+        // Read token directly from localStorage to avoid importing client (circular dep)
+        const raw   = localStorage.getItem('enigma-auth');
+        const token = raw ? JSON.parse(raw)?.state?.token : null;
+
+        if (token) {
+          // Fire-and-forget — don't block UI
+          axios
+            .post(`${API_BASE}/auth/logout`, {}, { headers: { Authorization: `Bearer ${token}` } })
+            .catch(() => {/* ignore — token may already be expired */});
+        }
+
         set({
-          user:      null,
-          token:     null,
-          role:      null,
+          user:       null,
+          token:      null,
+          role:       null,
           isLoggedIn: false,
-        }),
+        });
+      },
     }),
     {
       name: 'enigma-auth', // localStorage key — must match client.js getToken()

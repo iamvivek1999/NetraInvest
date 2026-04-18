@@ -24,6 +24,8 @@ const {
   getMyProfile,
   getProfile,
   getAllProfiles,
+  submitProfile,
+  getVerificationStatus,
 } = require('../controllers/startup.controller');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -45,6 +47,13 @@ router
 // ── /me MUST come before /:id ─────────────────────────────────────────────────
 
 router.get('/me', protect, authorize('startup'), getMyProfile);
+
+// POST /submit — must also come before /:id ("submit" is a fixed segment not an ObjectId)
+router.post('/submit', protect, authorize('startup'), submitProfile);
+
+// GET /verification-status - fixed segment
+router.get('/verification-status', protect, authorize('startup'), getVerificationStatus);
+
 
 // ── Single resource routes ────────────────────────────────────────────────────
 

@@ -19,6 +19,7 @@ import toast                           from 'react-hot-toast';
 import useAuthStore                    from '../store/authStore';
 import { shortenAddress }              from '../utils/formatters';
 import { APP_NAME }                    from '../utils/constants';
+import NotificationBell               from '../components/NotificationBell';
 
 export default function Navbar() {
   const { isLoggedIn, user, role, logout } = useAuthStore();
@@ -76,6 +77,9 @@ export default function Navbar() {
               <span className="user-pill">
                 👤 {user?.fullName?.split(' ')[0] || 'Account'}
               </span>
+
+              {/* Notification bell */}
+              <NotificationBell />
 
               {/* Dashboard link */}
               <NavLink

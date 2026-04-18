@@ -27,11 +27,12 @@
  * Validation mirrors backend campaign.validators.js exactly.
  */
 
-import { useState, useCallback }    from 'react';
+import { useState, useCallback, useEffect }    from 'react';
 import { useNavigate }              from 'react-router-dom';
 import toast                        from 'react-hot-toast';
 import { createCampaign }           from '../../api/campaigns.api';
 import { createMilestones }         from '../../api/milestones.api';
+import { getVerificationStatus }    from '../../api/startups.api';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -301,6 +302,22 @@ export default function CreateCampaign() {
   const [milestones, setMilestones] = useState(() =>
     Array.from({ length: 3 }, () => ({ title: '', description: '', targetDate: '' }))
   );
+
+  // Verification guard
+  useEffect(() => {
+    let cancelled = false;
+    getVerificationStatus()
+      .then((status) => {
+        if (!cancelled && status.verificationStatus !== 'approved') {
+          toast.error('You must be verified to create a campaign.');
+          navigate('/dashboard');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) navigate('/dashboard');
+      });
+    return () => { cancelled = true; };
+  }, [navigate]);
 
   // ── UI state ──────────────────────────────────────────────────────────────
   const [errors,       setErrors]       = useState({});

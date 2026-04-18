@@ -18,6 +18,33 @@ const { Schema } = mongoose;
 
 // ─── Sub-schemas ──────────────────────────────────────────────────────────────
 
+// Document metadata structure (for kycDocuments + businessVerificationDocuments)
+const documentMetaSchema = new Schema(
+  {
+    fileName:          { type: String, trim: true, default: null },
+    fileType:          { type: String, trim: true, default: null }, // 'pdf', 'jpg', etc.
+    fileUrl:           { type: String, trim: true, default: null }, // placeholder URL
+    uploadedAt:        { type: Date,   default: Date.now },
+    documentCategory:  { type: String, trim: true, default: null }, // e.g. 'identity', 'financial'
+    verificationLabel: { type: String, trim: true, default: null }, // admin-visible label
+  },
+  { _id: true }
+);
+
+// Financial data sub-schema
+const financialDataSchema = new Schema(
+  {
+    annualRevenue:  { type: Number, default: null },  // in INR
+    monthlyRevenue: { type: Number, default: null },
+    profitOrLoss:   { type: String, enum: ['profit', 'loss', 'breakeven', null], default: null },
+    burnRate:       { type: Number, default: null },  // monthly burn in INR
+    runwayMonths:   { type: Number, default: null },
+  },
+  { _id: false }
+);
+
+// ─── Sub-schemas ──────────────────────────────────────────────────────────────
+
 const teamMemberSchema = new Schema(
   {
     name: {
@@ -99,6 +126,21 @@ const startupProfileSchema = new Schema(
       maxlength: [100, 'Startup name cannot exceed 100 characters'],
     },
 
+    // Legal registered company name (may differ from brand name)
+    legalCompanyName: {
+      type: String,
+      trim: true,
+      maxlength: [200, 'Legal company name cannot exceed 200 characters'],
+      default: null,
+    },
+
+    // Logo URL (CDN/object-storage URL, set after upload)
+    companyLogo: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+
     tagline: {
       type: String,
       trim: true,
@@ -108,10 +150,46 @@ const startupProfileSchema = new Schema(
 
     description: {
       type: String,
-      required: [true, 'Description is required'],
       trim: true,
       minlength: [50, 'Description must be at least 50 characters'],
       maxlength: [3000, 'Description cannot exceed 3000 characters'],
+      default: null,
+    },
+
+    // Investor-facing 1–2 paragraph pitch
+    pitchSummary: {
+      type: String,
+      trim: true,
+      maxlength: [2000, 'Pitch summary cannot exceed 2000 characters'],
+      default: null,
+    },
+
+    problemStatement: {
+      type: String,
+      trim: true,
+      maxlength: [2000, 'Problem statement cannot exceed 2000 characters'],
+      default: null,
+    },
+
+    solutionDescription: {
+      type: String,
+      trim: true,
+      maxlength: [2000, 'Solution description cannot exceed 2000 characters'],
+      default: null,
+    },
+
+    targetMarket: {
+      type: String,
+      trim: true,
+      maxlength: [1000, 'Target market cannot exceed 1000 characters'],
+      default: null,
+    },
+
+    tractionSummary: {
+      type: String,
+      trim: true,
+      maxlength: [1500, 'Traction summary cannot exceed 1500 characters'],
+      default: null,
     },
 
     // ── Categorization ─────────────────────────────────────────────────────
@@ -179,6 +257,22 @@ const startupProfileSchema = new Schema(
       default: null,
     },
 
+    // ISO date string e.g. '2021-03-15'
+    incorporationDate: {
+      type: Date,
+      default: null,
+    },
+
+    // 'MCA' | 'startup_india' | 'other'
+    registrationType: {
+      type: String,
+      enum: {
+        values: ['mca', 'startup_india', 'llp', 'other'],
+        message: 'Invalid registration type',
+      },
+      default: null,
+    },
+
     website: {
       type: String,
       trim: true,
@@ -243,14 +337,41 @@ const startupProfileSchema = new Schema(
       github:   { type: String, default: null },
     },
 
+    // ── Financials ─────────────────────────────────────────────────────────
+    financialData: {
+      type: financialDataSchema,
+      default: () => ({}),
+    },
+
+    // ── KYC / Verification Documents ───────────────────────────────────────
+    // Identity + company documents required for KYB verification
+    kycDocuments: {
+      type: [documentMetaSchema],
+      default: [],
+      validate: {
+        validator: (arr) => arr.length <= 15,
+        message: 'Cannot upload more than 15 KYC documents',
+      },
+    },
+
+    // Business/financial documents (pitch deck, CA certificate, etc.)
+    businessVerificationDocuments: {
+      type: [documentMetaSchema],
+      default: [],
+      validate: {
+        validator: (arr) => arr.length <= 15,
+        message: 'Cannot upload more than 15 business verification documents',
+      },
+    },
+
     // ── Verification (admin-set only) ──────────────────────────────────────
     verificationStatus: {
       type: String,
       enum: {
-        values: ['pending', 'in_review', 'approved', 'rejected', 'more_info_required'],
+        values: ['draft', 'submitted', 'pending', 'in_review', 'approved', 'rejected', 'more_info_required'],
         message: 'Invalid verification status',
       },
-      default: 'pending',
+      default: 'draft',  // new profiles start as drafts
     },
 
     isVerified: {
@@ -262,7 +383,12 @@ const startupProfileSchema = new Schema(
       type: Date,
       default: null,
     },
-    
+
+    submittedAt: {
+      type: Date,
+      default: null,
+    },
+
     rejectionReason: {
       type: String,
       default: null,

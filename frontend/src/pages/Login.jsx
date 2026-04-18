@@ -13,6 +13,7 @@ import { useState }                                           from 'react';
 import { Link, useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
 import toast                                                   from 'react-hot-toast';
 import { loginUser }                                           from '../api/auth.api';
+import client                                                  from '../api/client';
 import useAuthStore                                            from '../store/authStore';
 import { APP_NAME }                                            from '../utils/constants';
 
@@ -73,8 +74,51 @@ export default function Login() {
     try {
       const { user, token } = await loginUser({ ...form, role });
       setAuth(user, token);
+      
+      let nextRoute = from || ROLE_REDIRECT[user.role] || '/dashboard';
+
+      if (user.role === 'investor') {
+        try {
+          const res = await client.get('/investors/me', { headers: { Authorization: `Bearer ${token}` } });
+          const profile = res.data?.data?.profile;
+          if (!profile || !profile.riskAppetite) {
+            nextRoute = '/setup/investor';
+          }
+        } catch (err) {
+          if (err.response?.status === 404) {
+            nextRoute = '/setup/investor';
+          }
+        }
+      }
+
+      if (user.role === 'startup') {
+        try {
+          const res = await client.get('/startups/me', { headers: { Authorization: `Bearer ${token}` } });
+          const profile = res.data?.data?.profile;
+          if (!profile) {
+            // No profile yet — send to new multi-step onboarding
+            nextRoute = '/startup/onboarding';
+          } else if (profile.verificationStatus === 'approved' || profile.isVerified) {
+            // Fully verified — regular dashboard
+            nextRoute = '/dashboard';
+          } else if (profile.verificationStatus === 'draft' || profile.verificationStatus === 'rejected' || profile.verificationStatus === 'more_info_required') {
+            // Has draft or was rejected — continue onboarding
+            nextRoute = '/startup/onboarding';
+          } else {
+            // pending / in_review — show status page
+            nextRoute = '/startup/pending-verification';
+          }
+        } catch (err) {
+          if (err.response?.status === 404) {
+            // No profile yet
+            nextRoute = '/startup/onboarding';
+          }
+          // Other errors: fall through to dashboard
+        }
+      }
+
       toast.success(`Welcome back, ${user.fullName.split(' ')[0]}! 👋`);
-      navigate(from || ROLE_REDIRECT[user.role] || '/dashboard', { replace: true });
+      navigate(nextRoute, { replace: true });
     } catch (err) {
       setError(err?.response?.data?.message || 'Login failed. Please try again.');
     } finally {

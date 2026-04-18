@@ -67,6 +67,29 @@ export const getStartupProfile = async (profileId) => {
   return data.data.profile;
 };
 
+// ─── Submit profile for verification ─────────────────────────────────────────
+/**
+ * Transition the startup's own profile from draft → pending.
+ * Backend validates required fields before accepting submission.
+ * @returns {object} Updated profile
+ */
+export const submitStartupProfile = async () => {
+  const { data } = await client.post('/startups/submit');
+  return data.data.profile;
+};
+
+// ─── Save draft (alias for create/patch depending on context) ─────────────────
+/**
+ * Convenience wrapper — always PATCHes if profileId exists, else POSTs.
+ * Returns updated/created profile.
+ */
+export const saveStartupDraft = async (profileId, payload) => {
+  if (profileId) {
+    return updateStartupProfile(profileId, payload);
+  }
+  return createStartupProfile(payload);
+};
+
 // ─── List all profiles ────────────────────────────────────────────────────────
 /**
  * Fetch filtered/paginated list of startup profiles.
@@ -77,6 +100,17 @@ export const listStartupProfiles = async (params = {}) => {
   const { data } = await client.get('/startups', { params });
   return {
     profiles: data.data.profiles,
-    meta:     data.meta,
+    meta: data.meta,
   };
 };
+
+// ─── Get Verification Status ──────────────────────────────────────────────────
+/**
+ * Get the startup's current verification status and access state.
+ * @returns {object} { startupProfileExists, verificationStatus, rejectionReason, canCreateCampaign, nextAction }
+ */
+export const getVerificationStatus = async () => {
+  const { data } = await client.get('/startups/verification-status');
+  return data.data;
+};
+

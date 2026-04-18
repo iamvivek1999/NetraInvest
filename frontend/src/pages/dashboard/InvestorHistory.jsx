@@ -89,6 +89,7 @@ export default function InvestorHistory() {
                 <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
                   <th style={{ padding: '1rem', fontWeight: 600 }}>Campaign</th>
                   <th style={{ padding: '1rem', fontWeight: 600 }}>Amount</th>
+                  <th style={{ padding: '1rem', fontWeight: 600 }}>Campaign Progress</th>
                   <th style={{ padding: '1rem', fontWeight: 600 }}>Status</th>
                   <th style={{ padding: '1rem', fontWeight: 600 }}>Date</th>
                   <th style={{ padding: '1rem', fontWeight: 600 }}>Audit Record</th>
@@ -119,6 +120,37 @@ export default function InvestorHistory() {
                       </td>
                       <td style={{ padding: '1rem', fontWeight: 600 }}>
                         {formatINR(inv.amount)}
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        {inv.campaignId && inv.campaignId.fundingGoal ? (
+                          <div style={{ width: '100%', maxWidth: '150px' }}>
+                            <div style={{
+                              display: 'flex', justifyContent: 'space-between',
+                              fontSize: '0.75rem', marginBottom: '0.25rem'
+                            }}>
+                              <span style={{ color: 'var(--color-primary)' }}>
+                                {formatINR(inv.campaignId.currentRaised)}
+                              </span>
+                              <span className="text-muted">
+                                {Math.min(100, Math.round((inv.campaignId.currentRaised / inv.campaignId.fundingGoal) * 100))}%
+                              </span>
+                            </div>
+                            <div style={{
+                              width: '100%', height: '6px',
+                              background: 'rgba(255,255,255,0.1)', borderRadius: '99px', overflow: 'hidden'
+                            }}>
+                              <div style={{
+                                width: `${Math.min(100, (inv.campaignId.currentRaised / inv.campaignId.fundingGoal) * 100)}%`,
+                                height: '100%',
+                                background: 'var(--color-primary)',
+                                borderRadius: '99px',
+                                transition: 'width 0.5s ease-out'
+                              }} />
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted text-sm">N/A</span>
+                        )}
                       </td>
                       <td style={{ padding: '1rem' }}>
                         <span style={{

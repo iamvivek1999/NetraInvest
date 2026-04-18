@@ -47,6 +47,7 @@ const sendResponse = require('../utils/sendResponse');
 const { ApiError } = require('../middleware/errorHandler');
 const { isBlockchainConfigured } = require('../config/blockchain');
 const { verifyInvestmentTx, deriveChain } = require('../services/txVerification.service');
+const notify     = require('../utils/notify');
 
 // ─── recordInvestment ─────────────────────────────────────────────────────────
 
@@ -232,11 +233,10 @@ const recordInvestment = async (req, res) => {
 
   // ── 7. Record the investment ──────────────────────────────────────────────────
 
-  const investment = await Investment.create({
+  const investmentData = {
     campaignId,
     startupProfileId:  campaign.startupProfileId,
     investorUserId:    userId,
-    txHash:            normalizedTxHash,       // null in stub mode; normalized lowercase otherwise
     walletAddress:     normalizedWallet,        // always lowercase — normalized once at step 1
     campaignKey:       campaign.campaignKey || null,
     contractAddress:   campaign.contractAddress || null,
@@ -251,7 +251,13 @@ const recordInvestment = async (req, res) => {
     // UPDATED FOR NON-BLOCKCHAIN PAYMENT FLOW
     paymentId,
     paymentProvider,
-  });
+  };
+
+  if (normalizedTxHash) {
+    investmentData.txHash = normalizedTxHash;
+  }
+
+  const investment = await Investment.create(investmentData);
 
   // ── 8. Update campaign totals ─────────────────────────────────────────────────
   // Only reached if Investment.create() succeeded — atomic enough for MVP.
@@ -267,6 +273,28 @@ const recordInvestment = async (req, res) => {
   const populated = await Investment.findById(investment._id)
     .populate('campaignId', 'title fundingGoal currentRaised currency')
     .populate('investorUserId', 'fullName email');
+
+  // ── 9. Trigger notifications (fire-and-forget) ────────────────────────────────
+  const amountLabel = `₹${finalAmount?.toLocaleString('en-IN') ?? finalAmount}`;
+  const campaignTitle = campaign.title ?? 'a campaign';
+
+  // Notify the investor that their investment was confirmed
+  notify(
+    userId,
+    'investment_confirmed',
+    `Your ${amountLabel} investment in "${campaignTitle}" was confirmed successfully.`,
+    { campaignId: campaign._id, investmentId: investment._id }
+  );
+
+  // Notify the startup that they received an investment
+  if (campaign.userId) {
+    notify(
+      campaign.userId,
+      'investment_received',
+      `${amountLabel} was invested in your campaign "${campaignTitle}".`,
+      { campaignId: campaign._id, investmentId: investment._id }
+    );
+  }
 
   sendResponse(res, 201, 'Investment recorded successfully.', {
     investment: populated,
