@@ -29,7 +29,7 @@ class ApiService {
   // static const String baseUrl = 'http://10.0.2.2:5000/api/v1';      // Android Emulator
   // static const String baseUrl = 'http://localhost:5000/api/v1';       // USB (needs: adb reverse tcp:5000 tcp:5000)
   static const String baseUrl =
-      'http://10.195.203.32:5000/api/v1'; // ◄ ACTIVE — WiFi (LAN IP)
+      'http://10.20.2.38:5000/api/v1'; // ◄ ACTIVE — WiFi (LAN IP)
 
   // ============ Token Management ============
 

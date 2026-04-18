@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enigma AI | Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f1115;
+            --surface: #1a1d24;
+            --surface-hover: #232730;
+            --border: #2e3440;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --radius: 8px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 2rem;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 { font-size: 1.5rem; font-weight: 600; }
+        h2 { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .stat-value { font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .stat-label { color: var(--text-muted); font-size: 0.875rem; }
+
+        /* Two Column Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+        }
+
+        /* Lists */
+        .list { list-style: none; }
+        .list-item {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+            background: var(--bg);
+            transition: border-color 0.2s;
+        }
+        .list-item:hover { border-color: var(--text-muted); }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .badge.reject { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .badge.approve { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .badge.review { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .badge.neutral { background: rgba(59, 130, 246, 0.2); color: var(--accent); }
+
+        .item-detail { color: var(--text-muted); font-size: 0.875rem; }
+        
+        .actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.8; }
+        .btn-approve { background: var(--success); color: white; }
+        .btn-reject { background: var(--danger); color: white; }
+        .btn-info { background: var(--surface-hover); color: var(--text); border: 1px solid var(--border); }
+
+        .empty-state {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Chat Widget */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chat-toggle {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .chat-toggle:hover { transform: scale(1.05); }
+
+        .chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            height: 500px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 300px;
+            min-height: 400px;
+        }
+
+        /* Resizers */
+        .resizer { position: absolute; z-index: 10; }
+        .resizer-t { top: -2px; left: 0; right: 0; height: 6px; cursor: ns-resize; }
+        .resizer-l { top: 0; left: -2px; bottom: 0; width: 6px; cursor: ew-resize; }
+        .resizer-tl { top: -2px; left: -2px; width: 10px; height: 10px; cursor: nwse-resize; }
+
+        .chat-window.open {
+            display: flex;
+        }
+
+        .chat-header {
+            background: var(--surface-hover);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-message {
+            max-width: 90%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .chat-message.user {
+            background: var(--accent);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.agent {
+            background: var(--surface-hover);
+            color: var(--text);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .chat-message.agent p { margin-bottom: 0.5rem; }
+        .chat-message.agent p:last-child { margin-bottom: 0; }
+        .chat-message.agent ul, .chat-message.agent ol { margin-left: 1.5rem; margin-bottom: 0.5rem; }
+        
+        .raw-data-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .raw-data-btn:hover { color: var(--text); }
+        .raw-data-content {
+            display: none;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            font-family: monospace;
+            background: rgba(0,0,0,0.2);
+            padding: 0.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent);
+        }
+
+        .chat-send {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 0 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Enigma AI Dashboard</h1>
+            <span id="refresh" style="cursor: pointer; color: var(--text-muted);">↻ Refresh</span>
+        </header>
+
+        <div class="stats-grid" id="stats">
+            <!-- Stats populated by JS -->
+        </div>
+
+        <div class="layout">
+            <div class="panel">
+                <h2>Pending HITL Reviews</h2>
+                <ul class="list" id="hitl-queue">
+                    <div class="empty-state">Loading queue...</div>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <h2>Recent AI Audit Logs</h2>
+                <ul class="list" id="audit-logs">
+                    <div class="empty-state">Loading logs...</div>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <button class="chat-toggle" id="chat-toggle">💬</button>
+        <div class="chat-window" id="chat-window">
+            <div class="resizer resizer-t"></div>
+            <div class="resizer resizer-l"></div>
+            <div class="resizer resizer-tl"></div>
+            <div class="chat-header">
+                Enigma AI Agent
+                <button class="chat-close" id="chat-close">✖</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-message agent">Hello! I am connected to the Orchestrator. How can I help you today?</div>
+            </div>
+            <form class="chat-input-area" id="chat-form">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Ask something..." autocomplete="off">
+                <button type="submit" class="chat-send">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/admin';
+        // Mock admin ID for testing resolving HITL
+        const ADMIN_ID = '69e344fa242e2ab8e24ebb52';
+
+        async function fetchStats() {
+            try {
+                const res = await fetch(`${API_BASE}/stats`);
+                const data = await res.json();
+                
+                document.getElementById('stats').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--warning)">${data.hitl.pending}</div>
+                        <div class="stat-label">Pending Reviews</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--accent)">${data.audit.total}</div>
+                        <div class="stat-label">Total AI Actions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.platform.campaigns}</div>
+                        <div class="stat-label">Active Campaigns</div>
+                    </div>
+                `;
+            } catch (e) { console.error('Failed to fetch stats', e); }
+        }
+
+        async function fetchHITL() {
+            try {
+                const res = await fetch(`${API_BASE}/hitl`);
+                const data = await res.json();
+                const container = document.getElementById('hitl-queue');
+                
+                if (!data.length) {
+                    container.innerHTML = '<div class="empty-state">No pending reviews. All clear! ✨</div>';
+                    return;
+                }
+
+                container.innerHTML = data.map(item => `
+                    <li class="list-item" id="hitl-${item._id}">
+                        <div class="item-header">
+                            <strong>${item.report.milestone || 'Unknown Milestone'}</strong>
+                            <span class="badge ${item.report.recommendation || 'neutral'}">AI: ${item.report.recommendation || 'REVIEW'}</span>
+                        </div>
+                        <div class="item-detail">
+                            Campaign: ${item.campaignId.slice(-6)}... | AI Confidence: ${(item.report.confidence * 100).toFixed(0)}%<br>
+                            Status: ${item.report.completion_status || 'N/A'}
+                        </div>
+                        <div class="actions">
+                            <button class="btn-approve" onclick="resolveHITL('${item._id}', 'approve')">Approve</button>
+                            <button class="btn-reject" onclick="resolveHITL('${item._id}', 'reject')">Reject</button>
+                        </div>
+                    </li>
+                `).join('');
+            } catch (e) { console.error('Failed to fetch HITL', e); }
+        }
+
+        async function fetchAudit() {
+            try {
+                const res = await fetch(`${API_BASE}/audit`);
+                const data = await res.json();
+                const container = document.getElementById('audit-logs');
+                
+                if (!data.length) {
+                    container.innerHTML = '<div class="empty-state">No audit logs found.</div>';
+                    return;
+                }
+
+                container.innerHTML = data.slice(0, 10).map(item => `
+                    <li class="list-item">
+                        <div class="item-header">
+                            <strong>${item.agentName || item.eventType}</strong>
+                            <span class="badge ${item.recommendation || item.status || 'neutral'}">${item.recommendation || item.status || item.eventType}</span>
+                        </div>
+                        <div class="item-detail">
+                            Time: ${new Date(item.createdAt).toLocaleTimeString()} | 
+                            ${item.confidence ? `Confidence: ${(item.confidence * 100).toFixed(0)}%` : ''}
+                        </div>
+                    </li>
+                `).join('');
+            } catch (e) { console.error('Failed to fetch audit logs', e); }
+        }
+
+        async function resolveHITL(id, decision) {
+            try {
+                const res = await fetch(`${API_BASE}/hitl/${id}/resolve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_user_id: ADMIN_ID,
+                        decision: decision,
+                        notes: `Resolved via admin dashboard`
+                    })
+                });
+                if (res.ok) {
+                    document.getElementById(`hitl-${id}`).style.display = 'none';
+                    refreshAll();
+                } else {
+                    alert('Failed to resolve HITL item');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function refreshAll() {
+            fetchStats();
+            fetchHITL();
+            fetchAudit();
+        }
+
+        document.getElementById('refresh').addEventListener('click', refreshAll);
+        
+        // Chat Widget Logic
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatWindow = document.getElementById('chat-window');
+        const chatClose = document.getElementById('chat-close');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+
+        chatToggle.addEventListener('click', () => {
+            chatWindow.classList.toggle('open');
+            if (chatWindow.classList.contains('open')) chatInput.focus();
+        });
+
+        chatClose.addEventListener('click', () => {
+            chatWindow.classList.remove('open');
+        });
+
+        // Resizer Logic
+        let isResizing = false;
+        let resizeDir = '';
+        let startX, startY, startW, startH;
+
+        document.querySelectorAll('.resizer').forEach(resizer => {
+            resizer.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                resizeDir = e.target.className;
+                startX = e.clientX;
+                startY = e.clientY;
+                startW = parseInt(window.getComputedStyle(chatWindow).width, 10);
+                startH = parseInt(window.getComputedStyle(chatWindow).height, 10);
+                e.preventDefault(); // prevent text selection
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            if (resizeDir.includes('resizer-l') || resizeDir.includes('resizer-tl')) {
+                chatWindow.style.width = (startW - (e.clientX - startX)) + 'px';
+            }
+            if (resizeDir.includes('resizer-t') || resizeDir.includes('resizer-tl')) {
+                chatWindow.style.height = (startH - (e.clientY - startY)) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => { isResizing = false; });
+
+        function appendMessage(content, sender) {
+            const el = document.createElement('div');
+            el.className = `chat-message ${sender}`;
+            
+            if (sender === 'user') {
+                el.textContent = content;
+            } else if (sender === 'agent') {
+                if (typeof content === 'string') {
+                    // Simple loading or error text
+                    el.textContent = content;
+                } else if (content.text) {
+                    // New conversational response
+                    let html = marked.parse(content.text);
+                    if (content.data) {
+                        html += `
+                            <button class="raw-data-btn" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">Show JSON</button>
+                            <pre class="raw-data-content">${JSON.stringify(content.data, null, 2)}</pre>
+                        `;
+                    }
+                    el.innerHTML = html;
+                } else {
+                    // Fallback for old raw object responses
+                    el.innerHTML = `<pre style="white-space: pre-wrap; font-size: 0.8rem; font-family: monospace;">${JSON.stringify(content, null, 2)}</pre>`;
+                }
+            }
+            
+            chatMessages.appendChild(el);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            appendMessage(text, 'user');
+            chatInput.value = '';
+            
+            // Show typing indicator
+            const loadingId = 'loading-' + Date.now();
+            const loadingEl = document.createElement('div');
+            loadingEl.className = 'chat-message agent';
+            loadingEl.id = loadingId;
+            loadingEl.textContent = 'Thinking...';
+            chatMessages.appendChild(loadingEl);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: text, user_id: "" })
+                });
+                const data = await res.json();
+                
+                document.getElementById(loadingId).remove();
+                appendMessage(data, 'agent');
+                refreshAll(); // Refresh dashboard data just in case
+            } catch (err) {
+                document.getElementById(loadingId).remove();
+                appendMessage('Error communicating with agent.', 'agent');
+            }
+        });
+
+        // Initial load
+        refreshAll();
+    </script>
+</body>
+</html>

@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import useAuthStore from '../../store/authStore';
 import { getInvestorDashboard } from '../../api/investor.api';
 import { formatINR } from '../../utils/formatters';
+import AiChat from '../../components/AiChat';
 
 export default function InvestorDashboard() {
   const { user } = useAuthStore();
@@ -129,6 +130,9 @@ export default function InvestorDashboard() {
           </div>
         )}
       </div>
+
+      {/* Enigma AI — investor-scoped: passes the logged-in user's _id */}
+      <AiChat userId={user?._id} userRole="investor" />
     </div>
   );
 }

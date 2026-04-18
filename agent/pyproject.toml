@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "enigma-ai"
+version = "1.0.0"
+description = "Enigma AI — Multi-Agent Investment Intelligence Platform"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+# The parent directory of agent/ must be on sys.path,
+# and agent/ itself is the enigma_ai package.
+where = [".."]
+include = ["agent*"]
+
+[tool.setuptools.package-dir]
+enigma_ai = "."

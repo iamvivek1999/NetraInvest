@@ -7,8 +7,11 @@ import {
   toggleUserStatus,
   toggleInvestorPremiumStatus
 } from '../../api/admin.api';
+import AiChat from '../../components/AiChat';
+import useAuthStore from '../../store/authStore';
 
 export default function AdminDashboard() {
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'compliance', 'moderation'
   const [complianceSubTab, setComplianceSubTab] = useState('startup'); // 'startup' or 'investor'
   
@@ -438,6 +441,9 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Enigma AI — admin mode: platform intelligence, HITL stats, risk analysis */}
+      <AiChat userId={user?._id} userRole="admin" />
     </div>
   );
 }
