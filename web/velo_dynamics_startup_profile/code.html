@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed-variant": "#842225",
+                    "on-tertiary-fixed": "#410005",
+                    "on-surface": "#dae2fd",
+                    "error": "#ffb4ab",
+                    "secondary-container": "#3a4a5f",
+                    "surface-container-highest": "#2d3449",
+                    "on-surface-variant": "#bbcabf",
+                    "on-error": "#690005",
+                    "primary-fixed": "#6ffbbe",
+                    "outline-variant": "#3c4a42",
+                    "on-secondary-fixed": "#0b1c30",
+                    "tertiary-fixed": "#ffdad7",
+                    "inverse-surface": "#dae2fd",
+                    "error-container": "#93000a",
+                    "surface-tint": "#4edea3",
+                    "on-primary-container": "#00422b",
+                    "primary-container": "#10b981",
+                    "secondary": "#b7c8e1",
+                    "primary-fixed-dim": "#4edea3",
+                    "outline": "#86948a",
+                    "on-primary-fixed-variant": "#005236",
+                    "on-primary": "#003824",
+                    "on-background": "#dae2fd",
+                    "inverse-primary": "#006c49",
+                    "on-primary-fixed": "#002113",
+                    "surface-container-lowest": "#060e20",
+                    "on-secondary-container": "#a9bad3",
+                    "surface-bright": "#31394d",
+                    "surface-container-low": "#131b2e",
+                    "surface-dim": "#0b1326",
+                    "secondary-fixed": "#d3e4fe",
+                    "surface-container": "#171f33",
+                    "surface-container-high": "#222a3d",
+                    "tertiary": "#ffb3af",
+                    "on-tertiary-container": "#711419",
+                    "tertiary-fixed-dim": "#ffb3af",
+                    "primary": "#4edea3",
+                    "on-tertiary": "#650911",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#213145",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "surface-variant": "#2d3449",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "surface": "#0b1326",
+                    "inverse-on-surface": "#283044",
+                    "background": "#0b1326",
+                    "tertiary-container": "#fc7c78"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0b1326]/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex justify-between items-center px-8 h-20 w-full max-w-none">
+<div class="text-2xl font-bold tracking-tighter text-[#4edea3] font-['Plus_Jakarta_Sans']">Velo Dynamics</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-slate-400 hover:text-white transition-colors font-['Plus_Jakarta_Sans'] tracking-tight" href="#">Dashboard</a>
+<a class="text-slate-400 hover:text-white transition-colors font-['Plus_Jakarta_Sans'] tracking-tight" href="#">Protocol</a>
+<a class="text-slate-400 hover:text-white transition-colors font-['Plus_Jakarta_Sans'] tracking-tight" href="#">Audit</a>
+<a class="text-slate-400 hover:text-white transition-colors font-['Plus_Jakarta_Sans'] tracking-tight" href="#">Team</a>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-slate-400">
+<span class="material-symbols-outlined hover:text-[#4edea3] cursor-pointer transition-all scale-95 active:scale-90 duration-200">notifications</span>
+<span class="material-symbols-outlined hover:text-[#4edea3] cursor-pointer transition-all scale-95 active:scale-90 duration-200">account_circle</span>
+</div>
+<button class="bg-[#10b981] text-[#003824] px-6 py-2 rounded-lg font-bold hover:bg-[#4edea3] transition-all scale-95 active:scale-90 duration-200">Invest Now</button>
+</div>
+</nav>
+<!-- SideNavBar (Hidden on Mobile) -->
+<aside class="fixed left-0 top-0 h-screen hidden lg:flex flex-col py-6 h-full w-64 border-r border-[#3c4a42]/20 bg-[#0b1326] z-40 transition-transform duration-300">
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-sm" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div>
+<div class="text-lg font-bold text-white leading-none">Velo Dynamics</div>
+<div class="text-[10px] uppercase tracking-widest text-primary font-bold">Sovereign Audit</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-200 font-['Plus_Jakarta_Sans'] text-sm hover:bg-[#131b2e] rounded transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span> Overview
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-200 font-['Plus_Jakarta_Sans'] text-sm hover:bg-[#131b2e] rounded transition-all" href="#">
+<span class="material-symbols-outlined">bar_chart</span> Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-[#10B981]/10 text-[#4edea3] border-l-4 border-[#4edea3] font-['Plus_Jakarta_Sans'] text-sm transition-all" href="#">
+<span class="material-symbols-outlined">security</span> Protocol
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-200 font-['Plus_Jakarta_Sans'] text-sm hover:bg-[#131b2e] rounded transition-all" href="#">
+<span class="material-symbols-outlined">verified_user</span> Compliance
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-200 font-['Plus_Jakarta_Sans'] text-sm hover:bg-[#131b2e] rounded transition-all" href="#">
+<span class="material-symbols-outlined">hub</span> Network
+            </a>
+</nav>
+<div class="px-4 py-6 border-t border-outline-variant/10 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-[#4edea3] font-['Plus_Jakarta_Sans'] text-sm transition-all" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-[#4edea3] font-['Plus_Jakarta_Sans'] text-sm transition-all" href="#">
+<span class="material-symbols-outlined">help_outline</span> Support
+            </a>
+</div>
+</aside>
+<main class="lg:ml-64 pt-24 px-4 md:px-12 pb-20 max-w-7xl mx-auto">
+<!-- Hero Section -->
+<section class="relative mb-20">
+<div class="flex flex-col lg:flex-row items-center gap-12">
+<div class="flex-1 space-y-6">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-container/15 rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-primary font-bold text-[10px] tracking-widest uppercase">Verified on Chain</span>
+</div>
+<h1 class="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter text-on-surface leading-tight">
+                        Autonomous <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-container">Carbon Credit</span> Auditing
+                    </h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl leading-relaxed">
+                        Redefining ecological transparency through satellite telemetry and sovereign blockchain infrastructure. Real-time verification for the global green economy.
+                    </p>
+<div class="flex flex-wrap gap-4 pt-4">
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-10 py-4 rounded-lg font-bold shadow-lg hover:shadow-primary/20 transition-all scale-95 active:scale-90">
+                            Express Interest
+                        </button>
+<button class="flex items-center gap-2 bg-surface-container-high hover:bg-surface-container-highest text-on-surface px-8 py-4 rounded-lg font-bold border border-outline-variant/20 transition-all">
+<span class="material-symbols-outlined">download</span> Download Whitepaper
+                        </button>
+</div>
+</div>
+<div class="flex-1 w-full max-w-lg aspect-square relative">
+<div class="absolute inset-0 bg-primary/20 blur-[120px] rounded-full"></div>
+<div class="relative glass-panel rounded-full p-8 border border-outline-variant/20">
+<img alt="Velo Dynamics Abstract" class="rounded-full w-full h-full object-cover grayscale opacity-80 mix-blend-screen" data-alt="Abstract visualization of Earth from space with digital glowing network lines and green data points representing carbon sequestration monitoring" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4GuBODUzyUFo4YFZ1jf5qBkFH5Sc4EdFVCe6R_pqK5AgQ2DKgskg9qux7hVMFugu4QKhT6YipH7sYZbLAaYavcGPmFK7LtdToRBS9oGc1icyG2OBevDy6hfiMWBHoEVB8SBewBzSSgnriJ1mKAvxBNZ2Yl3S5Q2q0RY5hcJPa676Thd1ZFxD5ynluRyZLXZeEjIeiEL7NQgmP4s8RIudGNVXH_G38q2JqFAc3ddCzo7xWwHFGa1NhCHVYx1f8Gdq9jPNz1sgIGco"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Key Metrics Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
+<!-- Valuation -->
+<div class="surface-container-low p-8 rounded-xl relative overflow-hidden group">
+<div class="text-label-sm uppercase tracking-widest text-slate-500 mb-4 font-bold text-xs">Current Valuation</div>
+<div class="text-4xl font-headline font-bold text-on-surface">₹1.85 Cr</div>
+<div class="mt-4 text-primary text-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> +12% from Seed
+                </div>
+<div class="absolute -right-4 -bottom-4 opacity-5 text-on-surface">
+<span class="material-symbols-outlined text-8xl">payments</span>
+</div>
+</div>
+<!-- Credibility Score -->
+<div class="glass-panel p-8 rounded-xl border border-outline-variant/20 relative">
+<div class="text-label-sm uppercase tracking-widest text-slate-500 mb-4 font-bold text-xs">Credibility Score</div>
+<div class="flex items-center gap-6">
+<div class="relative w-16 h-16">
+<svg class="w-full h-full" viewbox="0 0 36 36">
+<path class="text-outline-variant/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="transparent" stroke="currentColor" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="transparent" stroke="currentColor" stroke-dasharray="94, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center text-lg font-bold">94</div>
+</div>
+<div class="text-sm text-on-surface-variant font-medium">Top 1% Tier Auditor</div>
+</div>
+</div>
+<!-- TVL -->
+<div class="surface-container-low p-8 rounded-xl">
+<div class="text-label-sm uppercase tracking-widest text-slate-500 mb-4 font-bold text-xs">TVL</div>
+<div class="text-4xl font-headline font-bold text-on-surface">₹42 Lakhs</div>
+<div class="mt-4 text-on-surface-variant text-sm flex items-center gap-1">
+                    Secured by Sovereign Ledger
+                </div>
+</div>
+<!-- Impact -->
+<div class="surface-container-low p-8 rounded-xl">
+<div class="text-label-sm uppercase tracking-widest text-slate-500 mb-4 font-bold text-xs">Impact Audited</div>
+<div class="text-4xl font-headline font-bold text-on-surface">250k</div>
+<div class="mt-4 text-primary text-sm font-bold uppercase tracking-tighter">
+                    Tons CO2 Offset
+                </div>
+</div>
+</section>
+<!-- Protocol Overview -->
+<section class="mb-24 flex flex-col lg:flex-row gap-16 items-center">
+<div class="lg:w-1/2">
+<div class="h-1 w-20 bg-primary mb-8"></div>
+<h2 class="text-3xl md:text-4xl font-headline font-bold mb-8 tracking-tight">The Precision of Sovereign Verification</h2>
+<div class="space-y-6 text-on-surface-variant text-lg leading-relaxed">
+<p>
+                        Velo Dynamics leverages a proprietary "Sky-to-Chain" pipeline. By utilizing multi-spectral satellite telemetry, we bypass manual, error-prone verification processes that plague today's carbon markets.
+                    </p>
+<p>
+                        Every hectare of monitored forest or carbon sink is mapped to a blockchain-anchored data set. This ensures that every credit audited by Velo is immutable, non-replicable, and scientifically provable.
+                    </p>
+<ul class="space-y-4 pt-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<span>Direct satellite feed integration with zero human intervention.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<span>Proof-of-Sovereignty consensus for data validation.</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="lg:w-1/2 w-full grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-1 rounded-lg">
+<img alt="Environmental Tech" class="rounded-lg h-64 w-full object-cover" data-alt="Dramatic aerial drone view of a lush reforestation project area with perfectly aligned saplings in morning mist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDFgRMehZ4RPOp9IlosOjAHjC-QVCwJuAInnpH8KW9nbeFiZwhrw6AyEG56g9PR8Oc1DMOTsUb8I4XKwud8bPWsg9cQK2YZD_57LAG4XCqkw1K0r-y1bShWMdkUwKPmd1hs7MZXnYmsIrIYJ3DO__UER02_7B2ldGAl9SFairkq4Pt9JZzcwQB6Li16JaJ5UHK0AoDdzyQ9eQxWmNOgoGY9rz-eo-in6qJnAGNRt17ohrheImneU-JVoveapDpXKQEzfXuUxfDe20"/>
+</div>
+<div class="bg-surface-container-low p-1 rounded-lg mt-12">
+<img alt="Data Analytics" class="rounded-lg h-64 w-full object-cover" data-alt="Digital screen displaying complex green and cyan data visualizations, charts, and maps of environmental impact data" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSkt2OKDl7rLHBO-0Oo42TlWrpVMyINijDITjThgZ1uNPeLLArRYpZe0zRDOYG8LSpdXzDS4QIu5L-vYLb7u5CssvAmpsyA3-DGpJetZph3rliFZ1NOHpDp_HgZJf21df1oTJu2PdhA0H97Dfp0srTt4ESrXVnkPZR9jrxokL3FW0jN3NYMnTSqxkTENOTBbrTj7V1rzlKmiou7iL81wkmWYZpIPLnGdCklzl1kd5NNw5Y1TfXliwHVxGWBPgEqs4Xy6jvprfEN9U"/>
+</div>
+</div>
+</section>
+<!-- Team Section -->
+<section class="mb-24">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+<div>
+<div class="text-primary font-bold text-xs uppercase tracking-[0.2em] mb-2">The Architects</div>
+<h2 class="text-4xl font-headline font-bold">Execution Intelligence</h2>
+</div>
+<p class="text-on-surface-variant max-w-md text-right hidden md:block">
+                    A multi-disciplinary team from MIT, NASA, and top-tier blockchain labs.
+                </p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Team Member 1 -->
+<div class="group">
+<div class="relative mb-6 overflow-hidden rounded-xl aspect-[4/5]">
+<img alt="CEO" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Professional portrait of a male CEO in a modern dark suit, soft ambient studio lighting, confident expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1PtHyttU3thEX62L3oA-foTFk3AoX7Aybqi3fGvO25zO0XBTzvT1i1ketfLz5dAFDjTNh4kyW5CIaO5naqccsDiGZm3FthhPobqXC7fWMcJqVybGI6DJyv4PC4EssQk9bZ1A_y6dCGy-9chv0ilsC696EbsqkzMJhndaS8gP7QsMsulYGbbygU5JWvQOv9WK0UJpwRSpAU_IHo2w7poKtBpIwJT33wX0hx3-aD1dUCP8KySkUkENpZ-pzpSamlaaFMLQPlkUx06I"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-60"></div>
+</div>
+<h3 class="text-xl font-headline font-bold">Marcus Velo</h3>
+<div class="text-primary text-sm font-semibold mb-3">CEO &amp; Founder</div>
+<p class="text-on-surface-variant text-sm leading-relaxed">Ex-SpaceX Engineer with 15 years in geospatial data systems and tokenomics.</p>
+</div>
+<!-- Team Member 2 -->
+<div class="group">
+<div class="relative mb-6 overflow-hidden rounded-xl aspect-[4/5]">
+<img alt="CTO" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Professional portrait of a female CTO with glasses, smart business attire, bright and clean office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD624T9UcCkypzOU0dtORpHzrXnCEWoi-HAiZCpd9alO4kIJE7TKQbLK2-ykIhXrGIfHMx4_aq61t-i5q9P9zoOC_QaAv0p119qXn2X9AhHeam5220ZCvQ_I1WSEebyeSLWzC25BR_0wM_w8K6QDj77sP91UERaM2Y4g5pIPbGuiQaAPJHDSYqB5YmzShgPE0yLjaeQZ9_SRllRo_pZe4Y8QzdW2Du4JVlJ7nitSNQISgDwJw9a9WCuo4dsBbiktb8RhCByds_wTIA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-60"></div>
+</div>
+<h3 class="text-xl font-headline font-bold">Dr. Elena Chen</h3>
+<div class="text-primary text-sm font-semibold mb-3">Chief Science Officer</div>
+<p class="text-on-surface-variant text-sm leading-relaxed">PhD in Climatology from Oxford. Lead researcher in automated carbon sequencing.</p>
+</div>
+<!-- Team Member 3 -->
+<div class="group">
+<div class="relative mb-6 overflow-hidden rounded-xl aspect-[4/5]">
+<img alt="Lead Eng" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Portrait of a male lead developer, casual but professional, tech-focused environment with blurred digital screens in background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9meiAwExhzP3IpA2IPvb844ZZnLnsoswrLZQXHvbqHagwEp8jS2YXzYQFnlLE7o1jvBERYVkr3oFgQpfB5F6ssbEa4lDq9ll4RkyxDG1HxNi7P-JjbNE0bGihck2eeKdeOiLbHwPykTdZZnP8iu1zeOeYDQ3ybHg6AZhrIpbteMUAq_0ULDapNP9qfHubzoc4knfBdiZoN6d3f_hOY8-3M3iFCRnnH9mXURsy2K5NBsLKG9KPYsW5FgBeNYP5mmxAyt2hkcCUhCg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-60"></div>
+</div>
+<h3 class="text-xl font-headline font-bold">Julian Thorne</h3>
+<div class="text-primary text-sm font-semibold mb-3">Head of Blockchain</div>
+<p class="text-on-surface-variant text-sm leading-relaxed">Pioneer in L2 scaling solutions and sovereign bridge protocols.</p>
+</div>
+</div>
+</section>
+<!-- Funding History -->
+<section class="mb-24 bg-surface-container-low rounded-2xl p-10">
+<h2 class="text-3xl font-headline font-bold mb-10 text-center md:text-left">Funding Trajectory</h2>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="text-slate-500 text-xs uppercase tracking-widest border-b border-outline-variant/10">
+<th class="pb-6 px-4">Round</th>
+<th class="pb-6 px-4">Amount</th>
+<th class="pb-6 px-4">Date</th>
+<th class="pb-6 px-4">Lead Investors</th>
+<th class="pb-6 px-4 text-right">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr class="hover:bg-surface-container/50 transition-all">
+<td class="py-6 px-4 font-bold text-on-surface">Series A</td>
+<td class="py-6 px-4 text-on-surface font-headline font-bold">₹1.2 Cr</td>
+<td class="py-6 px-4 text-on-surface-variant">Nov 2023</td>
+<td class="py-6 px-4 text-on-surface-variant">Green Horizon VC, Ledger Prime</td>
+<td class="py-6 px-4 text-right">
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase">Closed</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/50 transition-all">
+<td class="py-6 px-4 font-bold text-on-surface">Seed</td>
+<td class="py-6 px-4 text-on-surface font-headline font-bold">₹25 Lakhs</td>
+<td class="py-6 px-4 text-on-surface-variant">Jan 2022</td>
+<td class="py-6 px-4 text-on-surface-variant">Sovereign Angels, TechSeed</td>
+<td class="py-6 px-4 text-right">
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase">Closed</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/50 transition-all">
+<td class="py-6 px-4 font-bold text-on-surface">Pre-Seed</td>
+<td class="py-6 px-4 text-on-surface font-headline font-bold">₹4.5 Lakhs</td>
+<td class="py-6 px-4 text-on-surface-variant">Aug 2021</td>
+<td class="py-6 px-4 text-on-surface-variant">Founder Syndicate</td>
+<td class="py-6 px-4 text-right">
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase">Closed</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="mb-24 relative overflow-hidden bg-[#10b981] rounded-3xl p-12 md:p-20 text-center">
+<div class="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] rounded-full -mr-48 -mt-48"></div>
+<div class="relative z-10 space-y-8">
+<h2 class="text-4xl md:text-6xl font-headline font-extrabold text-[#003824] tracking-tighter">Secure Your Stake in the <br/>Green Industrial Revolution</h2>
+<p class="text-[#00422b] text-lg md:text-xl max-w-2xl mx-auto font-medium">
+                    Velo Dynamics is opening limited institutional participation for the Protocol expansion phase.
+                </p>
+<div class="flex flex-col sm:flex-row justify-center gap-4">
+<button class="bg-[#003824] text-white px-12 py-5 rounded-lg font-bold text-lg hover:bg-surface transition-all scale-95 active:scale-90">
+                        Express Interest
+                    </button>
+<button class="bg-transparent text-[#003824] border-2 border-[#003824]/20 px-12 py-5 rounded-lg font-bold text-lg hover:bg-white/10 transition-all">
+                        Contact IR Team
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="flex flex-col items-center gap-6 w-full mt-20 w-full py-12 border-t border-[#3c4a42]/10 bg-[#0b1326]">
+<div class="flex gap-8 text-slate-600 font-['Inter'] text-xs tracking-widest uppercase">
+<a class="hover:text-[#4edea3] transition-opacity opacity-80 hover:opacity-100" href="#">Privacy Protocol</a>
+<a class="hover:text-[#4edea3] transition-opacity opacity-80 hover:opacity-100" href="#">Terms of Sovereignty</a>
+<a class="hover:text-[#4edea3] transition-opacity opacity-80 hover:opacity-100" href="#">On-Chain Data</a>
+</div>
+<div class="text-slate-600 font-['Inter'] text-xs tracking-widest uppercase opacity-80">
+            © 2024 Velo Dynamics. Secured via Sovereign Ledger.
+        </div>
+</footer>
+</body></html>

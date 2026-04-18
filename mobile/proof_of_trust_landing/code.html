@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Netra Invest | Institutional Futurist Investing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#0b1326",
+                        "tertiary-fixed": "#ffdad7",
+                        "primary": "#4edea3",
+                        "surface-container-lowest": "#060e20",
+                        "surface-container-highest": "#2d3449",
+                        "on-secondary-fixed": "#0b1c30",
+                        "on-primary-fixed": "#002113",
+                        "surface": "#0b1326",
+                        "surface-bright": "#31394d",
+                        "surface-container-high": "#222a3d",
+                        "surface-container-low": "#131b2e",
+                        "inverse-surface": "#dae2fd",
+                        "outline": "#86948a",
+                        "on-tertiary-fixed-variant": "#842225",
+                        "on-surface": "#dae2fd",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-secondary": "#213145",
+                        "surface-variant": "#2d3449",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-container": "#711419",
+                        "secondary-fixed": "#d3e4fe",
+                        "primary-fixed": "#6ffbbe",
+                        "surface-dim": "#0b1326",
+                        "tertiary-container": "#fc7c78",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#410005",
+                        "on-secondary-container": "#a9bad3",
+                        "on-primary-container": "#00422b",
+                        "on-primary": "#003824",
+                        "tertiary": "#ffb3af",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#4edea3",
+                        "secondary": "#b7c8e1",
+                        "inverse-primary": "#006c49",
+                        "on-tertiary": "#650911",
+                        "on-background": "#dae2fd",
+                        "primary-container": "#10b981",
+                        "surface-container": "#171f33",
+                        "secondary-container": "#3a4a5f",
+                        "on-surface-variant": "#bbcabf",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#005236",
+                        "outline-variant": "#3c4a42",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "inverse-on-surface": "#283044",
+                        "tertiary-fixed-dim": "#ffb3af"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b1326; color: #dae2fd; }
+        .glass-card {
+            background: rgba(23, 31, 51, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0b1326]/60 backdrop-blur-2xl shadow-[0_20px_40px_rgba(6,14,32,0.4)]">
+<div class="flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center overflow-hidden">
+<img alt="Netra Logo" data-alt="minimalist geometric logo icon with emerald green and dark blue intersecting shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJAGmePDolEkwsxUJdDDEr1bjix9WsYuFb6dvRqT93bflpEfVeE5XvY0QxaTkl1OUTZ-MwgL3UGVwLPnBp0GNnfexPJVafyD2yzILet3aldFphvzPQTaO2kBW_UptjcjQuBz_5l_jI0_MRhloNCQ1NBGq6__lSv3Dm3_F-hyEBypv0ck3DwBWT01vD0TnSCxgG6iYYkZXEWI9qO0_XICMn7tcXUoXn48Go0nBJrAhTT4AC8WAPu00sPWrou0IWD6Es2k58_htHrwLw"/>
+</div>
+<span class="text-lg font-bold text-[#4edea3] tracking-tighter font-headline">Netra Invest</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#4edea3]">notifications</span>
+<div class="w-8 h-8 rounded-full ring-2 ring-[#4edea3]/30 overflow-hidden">
+<img alt="Investor Profile" data-alt="professional male investor headshot with glasses and a friendly expression, high-end corporate style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc2Oi4ytX0BW5Lmcel3EtpoDH3_7T0_FeAli3c4KQfZxoqqvDYwWWQKVHr2V5lEPEfp3bw_qdNNr0JOS7dVqceeouJz-FMdvUcm9hh2ALDv6soLwPjxTnDKIUnhfSFQ39pbUN1ezQYaXwg4bWH7eUY1MLfWeqrwReGTsDhlyGCwLBGxH-pmdr02i39BG0-1AzMZE3Nfa_3SxZJYoJZcFj_d7j18DmjPx41lMlcylprhygF-LiTZJs2sMjW1UbybMZAWUuLTWg9_p8P"/>
+</div>
+</div>
+</div>
+<div class="h-[1px] w-full bg-gradient-to-r from-transparent via-[#4edea3]/20 to-transparent"></div>
+</header>
+<main class="pt-16 pb-24 px-6 space-y-12 max-w-md mx-auto">
+<!-- Hero Section -->
+<section class="relative pt-10">
+<div class="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 blur-[100px] rounded-full"></div>
+<div class="space-y-6 relative z-10">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 ring-1 ring-primary/20">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-[10px] font-bold text-primary tracking-widest uppercase font-label">Institutional Grade</span>
+</div>
+<h1 class="text-4xl font-extrabold tracking-tight leading-tight text-on-surface">
+                    The Frontier of <span class="text-primary italic">Capital</span> Curation.
+                </h1>
+<p class="text-secondary font-body leading-relaxed opacity-80">
+                    Direct access to blockchain-verified early-stage ventures. Institutional security meets decentralized opportunity.
+                </p>
+<!-- TVL Ticker -->
+<div class="glass-card p-6 rounded-xl border border-outline-variant/10 shadow-2xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">query_stats</span>
+</div>
+<div class="relative z-10">
+<p class="text-[10px] font-medium text-secondary tracking-widest uppercase mb-1">Total Value Locked</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-extrabold text-primary tracking-tighter">₹3,750Cr+</span>
+<span class="text-xs font-bold text-primary-container bg-primary/10 px-2 py-0.5 rounded">+12.4%</span>
+</div>
+<p class="text-[10px] text-on-surface-variant mt-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                            Updated 2 minutes ago via Node Registry
+                        </p>
+</div>
+<!-- Decorative Gradient -->
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
+</div>
+<div class="flex gap-4">
+<button class="flex-1 bg-primary text-on-primary font-bold py-4 rounded-md shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                        Invest Now
+                    </button>
+<button class="flex-1 border border-outline-variant/30 text-on-surface font-bold py-4 rounded-md hover:bg-surface-container transition-colors">
+                        Explore
+                    </button>
+</div>
+</div>
+</section>
+<!-- Verified Profiles Carousel -->
+<section class="space-y-6">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface">Verified Profiles</h2>
+<p class="text-xs text-on-surface-variant">Top-tier startup opportunities</p>
+</div>
+<button class="text-primary text-xs font-bold uppercase tracking-widest">View All</button>
+</div>
+<div class="flex overflow-x-auto gap-5 pb-6 -mx-6 px-6 no-scrollbar snap-x">
+<!-- Startup Card 1 -->
+<div class="min-w-[280px] snap-center glass-card rounded-xl overflow-hidden border border-outline-variant/10 flex flex-col">
+<div class="relative h-32 w-full">
+<img class="w-full h-full object-cover" data-alt="futuristic 3D digital landscape with glowing cyan lines and abstract geometric architecture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZJdTnqfvlw6uJkHRe75Vz8yfFgXL6g05mVuBzJ1hrFSGg7mXimMC8z1qynb5q7RdI3MMrJRwqwb3o3F4rxCrkeoC63E1T0yy9hUQJWfyLs5MLIwUzLINSuUg7HzD4l3l5bRPuta5OsTHvyPXqyMBDKxUqllQLGM9sbVnrgqk47Qjms3i5V1wV8KX9_Y_Kl5HWxG4rUnDl0HRALO_s060-UURAy0dyVeVIY8HrDAljNmLCq-RkSajeAx6QLO2OyCG6Zz0WUde9XAbt"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+<div class="absolute bottom-3 left-3 flex items-center gap-2">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high p-1 border border-primary/30">
+<img alt="NE Logo" data-alt="clean initials logo for a tech startup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpcbbn4ieqmZWFNQwmifjSbFPSGxRTC97iGDGyKBzfTse_SN_IlN_o61wTJ2bjyA6JNwRt0WfKcfacoUJ-jZHvRKtYkjf_kCTAhdwzYrzKymHPF7U1s1SwAPMbqsXdGdVmYcCMsTHYNdYuZPw7fxv5sabm5F5JQb3SuFqZVx6q52x_lTaAmR7GWoScvzK4ZnJo8pb_EZAkH4smXbQ4gKmjTSGUYRT9ThTOpunnWROhAwjAImKraiJ7t8a5froSBPxAi-NxDVekz-Nu"/>
+</div>
+<div class="text-sm font-bold">Nexus Energy</div>
+</div>
+</div>
+<div class="p-4 space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded font-bold uppercase tracking-tighter">DePIN Sector</span>
+<div class="flex items-center gap-1">
+<span class="text-xs font-bold text-on-surface">98</span>
+<span class="text-[10px] text-on-surface-variant">/100</span>
+</div>
+</div>
+<!-- Score Bar -->
+<div class="w-full h-1.5 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[98%]"></div>
+</div>
+<div class="flex justify-between text-[10px] font-medium text-on-surface-variant uppercase tracking-widest">
+<span>Target: ₹20Cr</span>
+<span class="text-primary">84% Filled</span>
+</div>
+</div>
+</div>
+<!-- Startup Card 2 -->
+<div class="min-w-[280px] snap-center glass-card rounded-xl overflow-hidden border border-outline-variant/10 flex flex-col opacity-60">
+<div class="relative h-32 w-full">
+<img class="w-full h-full object-cover" data-alt="abstract neural network visualization with soft emerald glowing nodes on a dark blue void" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCTNuKmksCNioRNjlaFnS0FbAHu1iLq4aVDHL784x4HfdaGEiVeZWysXbBt2Ms2gd2Uwxw_BWN9jCt7_fBTVm4JR_m0IGWY9Qi4mlBPzVR8EIMATJS7zN-pL44jYPojhYOaGSE-Lki8o0ycikV6WYOpEor2qcv0xQhZeKKGRxo8DQuHteDCdn0R_i9wBpLWrZp-sAUYWk8zmBsPk3sIHcvsIAWxy21jFdBA3Vwf107WhxHg5WC4adtyqSi2GMmIj8pODqv_eceWPdY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+<div class="absolute bottom-3 left-3 flex items-center gap-2">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high p-1 border border-primary/30">
+<img alt="AL Logo" data-alt="modern minimalist company logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMWycI3qv5iPZ_kUNVr3h2mnLevUO1Zdj0QUYdO_0T1-8ssIa8mbiVd-LnYnv-5On6RMMZEt9gbm27lZgzzNiefy1s1QGN-RkY_QXfxkyxwJFI3vFPRizjsSYtl3qXW5azg2sbRyOuDLwjhn8pKqYkZjFT9utGa8p7ZjjxaV6tXANMsgP7ck766NzkR80-gOxrE_gBL0mGsSjqr5TCm14fJOY5nNK25WTyKIb0CfEJbCGoNx1egWVFB9qvsG_fp9jtoMCUw2xlvsEv"/>
+</div>
+<div class="text-sm font-bold">Aletheia AI</div>
+</div>
+</div>
+<div class="p-4 space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded font-bold uppercase tracking-tighter">AI Oracle</span>
+<div class="flex items-center gap-1">
+<span class="text-xs font-bold text-on-surface">92</span>
+<span class="text-[10px] text-on-surface-variant">/100</span>
+</div>
+</div>
+<div class="w-full h-1.5 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[92%]"></div>
+</div>
+<div class="flex justify-between text-[10px] font-medium text-on-surface-variant uppercase tracking-widest">
+<span>Target: ₹42Cr</span>
+<span class="text-primary">42% Filled</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Asymmetric Data Insights -->
+<section class="space-y-6">
+<h2 class="text-2xl font-bold tracking-tight text-on-surface">Network Intelligence</h2>
+<div class="grid grid-cols-2 gap-4">
+<div class="col-span-2 glass-card p-6 rounded-xl border border-outline-variant/10 flex items-center justify-between">
+<div>
+<p class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Market Sentiment</p>
+<p class="text-2xl font-bold">Extreme Bullish</p>
+</div>
+<div class="w-16 h-16 rounded-full border-4 border-primary border-t-transparent animate-spin-slow flex items-center justify-center">
+<span class="text-xs font-bold text-primary">88%</span>
+</div>
+</div>
+<div class="glass-card p-5 rounded-xl border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary mb-2">hub</span>
+<p class="text-lg font-bold">4.2k</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-medium">Nodes Active</p>
+</div>
+<div class="glass-card p-5 rounded-xl border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary mb-2">shield_with_heart</span>
+<p class="text-lg font-bold">100%</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-medium">Uptime Audit</p>
+</div>
+</div>
+</section>
+<!-- Institutional Footer Note -->
+<footer class="pt-8 pb-12 text-center space-y-4 opacity-50">
+<div class="flex justify-center gap-4">
+<div class="w-8 h-[1px] bg-on-surface-variant self-center"></div>
+<span class="text-[10px] uppercase tracking-[0.2em] font-bold">Established MMXXIV</span>
+<div class="w-8 h-[1px] bg-on-surface-variant self-center"></div>
+</div>
+<p class="text-[10px] leading-relaxed max-w-xs mx-auto">
+                All investments carry risk. Netra Invest is a regulated curation layer for accredited and institutional participants.
+            </p>
+</footer>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full rounded-t-[2rem] z-50 pb-safe bg-[#0b1326]/80 backdrop-blur-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
+<div class="flex justify-around items-center w-full px-4 h-20">
+<div class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase mt-1">Portfolio</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#10b981]/20 text-[#4edea3] rounded-2xl px-5 py-2 ring-1 ring-[#4edea3]/30 active:scale-90 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase mt-1">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase mt-1">Ledger</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase mt-1">Settings</span>
+</div>
+</div>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 8s linear infinite;
+        }
+    </style>
+</body></html>

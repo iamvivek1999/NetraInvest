@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#6ffbbe",
+                    "inverse-primary": "#006c49",
+                    "on-primary": "#003824",
+                    "surface-container-lowest": "#060e20",
+                    "surface-container-low": "#131b2e",
+                    "on-surface": "#dae2fd",
+                    "inverse-on-surface": "#283044",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "surface-dim": "#0b1326",
+                    "error-container": "#93000a",
+                    "surface-variant": "#2d3449",
+                    "on-surface-variant": "#bbcabf",
+                    "outline": "#86948a",
+                    "on-error": "#690005",
+                    "surface": "#0b1326",
+                    "primary-container": "#10b981",
+                    "surface-bright": "#31394d",
+                    "primary-fixed-dim": "#4edea3",
+                    "surface-tint": "#4edea3",
+                    "on-primary-fixed": "#002113",
+                    "on-tertiary-fixed-variant": "#842225",
+                    "on-secondary-fixed": "#0b1c30",
+                    "on-primary-fixed-variant": "#005236",
+                    "on-primary-container": "#00422b",
+                    "error": "#ffb4ab",
+                    "outline-variant": "#3c4a42",
+                    "on-secondary": "#213145",
+                    "on-tertiary-fixed": "#410005",
+                    "primary": "#4edea3",
+                    "surface-container-high": "#222a3d",
+                    "inverse-surface": "#dae2fd",
+                    "tertiary-fixed-dim": "#ffb3af",
+                    "surface-container-highest": "#2d3449",
+                    "tertiary": "#ffb3af",
+                    "surface-container": "#171f33",
+                    "secondary-container": "#3a4a5f",
+                    "secondary": "#b7c8e1",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-secondary-container": "#a9bad3",
+                    "on-tertiary-container": "#711419",
+                    "on-error-container": "#ffdad6",
+                    "background": "#0b1326",
+                    "tertiary-container": "#fc7c78",
+                    "tertiary-fixed": "#ffdad7",
+                    "on-background": "#dae2fd",
+                    "on-tertiary": "#650911"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(24px);
+        }
+        .tonal-shift {
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-transparent backdrop-blur-xl tonal-shift bg-slate-900/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+<div class="flex justify-between items-center px-8 h-20 w-full mx-auto font-headline tracking-tight">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tighter text-emerald-400">Netra Invest</span>
+<div class="hidden md:flex gap-6">
+<a class="text-slate-400 hover:text-slate-200 transition-colors" href="#">Ecosystem</a>
+<a class="text-slate-400 hover:text-slate-200 transition-colors" href="#">Governance</a>
+<a class="text-slate-400 hover:text-slate-200 transition-colors" href="#">Assets</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="material-symbols-outlined text-slate-400 hover:bg-emerald-400/10 p-2 rounded-full cursor-pointer transition-all" data-icon="notifications">notifications</div>
+<div class="flex items-center gap-3 bg-primary-container px-4 py-2 rounded-md scale-95 active:scale-90 duration-200 cursor-pointer">
+<span class="text-on-primary-container font-bold text-sm">Connect Wallet</span>
+</div>
+<img alt="Investor Profile" class="w-10 h-10 rounded-full border border-primary/20" data-alt="professional portrait of a confident male executive in a sleek dark suit against a minimalist architectural background with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-hDhjnkg58F391wCy8ArbIbjwd0NGqFCcBXvdrUUIkBI6JHHShWScG0f59rdm6xR7dLSBtD4ps46m5Q-h9341QMJrhkSKMrmsFbKkbMRtwwxEbe13KN6iHZgAYkbnzqxY2VAE9t0vjR6g2tv9gKF8qolb84XCTdTgmJHiRAvcuqv26mb4MdA9U5kblIMHf0BI54kLtXunQRLhOdFrDIceeAdm5LWdCQD2Mtb0s9StH8cLl_ehV0VT48UU1VLRc5ReTjgzozOaYI4"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-900 flex flex-col py-6 tonal-shift border-r border-emerald-900/20 font-headline font-medium z-40 hidden md:flex">
+<div class="px-6 mb-10 pt-20">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-sm" data-weight="fill" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div>
+<p class="text-emerald-500 font-black leading-none">The Sovereign</p>
+<p class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Institutional Grade</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-emerald-400 border-l-4 border-emerald-500 bg-emerald-500/5 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span>Portfolio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span>Transactions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span>Yields</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-2">
+<button class="w-full bg-emerald-500/10 text-emerald-400 py-3 rounded-lg font-bold text-sm mb-6 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
+                New Investment
+            </button>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-300 transition-colors text-sm" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help_outline">help_outline</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-300 transition-colors text-sm" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span>Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 pt-28 px-8 pb-12 min-h-screen bg-surface">
+<header class="mb-12">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-xs font-bold tracking-[0.2em] text-primary uppercase">Institutional Control Center</span>
+<div class="h-[1px] flex-1 bg-gradient-to-r from-primary/30 to-transparent"></div>
+</div>
+<h1 class="text-5xl font-extrabold font-headline tracking-tighter text-on-surface">Capital Overview</h1>
+</header>
+<!-- Top Metrics Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+<div class="glass-panel p-6 rounded-xl border-l-4 border-primary">
+<p class="text-sm font-label text-on-surface-variant uppercase tracking-widest mb-1">Net Asset Value</p>
+<h2 class="text-3xl font-headline font-bold text-on-surface">₹42,84,912.00</h2>
+<div class="mt-4 flex items-center gap-2 text-primary font-bold text-xs">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span>+12.4% THIS MONTH</span>
+</div>
+</div>
+<div class="glass-panel p-6 rounded-xl">
+<p class="text-sm font-label text-on-surface-variant uppercase tracking-widest mb-1">Active Positions</p>
+<h2 class="text-3xl font-headline font-bold text-on-surface">18</h2>
+<p class="mt-4 text-slate-500 text-xs font-medium">Across 4 Verticals</p>
+</div>
+<div class="glass-panel p-6 rounded-xl">
+<p class="text-sm font-label text-on-surface-variant uppercase tracking-widest mb-1">Total Yield</p>
+<h2 class="text-3xl font-headline font-bold text-on-surface">₹1.42 Lakhs</h2>
+<p class="mt-4 text-primary text-xs font-bold uppercase">Verified On Chain</p>
+</div>
+<div class="glass-panel p-6 rounded-xl bg-primary-container/10">
+<p class="text-sm font-label text-primary uppercase tracking-widest mb-1">Sovereign Score</p>
+<h2 class="text-3xl font-headline font-bold text-primary">942</h2>
+<p class="mt-4 text-slate-400 text-xs font-medium">Top 2% of Investors</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Portfolio Visualization -->
+<div class="lg:col-span-8 space-y-8">
+<section class="glass-panel p-8 rounded-2xl relative overflow-hidden">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h3 class="text-2xl font-headline font-bold mb-2">Portfolio Allocation</h3>
+<p class="text-on-surface-variant text-sm">Capital distribution across emerging startups</p>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface rounded-full text-[10px] font-bold text-slate-400 border border-outline-variant/30">DEFI</span>
+<span class="px-3 py-1 bg-surface rounded-full text-[10px] font-bold text-slate-400 border border-outline-variant/30">AI</span>
+<span class="px-3 py-1 bg-surface rounded-full text-[10px] font-bold text-slate-400 border border-outline-variant/30">INFRA</span>
+</div>
+</div>
+<div class="flex items-end gap-4 h-64">
+<!-- Bar 1 -->
+<div class="flex-1 flex flex-col justify-end gap-3 group">
+<div class="bg-primary/20 hover:bg-primary/40 h-[60%] rounded-t-lg transition-all relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-surface p-1 rounded text-[10px] font-bold">₹1.2 Cr</div>
+</div>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter text-center truncate">QuantNode</span>
+</div>
+<!-- Bar 2 -->
+<div class="flex-1 flex flex-col justify-end gap-3 group">
+<div class="bg-primary/60 hover:bg-primary/80 h-[85%] rounded-t-lg transition-all relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-surface p-1 rounded text-[10px] font-bold">₹2.4 Cr</div>
+</div>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter text-center truncate">Lumina AI</span>
+</div>
+<!-- Bar 3 -->
+<div class="flex-1 flex flex-col justify-end gap-3 group">
+<div class="bg-primary/40 hover:bg-primary/60 h-[45%] rounded-t-lg transition-all relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-surface p-1 rounded text-[10px] font-bold">₹80 Lakh</div>
+</div>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter text-center truncate">EtherFlow</span>
+</div>
+<!-- Bar 4 -->
+<div class="flex-1 flex flex-col justify-end gap-3 group">
+<div class="bg-primary/10 hover:bg-primary/30 h-[30%] rounded-t-lg transition-all relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-surface p-1 rounded text-[10px] font-bold">₹40 Lakh</div>
+</div>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter text-center truncate">Zeta Shield</span>
+</div>
+<!-- Bar 5 -->
+<div class="flex-1 flex flex-col justify-end gap-3 group">
+<div class="bg-primary/90 hover:bg-primary h-[95%] rounded-t-lg transition-all relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-surface p-1 rounded text-[10px] font-bold">₹3.1 Cr</div>
+</div>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter text-center truncate">Apex Ledger</span>
+</div>
+</div>
+</section>
+<!-- Real-Time Fund Tracker -->
+<section class="glass-panel p-8 rounded-2xl">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-xl font-headline font-bold">Live Fund Milestone Tracker</h3>
+<div class="flex items-center gap-2 text-xs font-bold text-primary">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                            CHAIN-SYNCED
+                        </div>
+</div>
+<div class="space-y-10">
+<!-- Project 1 -->
+<div class="space-y-4">
+<div class="flex justify-between text-sm font-bold">
+<span class="text-on-surface">Lumina AI - Series A Expansion</span>
+<span class="text-slate-400">₹2.1 Cr / ₹4.0 Cr</span>
+</div>
+<div class="h-3 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary/40 to-primary w-[52.5%] rounded-full"></div>
+</div>
+<div class="flex justify-between text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+<span>Milestone 1: Compute Acquisition</span>
+<span class="text-primary">In Progress</span>
+</div>
+</div>
+<!-- Project 2 -->
+<div class="space-y-4">
+<div class="flex justify-between text-sm font-bold">
+<span class="text-on-surface">Apex Ledger - Security Audit Phase</span>
+<span class="text-slate-400">₹9.4L / ₹10L</span>
+</div>
+<div class="h-3 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary/40 to-primary w-[94%] rounded-full"></div>
+</div>
+<div class="flex justify-between text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+<span>Milestone 3: Final penetration testing</span>
+<span class="text-primary">94% Complete</span>
+</div>
+</div>
+<!-- Project 3 -->
+<div class="space-y-4">
+<div class="flex justify-between text-sm font-bold">
+<span class="text-on-surface">QuantNode - R&amp;D Seed</span>
+<span class="text-slate-400">₹3L / ₹12L</span>
+</div>
+<div class="h-3 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary/40 to-primary w-[25%] rounded-full"></div>
+</div>
+<div class="flex justify-between text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+<span>Milestone 1: Core algorithm design</span>
+<span class="text-slate-500">Initiating</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Side Dashboard Elements -->
+<div class="lg:col-span-4 space-y-8">
+<!-- Risk Heatmap -->
+<section class="glass-panel p-8 rounded-2xl">
+<h3 class="text-xl font-headline font-bold mb-6">Risk Integrity Grid</h3>
+<div class="grid grid-cols-4 gap-2 mb-6">
+<!-- Simulated Heatmap Grid -->
+<div class="aspect-square bg-primary/80 rounded-sm"></div>
+<div class="aspect-square bg-primary/60 rounded-sm"></div>
+<div class="aspect-square bg-primary/40 rounded-sm"></div>
+<div class="aspect-square bg-slate-800 rounded-sm"></div>
+<div class="aspect-square bg-primary/90 rounded-sm"></div>
+<div class="aspect-square bg-primary/70 rounded-sm"></div>
+<div class="aspect-square bg-tertiary-container/40 rounded-sm"></div>
+<div class="aspect-square bg-slate-800 rounded-sm"></div>
+<div class="aspect-square bg-primary/50 rounded-sm"></div>
+<div class="aspect-square bg-error/20 rounded-sm"></div>
+<div class="aspect-square bg-slate-800 rounded-sm"></div>
+<div class="aspect-square bg-slate-800 rounded-sm"></div>
+<div class="aspect-square bg-primary/30 rounded-sm"></div>
+<div class="aspect-square bg-slate-800 rounded-sm"></div>
+<div class="aspect-square bg-slate-800 rounded-sm"></div>
+<div class="aspect-square bg-slate-800 rounded-sm"></div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-slate-500 uppercase">System Health</span>
+<span class="text-xs font-bold text-primary">OPTIMAL</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                            Most assets are performing within institutional safety parameters. <span class="text-tertiary">Zeta Shield</span> is currently being monitored for deviation.
+                        </p>
+</div>
+</section>
+<!-- Credibility Score Card -->
+<section class="glass-panel p-8 rounded-2xl flex flex-col items-center justify-center text-center">
+<div class="relative w-40 h-40 mb-6">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-outline-variant/20" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-dasharray="440" stroke-dashoffset="66" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-4xl font-headline font-black text-on-surface">85</span>
+<span class="text-[10px] font-bold text-slate-500 uppercase">Trust Index</span>
+</div>
+</div>
+<h4 class="text-lg font-headline font-bold mb-2">Institutional Tier 1</h4>
+<p class="text-sm text-on-surface-variant px-4">Your current standing allows for priority access to Sovereign Ledgers.</p>
+</section>
+<!-- Recent Events -->
+<section class="glass-panel p-8 rounded-2xl">
+<h3 class="text-xl font-headline font-bold mb-6">Intelligence Feed</h3>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="w-1 h-12 bg-primary rounded-full"></div>
+<div>
+<p class="text-xs font-bold text-slate-400 mb-1">2 HOURS AGO</p>
+<p class="text-sm font-medium">Lumina AI successfully locked 500 ETH in treasury.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-1 h-12 bg-outline-variant rounded-full"></div>
+<div>
+<p class="text-xs font-bold text-slate-400 mb-1">6 HOURS AGO</p>
+<p class="text-sm font-medium">Audit report published for Apex Ledger Phase 2.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="md:ml-64 bg-slate-950 border-t border-slate-900 w-full py-12 font-inter text-xs tracking-wide">
+<div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+<div>
+<p class="font-headline font-bold text-slate-200 mb-2">Netra Invest</p>
+<p class="text-slate-600">© 2024 Netra Invest. All rights reserved. Sovereign Ledgers Inc.</p>
+</div>
+<div class="flex flex-wrap gap-6 md:justify-end">
+<a class="text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4" href="#">Whitepaper</a>
+<a class="text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4" href="#">Audit Status</a>
+<a class="text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4" href="#">Terms of Service</a>
+<a class="text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4" href="#">Privacy Policy</a>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NeuralNode | Startup Health Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffdad7",
+                    "on-primary": "#003824",
+                    "on-background": "#dae2fd",
+                    "tertiary-fixed-dim": "#ffb3af",
+                    "secondary-container": "#3a4a5f",
+                    "outline": "#86948a",
+                    "surface-dim": "#0b1326",
+                    "tertiary": "#ffb3af",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed": "#410005",
+                    "surface-tint": "#4edea3",
+                    "on-primary-fixed": "#002113",
+                    "inverse-on-surface": "#283044",
+                    "on-surface": "#dae2fd",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "secondary": "#b7c8e1",
+                    "primary": "#4edea3",
+                    "surface": "#0b1326",
+                    "background": "#0b1326",
+                    "error": "#ffb4ab",
+                    "primary-fixed": "#6ffbbe",
+                    "on-tertiary-container": "#711419",
+                    "tertiary-container": "#fc7c78",
+                    "surface-bright": "#31394d",
+                    "outline-variant": "#3c4a42",
+                    "on-primary-container": "#00422b",
+                    "on-primary-fixed-variant": "#005236",
+                    "on-secondary-container": "#a9bad3",
+                    "surface-container-high": "#222a3d",
+                    "inverse-surface": "#dae2fd",
+                    "surface-container-lowest": "#060e20",
+                    "on-error": "#690005",
+                    "surface-container-highest": "#2d3449",
+                    "on-secondary-fixed": "#0b1c30",
+                    "secondary-fixed": "#d3e4fe",
+                    "inverse-primary": "#006c49",
+                    "on-secondary": "#213145",
+                    "primary-container": "#10b981",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#842225",
+                    "primary-fixed-dim": "#4edea3",
+                    "on-surface-variant": "#bbcabf",
+                    "surface-variant": "#2d3449",
+                    "surface-container-low": "#131b2e",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "surface-container": "#171f33",
+                    "on-tertiary": "#650911"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-panel {
+            background: rgba(23, 31, 51, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-[#0b1326]/70 backdrop-blur-md flex items-center justify-between px-6 h-20 w-full font-['Plus_Jakarta_Sans'] tracking-tight no-border bg-gradient-to-b from-[#0b1326] to-transparent">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#10b981]/10 text-[#4edea3] active:scale-95 duration-150 ease-in-out">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<span class="text-lg font-bold text-[#f0f4f8]">Startup Insight</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#10b981]/10 text-[#4edea3] active:scale-95 duration-150 ease-in-out">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</header>
+<main class="pt-28 px-6 max-w-7xl mx-auto space-y-8">
+<!-- Hero Section: Health Status -->
+<section class="relative overflow-hidden rounded-[2rem] bg-surface-container-low p-8 md:p-12">
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
+<div class="absolute inset-0 bg-gradient-to-bl from-primary/40 to-transparent"></div>
+</div>
+<div class="relative z-10 flex flex-col md:flex-row items-center md:items-end justify-between gap-8">
+<div class="flex flex-col md:flex-row items-center gap-6">
+<div class="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-surface-container-highest flex items-center justify-center shadow-2xl p-6 ring-1 ring-outline-variant/20">
+<img alt="NeuralNode Logo" class="w-full h-full" data-alt="abstract geometric logo design for a tech startup called NeuralNode using emerald green and dark blue shades" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW_fd_iVMKSEksHlEbxN81tNBvw4SdDh4UGbY2JEqj5DUEpNUYc3Zxnnv81gMyJ0S7a6Z4vOk7kHGpV-PdxsUNYB-x2FMipFEqC-6Ab1yftBLf0odHWdEt_lyeJF-OjldeiAXFmrxeXoJFvmMFGqf0fjZlmxxwcizL6P0xE7cgbWBuN39wIvQsRdLMVbrjDlL4ggTps9JaIDEZqcHBoy4WxrDMZ_BOSpEwtzSqwRSUY7R461lM8CfK7V_rp41SLyxwY7e40ZkspNzy"/>
+</div>
+<div class="text-center md:text-left">
+<div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest ring-1 ring-primary/20">Series A</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">Web3 Infrastructure</span>
+</div>
+<h1 class="text-4xl md:text-6xl font-extrabold tracking-tighter text-on-surface mb-2">NeuralNode</h1>
+<p class="text-secondary max-w-md">Decentralized neural processing units for the next generation of autonomous AI agents.</p>
+</div>
+</div>
+<div class="flex flex-col items-center md:items-end">
+<div class="text-[0.7rem] uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-2">Current Health Status</div>
+<div class="flex items-center gap-4 bg-primary/10 px-8 py-4 rounded-2xl ring-1 ring-primary/30">
+<div class="relative flex items-center justify-center">
+<div class="w-12 h-12 rounded-full border-4 border-primary/20 flex items-center justify-center">
+<div class="w-8 h-8 rounded-full bg-primary shadow-[0_0_20px_rgba(78,222,163,0.6)]"></div>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-3xl font-black text-primary leading-none">High Health</span>
+<span class="text-sm font-medium text-primary/70">Score: 94/100</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- KPI Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- TVL Growth Card -->
+<div class="glass-panel p-6 rounded-2xl ring-1 ring-outline-variant/10 hover:bg-surface-container-high transition-all duration-300 group">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<span class="text-primary text-sm font-bold">+28.4%</span>
+</div>
+<h3 class="text-secondary text-sm font-medium mb-1">TVL Growth</h3>
+<div class="text-3xl font-bold text-on-surface mb-4">₹412.8M</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[78%]"></div>
+</div>
+</div>
+<!-- Node Uptime Card -->
+<div class="glass-panel p-6 rounded-2xl ring-1 ring-outline-variant/10 hover:bg-surface-container-high transition-all duration-300 group">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">memory</span>
+</div>
+<span class="text-primary text-sm font-bold">Stable</span>
+</div>
+<h3 class="text-secondary text-sm font-medium mb-1">Node Uptime</h3>
+<div class="text-3xl font-bold text-on-surface mb-4">99.998%</div>
+<div class="flex gap-1 h-1.5">
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full"></div>
+</div>
+</div>
+<!-- Community Sentiment Card -->
+<div class="glass-panel p-6 rounded-2xl ring-1 ring-outline-variant/10 hover:bg-surface-container-high transition-all duration-300 group">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">favorite</span>
+</div>
+<span class="text-primary text-sm font-bold">Bullish</span>
+</div>
+<h3 class="text-secondary text-sm font-medium mb-1">Community Sentiment</h3>
+<div class="text-3xl font-bold text-on-surface mb-4">88/100</div>
+<div class="flex items-center gap-2">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full ring-2 ring-surface bg-surface-container-highest"></div>
+<div class="w-6 h-6 rounded-full ring-2 ring-surface bg-surface-container-highest"></div>
+<div class="w-6 h-6 rounded-full ring-2 ring-surface bg-surface-container-highest"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">+4.2k Active Users</span>
+</div>
+</div>
+</section>
+<!-- Main Insights Split -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Radar Visualization -->
+<div class="lg:col-span-7 bg-surface-container rounded-[2rem] p-8 min-h-[500px] flex flex-col justify-between">
+<div>
+<h2 class="text-2xl font-bold text-on-surface tracking-tight mb-2">Health Index Visualization</h2>
+<p class="text-on-surface-variant text-sm max-w-md">Multidimensional analysis of NeuralNode's operational and financial metrics.</p>
+</div>
+<div class="relative flex-grow flex items-center justify-center py-12">
+<!-- Faux Radar Visualization using SVG and gradients -->
+<div class="relative w-72 h-72 md:w-96 md:h-96">
+<!-- Concentric Circles -->
+<div class="absolute inset-0 border border-outline-variant/20 rounded-full"></div>
+<div class="absolute inset-[15%] border border-outline-variant/20 rounded-full"></div>
+<div class="absolute inset-[30%] border border-outline-variant/20 rounded-full"></div>
+<div class="absolute inset-[45%] border border-outline-variant/20 rounded-full"></div>
+<!-- Axis Lines -->
+<div class="absolute top-1/2 left-0 w-full h-px bg-outline-variant/10"></div>
+<div class="absolute top-0 left-1/2 w-px h-full bg-outline-variant/10"></div>
+<!-- Data Polygon (Stylized) -->
+<svg class="absolute inset-0 w-full h-full drop-shadow-[0_0_15px_rgba(78,222,163,0.4)]" viewbox="0 0 100 100">
+<polygon fill="rgba(78,222,163,0.3)" points="50,10 85,35 75,85 20,70 15,30" stroke="#4edea3" stroke-width="2"></polygon>
+<circle cx="50" cy="10" fill="#4edea3" r="2"></circle>
+<circle cx="85" cy="35" fill="#4edea3" r="2"></circle>
+<circle cx="75" cy="85" fill="#4edea3" r="2"></circle>
+<circle cx="20" cy="70" fill="#4edea3" r="2"></circle>
+<circle cx="15" cy="30" fill="#4edea3" r="2"></circle>
+</svg>
+<!-- Labels -->
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-widest text-on-surface whitespace-nowrap">Technical Progress (98)</div>
+<div class="absolute top-1/2 -right-12 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-on-surface whitespace-nowrap rotate-90">Financial Stability (82)</div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-widest text-on-surface whitespace-nowrap">Market Traction (74)</div>
+<div class="absolute top-1/2 -left-12 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-on-surface whitespace-nowrap -rotate-90">Regulatory (88)</div>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-outline-variant/10">
+<div class="text-center">
+<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Tech</div>
+<div class="text-xl font-bold text-primary">98</div>
+</div>
+<div class="text-center border-l border-outline-variant/10">
+<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Financial</div>
+<div class="text-xl font-bold text-secondary">82</div>
+</div>
+<div class="text-center border-l border-outline-variant/10">
+<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Market</div>
+<div class="text-xl font-bold text-on-surface">74</div>
+</div>
+<div class="text-center border-l border-outline-variant/10">
+<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Regs</div>
+<div class="text-xl font-bold text-on-surface">88</div>
+</div>
+</div>
+</div>
+<!-- News Feed & Risk Assessment -->
+<div class="lg:col-span-5 flex flex-col gap-8">
+<!-- Recent Intel -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-bold text-on-surface">Recent Intel</h2>
+<button class="text-primary text-xs font-bold uppercase tracking-widest">View Ledger</button>
+</div>
+<div class="space-y-3">
+<div class="glass-panel p-4 rounded-xl ring-1 ring-outline-variant/10 flex gap-4 items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-sm">bolt</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface leading-snug">Mainnet V2 Deployment Confirmed</h4>
+<p class="text-xs text-on-surface-variant mt-1 line-clamp-2">NeuralNode announces full activation of Layer 2 scaling solution, reducing node costs by 40%.</p>
+<div class="text-[10px] text-on-surface-variant mt-2 font-medium">2 hours ago • Blockchain Verified</div>
+</div>
+</div>
+<div class="glass-panel p-4 rounded-xl ring-1 ring-outline-variant/10 flex gap-4 items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-sm">partner_exchange</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface leading-snug">Strategic Alliance with Nvidia</h4>
+<p class="text-xs text-on-surface-variant mt-1 line-clamp-2">Integration of H100 GPU clusters into the NeuralNode network begins Q4.</p>
+<div class="text-[10px] text-on-surface-variant mt-2 font-medium">1 day ago • Market Insight</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Risk Assessment -->
+<div class="bg-surface-container-highest/40 p-6 rounded-[1.5rem] space-y-4">
+<h2 class="text-xl font-bold text-on-surface">Risk Factors</h2>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<div class="flex-grow">
+<div class="flex justify-between items-center mb-1">
+<span class="text-sm font-bold text-on-surface">Hardware Supply Chain</span>
+<span class="text-[10px] font-black text-secondary uppercase">Low Risk</span>
+</div>
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[20%]"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-tertiary-container"></div>
+<div class="flex-grow">
+<div class="flex justify-between items-center mb-1">
+<span class="text-sm font-bold text-on-surface">Regulatory Ambiguity (EU)</span>
+<span class="text-[10px] font-black text-tertiary-container uppercase">Medium Risk</span>
+</div>
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container w-[45%]"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<div class="flex-grow">
+<div class="flex justify-between items-center mb-1">
+<span class="text-sm font-bold text-on-surface">Token Liquidity Depth</span>
+<span class="text-[10px] font-black text-secondary uppercase">Low Risk</span>
+</div>
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[15%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Detailed Analytics Card -->
+<section class="bg-surface-container-low rounded-[2rem] p-8 md:p-12">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+<div>
+<h2 class="text-3xl font-black text-on-surface tracking-tight">Financial Health Ledger</h2>
+<p class="text-on-surface-variant">Real-time verification of on-chain treasury and burn rate.</p>
+</div>
+<div class="flex gap-4">
+<div class="text-right">
+<div class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Available Runway</div>
+<div class="text-2xl font-bold text-primary">34 Months</div>
+</div>
+<div class="w-px h-10 bg-outline-variant/20"></div>
+<div class="text-right">
+<div class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Monthly Burn</div>
+<div class="text-2xl font-bold text-on-surface">₹1.2M</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">₹1.2M</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[20px] bg-[#0b1326]/80 backdrop-blur-2xl flex justify-around items-center h-24 px-6 pb-6 w-full tonal-shift bg-[#10192d] shadow-[0_-20px_40px_rgba(6,14,32,0.4)]">
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/50 hover:text-[#4edea3] transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1">grid_view</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] uppercase tracking-[0.1em] font-medium">Feed</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/50 hover:text-[#4edea3] transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1">account_balance_wallet</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] uppercase tracking-[0.1em] font-medium">Portfolio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#4edea3] bg-[#10b981]/10 rounded-xl px-4 py-1 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] uppercase tracking-[0.1em] font-semibold">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/50 hover:text-[#4edea3] transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] uppercase tracking-[0.1em] font-medium">Account</span>
+</a>
+</nav>
+</body></html>

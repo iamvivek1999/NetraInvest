@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Netra Invest | Discover Startups</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#6ffbbe",
+                    "inverse-primary": "#006c49",
+                    "on-primary": "#003824",
+                    "surface-container-lowest": "#060e20",
+                    "surface-container-low": "#131b2e",
+                    "on-surface": "#dae2fd",
+                    "inverse-on-surface": "#283044",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "surface-dim": "#0b1326",
+                    "error-container": "#93000a",
+                    "surface-variant": "#2d3449",
+                    "on-surface-variant": "#bbcabf",
+                    "outline": "#86948a",
+                    "on-error": "#690005",
+                    "surface": "#0b1326",
+                    "primary-container": "#10b981",
+                    "surface-bright": "#31394d",
+                    "primary-fixed-dim": "#4edea3",
+                    "surface-tint": "#4edea3",
+                    "on-primary-fixed": "#002113",
+                    "on-tertiary-fixed-variant": "#842225",
+                    "on-secondary-fixed": "#0b1c30",
+                    "on-primary-fixed-variant": "#005236",
+                    "on-primary-container": "#00422b",
+                    "error": "#ffb4ab",
+                    "outline-variant": "#3c4a42",
+                    "on-secondary": "#213145",
+                    "on-tertiary-fixed": "#410005",
+                    "primary": "#4edea3",
+                    "surface-container-high": "#222a3d",
+                    "inverse-surface": "#dae2fd",
+                    "tertiary-fixed-dim": "#ffb3af",
+                    "surface-container-highest": "#2d3449",
+                    "tertiary": "#ffb3af",
+                    "surface-container": "#171f33",
+                    "secondary-container": "#3a4a5f",
+                    "secondary": "#b7c8e1",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-secondary-container": "#a9bad3",
+                    "on-tertiary-container": "#711419",
+                    "on-error-container": "#ffdad6",
+                    "background": "#0b1326",
+                    "tertiary-container": "#fc7c78",
+                    "tertiary-fixed": "#ffdad7",
+                    "on-background": "#dae2fd",
+                    "on-tertiary": "#650911"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-shift {
+            transition: background-color 0.3s ease;
+        }
+        .glass-panel {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-transparent backdrop-blur-xl tonal-shift bg-slate-900/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+<div class="flex justify-between items-center px-8 h-20 w-full mx-auto max-w-[1440px]">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tighter text-emerald-400 font-headline">Netra Invest</span>
+<div class="hidden md:flex gap-6">
+<a class="font-headline tracking-tight text-emerald-400 font-bold border-b-2 border-emerald-400 pb-1" href="#">Ecosystem</a>
+<a class="font-headline tracking-tight text-slate-400 hover:text-slate-200 transition-colors" href="#">Governance</a>
+<a class="font-headline tracking-tight text-slate-400 hover:text-slate-200 transition-colors" href="#">Assets</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined p-2 text-slate-400 hover:bg-emerald-400/10 transition-all rounded-full scale-95 active:scale-90 duration-200" data-icon="notifications">notifications</button>
+<button class="bg-primary hover:bg-primary-fixed-dim text-on-primary px-6 py-2.5 rounded-lg font-headline font-bold text-sm transition-all scale-95 active:scale-90 duration-200 shadow-lg shadow-primary/20">
+                    Connect Wallet
+                </button>
+</div>
+</div>
+</nav>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative overflow-hidden min-h-[819px] flex flex-col items-center justify-center px-6 py-24 text-center">
+<div class="absolute inset-0 -z-10">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)]"></div>
+<img alt="" class="w-full h-full object-cover opacity-20" data-alt="abstract digital connection network with flowing green lines and glowing particles on a deep midnight blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLnJKmON-EaIF5wzPQbBnvxIRTdGT3nNQcEcLE81LXhAo2vSSbCULxfnxhitjbOah4jblmLFdtGxWfqu6IXuX1ZEjtgR5Bqpy7oEv-KhKPsBoh1hSXGNut0rQafBZDi2vV_v7cuZiHX6hCeliJLDaOPy2ZCPELUQeD5LzvvCDNk2IkMt4oAyD0o-RM9KxrkBcMNQVMl98mQX9L58dvzRdE7dig0ufAzhscPfFp-ogaZqp-CAc-0pAtvtcZT_Oeq7eZIZDjhrcrtFI"/>
+</div>
+<div class="max-w-4xl mx-auto space-y-8">
+<div class="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-container/10 text-primary border border-primary/20 text-xs font-bold tracking-widest uppercase font-label">
+                    Sovereign Early-Stage Capital
+                </div>
+<h1 class="text-5xl md:text-7xl font-extrabold font-headline tracking-tighter text-on-surface leading-[1.1]">
+                    The Transparent <span class="text-primary">Early-Stage</span> Ecosystem
+                </h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+                    Access institutional-grade startup opportunities verified on-chain. Experience the evolution of private equity through cryptographic certainty.
+                </p>
+<!-- TVL Ticker -->
+<div class="pt-8 flex flex-col md:flex-row gap-8 justify-center items-center">
+<div class="glass-panel p-6 rounded-xl border border-outline-variant/20 min-w-[240px]">
+<p class="text-label-sm uppercase tracking-widest text-on-surface-variant mb-1">Total Value Locked</p>
+<div class="text-3xl font-black font-headline text-primary tabular-nums">₹48.29 Crore</div>
+</div>
+<div class="glass-panel p-6 rounded-xl border border-outline-variant/20 min-w-[240px]">
+<p class="text-label-sm uppercase tracking-widest text-on-surface-variant mb-1">Verified Startups</p>
+<div class="text-3xl font-black font-headline text-primary tabular-nums">1,248</div>
+</div>
+</div>
+<div class="pt-8">
+<button class="bg-primary text-on-primary px-10 py-4 rounded-lg font-headline font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20">
+                        Launch Dashboard
+                    </button>
+</div>
+</div>
+</section>
+<!-- Verified Profiles Carousel / Bento Grid -->
+<section class="max-w-7xl mx-auto px-8 py-24">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+<div class="space-y-4">
+<h2 class="text-4xl font-extrabold font-headline tracking-tighter">Verified Opportunities</h2>
+<p class="text-on-surface-variant max-w-lg">Every profile is audited by Netra's consensus protocol and locked on the Sovereign Ledger.</p>
+</div>
+<div class="flex gap-4">
+<button class="p-3 rounded-full border border-outline-variant/30 hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="p-3 rounded-full border border-outline-variant/30 bg-primary-container/20 text-primary hover:bg-primary-container/30 transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Startup Card 1 -->
+<div class="glass-panel group rounded-xl p-6 border border-outline-variant/10 hover:border-primary/30 transition-all duration-500 flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<div class="h-16 w-16 rounded-lg bg-surface-container-high p-2">
+<img alt="" class="w-full h-full object-contain" data-alt="minimalist geometric logo for a tech startup, abstract pulse line symbol in emerald green" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAe01AgaF0LO71kAeye41zHNpQUtVCQ0yyIMq1o-nh2qaxZceNkqvISTogy68Fx1q8iZPG0eHJ2bCzuERE1RTv-lZIOrGx314yG-UVOQ4bnwxUwQsYIoqqyeMljbuNgVPvarFgLmK1iJnMgBYn2-Ut7YScB4Eoo0yNQtQ7OZG53li2ag8H0gSbybbL3J2NUT42qF3PnRY_0u35CkAyBYWj82lzJr_uX5tjExlBB43NGpKHVbnZz5lX9oRi8aTiTutnbhN3SqCkW67U"/>
+</div>
+<div class="flex flex-col items-end">
+<div class="bg-primary-container/15 text-primary px-3 py-1 rounded-full text-[10px] font-bold font-label flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-weight="fill">verified</span>
+                                VERIFIED ON CHAIN
+                            </div>
+</div>
+</div>
+<div class="space-y-2">
+<h3 class="text-2xl font-bold font-headline group-hover:text-primary transition-colors">Aether Flow</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Next-generation decentralized liquidity protocol for RWA tokenization on Ethereum L2.</p>
+</div>
+<div class="mt-auto pt-6 flex items-center justify-between">
+<div class="space-y-1">
+<p class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest">Credibility Score</p>
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold font-headline text-primary">98</span>
+<div class="w-24 h-1.5 bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[98%]"></div>
+</div>
+</div>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest">Seeking</p>
+<p class="text-lg font-bold font-headline">₹2.5 Crore</p>
+</div>
+</div>
+</div>
+<!-- Startup Card 2 -->
+<div class="glass-panel group rounded-xl p-6 border border-outline-variant/10 hover:border-primary/30 transition-all duration-500 flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<div class="h-16 w-16 rounded-lg bg-surface-container-high p-2">
+<img alt="" class="w-full h-full object-contain" data-alt="clean modern typography logo 'VELO' with a stylized lightning bolt icon in mint green" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN8EYhXRs4qgtE3Vp9zSfn_1m7FTz1lAllsSX4jNZQoqed8lkJgdIzBXCKl2HHQQCQmnaG683tXT4GzVPpOsiL7bxXUgnL_VXvFAHZq5F0XKW3LIPv6MwOOPgLFcnlGVTxOQessZJUXsh07JI6-KouG9Tl1ZMxY2lvsWVP8XJFd_7eiyZw5c9ENrimA80QCaqd689y7D486nMNiCmNWVq3vg_B8GdMJAb_rPHU1r2jB59lcA3Np0-G3CHv7o3DECKXRLoszMIzF7k"/>
+</div>
+<div class="flex flex-col items-end">
+<div class="bg-primary-container/15 text-primary px-3 py-1 rounded-full text-[10px] font-bold font-label flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-weight="fill">verified</span>
+                                VERIFIED ON CHAIN
+                            </div>
+</div>
+</div>
+<div class="space-y-2">
+<h3 class="text-2xl font-bold font-headline group-hover:text-primary transition-colors">Velo Dynamics</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Autonomous carbon credit auditing using satellite telemetry and blockchain-anchored data sets.</p>
+</div>
+<div class="mt-auto pt-6 flex items-center justify-between">
+<div class="space-y-1">
+<p class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest">Credibility Score</p>
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold font-headline text-primary">94</span>
+<div class="w-24 h-1.5 bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[94%]"></div>
+</div>
+</div>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest">Seeking</p>
+<p class="text-lg font-bold font-headline">₹1.8 Crore</p>
+</div>
+</div>
+</div>
+<!-- Startup Card 3 -->
+<div class="glass-panel group rounded-xl p-6 border border-outline-variant/10 hover:border-primary/30 transition-all duration-500 flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<div class="h-16 w-16 rounded-lg bg-surface-container-high p-2">
+<img alt="" class="w-full h-full object-contain" data-alt="elegant architectural monogram logo for a fintech brand in metallic green finish" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoe62RCH72KOiXFH5t3nYi1zc8a07EyIo70RS6699K2BW58Dn15ygFa6P9r45Gn6kIrBrqXUesTgDxlyhzROYrVHzEH3PXpmxSYXryRsrTfsMdUcwVzuVkhkR6vtqj5YxC52SCYzIgkh75X4lzFQPGjoWJuOGFywB35rpj_LBeoJ-Ke-s6sQvGLPhgNciTWe_FVR7c1z_NuHlxL3eqYGMATDnpqsJtpBBd4-vYwGwGh7SZhWgq7pz3pkIchxIUE2TlUHIwifIkKWU"/>
+</div>
+<div class="flex flex-col items-end">
+<div class="bg-primary-container/15 text-primary px-3 py-1 rounded-full text-[10px] font-bold font-label flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-weight="fill">verified</span>
+                                VERIFIED ON CHAIN
+                            </div>
+</div>
+</div>
+<div class="space-y-2">
+<h3 class="text-2xl font-bold font-headline group-hover:text-primary transition-colors">Sovereign OS</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Privacy-first operating system for institutional fund managers with native MPC wallet integration.</p>
+</div>
+<div class="mt-auto pt-6 flex items-center justify-between">
+<div class="space-y-1">
+<p class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest">Credibility Score</p>
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold font-headline text-primary">96</span>
+<div class="w-24 h-1.5 bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[96%]"></div>
+</div>
+</div>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest">Seeking</p>
+<p class="text-lg font-bold font-headline">₹4.2 Crore</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Institutional Features Section -->
+<section class="bg-surface-container-low py-24">
+<div class="max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+<div class="relative">
+<div class="absolute -inset-4 bg-primary/20 blur-3xl opacity-20 -z-10"></div>
+<img alt="" class="rounded-2xl border border-outline-variant/10 shadow-2xl" data-alt="complex high-tech financial dashboard with 3D data visualization charts and glowing green elements on a dark interface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAf3ZC8Y1fvowkaF1qtlZuWpzVLb9KnFgcbLtHkj5W3lZVZGzp9XGhz2e_9Gl2HQlr0OmDS6dqX72etlqOJaRGQ_LExCyIwSkCo6LWXcViyv0_jlw0QPYlb1dCRh79A_cmssUAwmmwdivXpmJPzBG5nf65LFQ5FQbFPOAX5PXRZz_YDCwjv6x5kIBbH9qbWk3-FheMtu8wFMFWYrPKQEJAecP_ru6LLsPeQB7KC4QjfhtJ6FdKG_QPOtJpfydomcMvIWKgXytv5iFU"/>
+</div>
+<div class="space-y-10">
+<div class="space-y-4">
+<h2 class="text-4xl font-extrabold font-headline tracking-tighter leading-tight">Institutional Precision. <br/><span class="text-primary">Ecosystem Transparency.</span></h2>
+<p class="text-on-surface-variant leading-relaxed text-lg">Netra Invest bridges the gap between traditional venture capital and the open finance revolution. Our suite of institutional tools provides unmatched clarity.</p>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<div class="flex gap-4 p-4 rounded-xl hover:bg-surface-container-high transition-colors">
+<div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined">shield_with_heart</span>
+</div>
+<div>
+<h4 class="font-bold font-headline mb-1">Trustless Due Diligence</h4>
+<p class="text-on-surface-variant text-sm">Automated analysis of startup treasury health and on-chain activity metrics.</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 rounded-xl hover:bg-surface-container-high transition-colors">
+<div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div>
+<h4 class="font-bold font-headline mb-1">Institutional Custody</h4>
+<p class="text-on-surface-variant text-sm">Every investment is secured by multi-party computation and cold-storage architecture.</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 rounded-xl hover:bg-surface-container-high transition-colors">
+<div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<div>
+<h4 class="font-bold font-headline mb-1">Real-Time TVL Tracking</h4>
+<p class="text-on-surface-variant text-sm">Monitor ecosystem growth with zero lag through our live on-chain data indexer.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-24 px-8">
+<div class="max-w-7xl mx-auto glass-panel rounded-3xl p-12 md:p-20 text-center border border-primary/10 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-8 opacity-20">
+<span class="material-symbols-outlined text-[160px] text-primary">token</span>
+</div>
+<div class="relative z-10 space-y-8 max-w-2xl mx-auto">
+<h2 class="text-4xl md:text-5xl font-black font-headline tracking-tighter">Ready to Build Your <br/>Sovereign Portfolio?</h2>
+<p class="text-on-surface-variant text-lg">Join 4,000+ institutional and accredited investors navigating the frontier of startup equity.</p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+<button class="bg-primary text-on-primary px-10 py-4 rounded-lg font-headline font-bold text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all">Get Started</button>
+<button class="border border-outline-variant px-10 py-4 rounded-lg font-headline font-bold text-lg hover:bg-surface-variant transition-all">View Audit Report</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-950 w-full py-12 tonal-shift border-t border-slate-900">
+<div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-6">
+<span class="font-plus-jakarta-sans font-bold text-slate-200 text-xl">Netra Invest</span>
+<p class="font-inter text-xs tracking-wide text-slate-600 max-w-sm">
+                    Empowering the next generation of sovereign financial institutions through cryptographic proof and absolute transparency.
+                </p>
+<div class="flex gap-4">
+<a class="text-slate-500 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="text-slate-500 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">alternate_email</span></a>
+</div>
+</div>
+<div class="flex flex-col md:items-end justify-between gap-8">
+<div class="flex flex-wrap gap-x-8 gap-y-4 md:justify-end">
+<a class="font-inter text-xs tracking-wide text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4 opacity-80 hover:opacity-100" href="#">Whitepaper</a>
+<a class="font-inter text-xs tracking-wide text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4 opacity-80 hover:opacity-100" href="#">Audit Status</a>
+<a class="font-inter text-xs tracking-wide text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4 opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-inter text-xs tracking-wide text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4 opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+</div>
+<p class="font-inter text-[10px] tracking-wide text-slate-700 md:text-right">
+                    © 2024 Netra Invest. All rights reserved. Sovereign Ledgers Inc.
+                </p>
+</div>
+</div>
+</footer>
+</body></html>

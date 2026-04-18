@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NeuralNode | Netra Invest</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#2d3449",
+                        "on-error-container": "#ffdad6",
+                        "surface-bright": "#31394d",
+                        "on-background": "#dae2fd",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-secondary-fixed": "#0b1c30",
+                        "outline": "#86948a",
+                        "inverse-surface": "#dae2fd",
+                        "inverse-on-surface": "#283044",
+                        "surface-variant": "#2d3449",
+                        "primary-fixed": "#6ffbbe",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-surface": "#dae2fd",
+                        "on-tertiary-container": "#711419",
+                        "background": "#0b1326",
+                        "tertiary": "#ffb3af",
+                        "tertiary-container": "#fc7c78",
+                        "surface": "#0b1326",
+                        "on-error": "#690005",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "inverse-primary": "#006c49",
+                        "surface-container": "#171f33",
+                        "surface-tint": "#4edea3",
+                        "primary": "#4edea3",
+                        "on-tertiary": "#650911",
+                        "error-container": "#93000a",
+                        "surface-dim": "#0b1326",
+                        "on-primary": "#003824",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-surface-variant": "#bbcabf",
+                        "on-secondary-container": "#a9bad3",
+                        "on-tertiary-fixed": "#410005",
+                        "secondary": "#b7c8e1",
+                        "on-tertiary-fixed-variant": "#842225",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-primary-container": "#00422b",
+                        "surface-container-high": "#222a3d",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "surface-container-lowest": "#060e20",
+                        "outline-variant": "#3c4a42",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "primary-container": "#10b981",
+                        "on-secondary": "#213145",
+                        "on-primary-fixed": "#002113",
+                        "secondary-container": "#3a4a5f",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b1326;
+            color: #dae2fd;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(23, 31, 51, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface/80 dark:bg-[#0b1326]/80 backdrop-blur-xl shadow-2xl shadow-[#060e20]/40 flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="text-[#b7c8e1] hover:bg-[#10b981]/10 transition-colors duration-300 active:scale-95 p-2 rounded-full">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-lg text-[#4edea3]">NeuralNode</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-[#b7c8e1] hover:bg-[#10b981]/10 transition-colors duration-300 active:scale-95 p-2 rounded-full">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<main class="pt-16 max-w-5xl mx-auto px-4 sm:px-6">
+<!-- Hero Section -->
+<section class="mt-6 rounded-[2rem] overflow-hidden relative h-64 sm:h-96 w-full shadow-2xl">
+<img class="w-full h-full object-cover" data-alt="Futuristic 3D visualization of glowing neural network nodes in deep midnight blue and neon emerald green digital space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsoJg2J419dsdKJFLtzbTlCl5Tduqpe5L4a4ZiK7XsqGOQ09lOfyE-yA8esqtZGLGvRhgcmrO42mugmtP83y0HOuw0qKkCxrm89Lkjh3iq1Z2L9lf5TSjM1TCYKPnvqiy1AG1_2l1Rs17D01d2cBR74LHRMIvSD-k60qiXBI-SI3Gy6udLIXqumvGJz5vEj65p6CC7A-LUxEKrQCH5NDaOFrm8uKEeojuizR5hpA3ZnnJCp04xuS9p5gNfA6O-xKGBOY3vfoQglu6P"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent"></div>
+<div class="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+<div class="space-y-1">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-primary/10 text-primary border border-primary/20 backdrop-blur-md">
+                        Decentralized AI Infrastructure
+                    </span>
+<h2 class="text-3xl sm:text-5xl font-extrabold tracking-tighter text-on-surface">NeuralNode</h2>
+</div>
+<div class="hidden sm:flex flex-col items-end">
+<span class="text-on-surface-variant text-xs font-semibold uppercase tracking-wider mb-1">Credibility Score</span>
+<div class="flex items-center gap-2">
+<span class="text-4xl font-bold text-primary">94</span>
+<span class="text-on-surface-variant font-medium">/ 100</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Project Identity & Description -->
+<section class="mt-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+<div class="md:col-span-7 space-y-6">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-high border border-outline-variant/10 flex items-center justify-center p-3 shadow-lg">
+<img class="w-full h-full object-contain" data-alt="Minimalist geometric logo icon with emerald green hex patterns representing a neural synapse" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbvArnNQVmqxvTeZE73K-5QdKW1S3ZNO17KxZn9wqUnxaFxCiMVN5u9EVIoxfGPOi8oInq0_OLBafcMK7b7efE0AX4WEpGiw-Z1g0r5R-Xd1fxcL35bzZ0bS0aS_pOwd5Nd-pHLYlkucEHCWuOUlRFXjYQlEPh1ZWwGLh4crUTVKyHG1yQUStLFmHTcGgJ6W1G0Z7HBTmRqT2toE70_w_NveBacQLL53jiyuyK39-awL7hgGg6fQiiFMcQFU_781IvBk_UGLayI1PN"/>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-xl font-bold text-on-surface">NeuralNode</h3>
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<p class="text-on-surface-variant text-sm font-medium tracking-wide">AI Infrastructure Sector</p>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">Mission Brief</h4>
+<p class="text-lg leading-relaxed text-secondary/90 font-medium">
+                        Decentralized compute network for massive-scale LLM training and inference. By leveraging idle GPU global capacity, NeuralNode reduces AI training costs by up to 70% while ensuring censorship resistance.
+                    </p>
+</div>
+</div>
+<!-- Bento Metrics -->
+<div class="md:col-span-5 grid grid-cols-2 gap-4">
+<div class="glass-card p-5 rounded-3xl border border-outline-variant/10 hover:bg-surface-container-high transition-all duration-300">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Raised</p>
+<p class="text-xl font-bold text-on-surface">₹4.2M</p>
+<div class="mt-3 h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[42%] rounded-full shadow-[0_0_10px_rgba(78,222,163,0.4)]"></div>
+</div>
+<p class="mt-1 text-[10px] text-on-surface-variant text-right">Target ₹10M</p>
+</div>
+<div class="glass-card p-5 rounded-3xl border border-outline-variant/10 hover:bg-surface-container-high transition-all duration-300">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Investors</p>
+<div class="flex items-center">
+<p class="text-xl font-bold text-on-surface mr-2">1,402</p>
+</div>
+<div class="flex -space-x-2 mt-3">
+<img class="w-6 h-6 rounded-full border-2 border-surface" data-alt="Investor profile headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHgMMR2plsb3atfTs0FxrpPqGozTzmtD2atIgZqhNWHSzpmSxIsWCjtLxlMaZUE11PSIL56xqUkr4M9fsYN_kabydk5iOnAcIci-_qmke4-PQkZj5MoSEWP2ibmTWeBhdzIf-lDFHGuQX86e1JGA9JJzkqa_IYoH-j0u-nVbcNznYuDjGrpk02BgynxC4Fe2nBPn1M_CgxPfWsjf16Q2e3Rd20paLu3-IvYbFld49TbbZHQHZGiE6D_tG4qBceJmP0qaZ4UFYrr_XD"/>
+<img class="w-6 h-6 rounded-full border-2 border-surface" data-alt="Investor profile headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDYqqayJAOjI_ReLfO9fkv2MtIntEftfBpM9GUcKzmjrwfvoHNUzompwiRonda2E-QLYLAQqs9uLJn3-CsgdJWiwTkzipVEWWx2v-0E20uE8sgVAhH4kXTVCe1o4xaASXKRj5_b6ivsdXOMMdNvn9rjC5hrQ4FvMv-UAyk8F0Bu_1GxSs5ataBQvYvUOGBwSajhASWu4VZkLcyoo18X6geomodM1OtGjV9zJBUoy6raPRWLPt22YFDWbDv2KekppCR3VXtWCxhk52C"/>
+<img class="w-6 h-6 rounded-full border-2 border-surface" data-alt="Investor profile headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5LQ13d2KgWj8mcqTurcpcr39NE3tTUkw_OaiQVdSbThhaPJ20Z0E_2YtR_kdJ7Zw9fIPl5olsZPqFzM9zPDYPloM5vpGovsXjzaQOh4JCZC2hVdUWWk3mmklqUyKdJv6TMfRK2T3FYlolfmMxFA1zmqCrO6DETJvNFtEFzTX82QUwSUg2qAzF5tFPmfh8LqgBcFZn194TfbfXCNHioFVaoGR2Rupl0xK1WuPOXYXVGUDF2KaZWQGcZdhlresketY1hI_CG1UUchl8"/>
+<div class="w-6 h-6 rounded-full border-2 border-surface bg-surface-container-highest flex items-center justify-center text-[8px] font-bold">+1k</div>
+</div>
+</div>
+<div class="glass-card p-5 rounded-3xl border border-outline-variant/10 hover:bg-surface-container-high transition-all duration-300">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Nodes Active</p>
+<div class="flex items-baseline gap-1">
+<p class="text-2xl font-bold text-primary">4.2k</p>
+<span class="material-symbols-outlined text-primary text-xs" style="font-variation-settings: 'FILL' 1;">sensors</span>
+</div>
+</div>
+<div class="glass-card p-5 rounded-3xl border border-outline-variant/10 hover:bg-surface-container-high transition-all duration-300">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Uptime Audit</p>
+<div class="flex items-baseline gap-1">
+<p class="text-2xl font-bold text-on-surface">100%</p>
+<span class="text-primary text-[8px] font-bold tracking-tighter">SECURE</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Roadmap -->
+<section class="mt-16">
+<div class="flex items-center justify-between mb-8">
+<h4 class="text-xl font-bold text-on-surface">Development Roadmap</h4>
+<div class="px-3 py-1 rounded-full bg-surface-container border border-outline-variant/20 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-[10px] font-bold text-on-surface uppercase tracking-wider">Live Updates</span>
+</div>
+</div>
+<div class="space-y-0 relative">
+<div class="absolute left-4 top-2 bottom-2 w-px bg-gradient-to-b from-primary via-outline-variant/30 to-outline-variant/10"></div>
+<!-- Step 1 -->
+<div class="relative pl-12 pb-10">
+<div class="absolute left-2.5 top-2 w-3 h-3 rounded-full bg-primary shadow-[0_0_15px_rgba(78,222,163,0.6)] border-4 border-surface"></div>
+<div class="glass-card p-6 rounded-3xl border border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="space-y-1">
+<span class="text-primary text-[10px] font-bold tracking-widest uppercase">Phase 1</span>
+<h5 class="text-lg font-bold text-on-surface">Core Protocol Alpha</h5>
+<p class="text-sm text-on-surface-variant">Architecture design and initial validator network deployment.</p>
+</div>
+<div class="shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="text-[10px] font-bold text-primary uppercase">Verified on Chain</span>
+</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="relative pl-12 pb-10">
+<div class="absolute left-2.5 top-2 w-3 h-3 rounded-full bg-primary border-4 border-surface"></div>
+<div class="glass-card p-6 rounded-3xl border border-primary/30 bg-surface-container-high/40 space-y-2">
+<div class="flex items-center justify-between">
+<span class="text-primary text-[10px] font-bold tracking-widest uppercase">Phase 2</span>
+<span class="px-2 py-0.5 rounded-md bg-secondary-container text-secondary text-[9px] font-bold uppercase tracking-wider">In Progress</span>
+</div>
+<h5 class="text-lg font-bold text-on-surface">Global Node Expansion</h5>
+<p class="text-sm text-on-surface-variant">Scaling GPU node onboarding to support tier-1 AI research facilities.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="relative pl-12">
+<div class="absolute left-2.5 top-2 w-3 h-3 rounded-full bg-surface-container-highest border-4 border-surface"></div>
+<div class="glass-card p-6 rounded-3xl border border-outline-variant/10 opacity-60 grayscale-[0.5] space-y-2">
+<span class="text-on-surface-variant text-[10px] font-bold tracking-widest uppercase">Phase 3</span>
+<h5 class="text-lg font-bold text-on-surface">Tokenomics &amp; DAO Governance</h5>
+<p class="text-sm text-on-surface-variant">Transitioning control to the community through NODE token distribution.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Team Section -->
+<section class="mt-16 mb-12">
+<h4 class="text-xl font-bold text-on-surface mb-8">Executive Team</h4>
+<div class="flex gap-6 overflow-x-auto pb-6 hide-scrollbar">
+<div class="min-w-[240px] glass-card p-6 rounded-[2.5rem] border border-outline-variant/10 flex flex-col items-center text-center space-y-4 hover:border-primary/30 transition-all duration-500">
+<div class="w-24 h-24 rounded-full p-1 border-2 border-primary/20">
+<img class="w-full h-full object-cover rounded-full" data-alt="Professional portrait of Dr. Aris Thorne, a tech executive with a confident expression in a modern office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlCujPMNVkABZjs0c5UTu-o4fvAcDffJIsNoP-bMiuHO2xnM_Ow-NDc7_2-jb45ZoQNJ8fY6FzXiiTcv1cQ5FfUJ6KQ3FL4HAPOpsmxLqSHTWA3NGC-WWqZEACflblRAFOrxqCqR0ylRNAw_wSf-WUz1UPKy9MzyBcC04dpUd68JCqAf5zqsg7XEFZ0ZmUV082QmXNcVPW7cwFdOJDV1JMLbbBgaF7Vv5IcSLUL4yxgI03f80sjIzcc0iDSvjRcz2pHSotXo2Wjr_T"/>
+</div>
+<div>
+<h6 class="text-lg font-bold text-on-surface">Dr. Aris Thorne</h6>
+<p class="text-primary text-xs font-bold uppercase tracking-widest mt-1">CEO &amp; Founder</p>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Former Head of Infrastructure at DeepMind.</p>
+</div>
+<div class="min-w-[240px] glass-card p-6 rounded-[2.5rem] border border-outline-variant/10 flex flex-col items-center text-center space-y-4 hover:border-primary/30 transition-all duration-500">
+<div class="w-24 h-24 rounded-full p-1 border-2 border-primary/20">
+<img class="w-full h-full object-cover rounded-full" data-alt="Professional portrait of Sarah Chen, a CTO with a focused expression and minimal glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnjt1QVB-aYUbpZppTU6HcR9H8aQYgaXQofhHC1PbgcY0ehPjyJtjV-bOOzZYzkLg7bf8zOBrj9c1UAAggPbsPUIwCXM0dGUNwdokeYWcSv0V-RxfqdZbtN6do45arUdg5yOB_1f4-sqPEdgwwtSKe2kcRcd44K6I0ru23Q5S4T2Nyn2W4Yjp7meuRTyCcMUALht3tBi7CPQukrYyPpNYDKu3QzPhQrlRVOd9Ak7ajSEZdf-eS8HX46BQUfa7WjseBO26Wl37O_ykP"/>
+</div>
+<div>
+<h6 class="text-lg font-bold text-on-surface">Sarah Chen</h6>
+<p class="text-primary text-xs font-bold uppercase tracking-widest mt-1">CTO</p>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Distributed Systems Lead at Solana Labs.</p>
+</div>
+<div class="min-w-[240px] glass-card p-6 rounded-[2.5rem] border border-outline-variant/10 flex flex-col items-center text-center space-y-4 hover:border-primary/30 transition-all duration-500">
+<div class="w-24 h-24 rounded-full p-1 border-2 border-primary/20">
+<img class="w-full h-full object-cover rounded-full" data-alt="Professional portrait of Marcus Vane, an operations lead in a sleek tech attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9Ao352OMn67dRkvjPH6_aAKdRVipsV8BYAb758CXKB_TaygFwIvmDeroHArxPBDjC2d8DqYEvtEaMwDQU-xouhdt6pJ5eQ7O4Jzjm_gVAXCm6dnCu80QW3EDEX1ZCFPmNStXhF6cCPfivIZc6HK2yxovez-O_EvoGWszJPDvFSjUypimS3ZumuMUwgYWFfDt2sfakFZd9Z3cYXOuxukKdIjUzf_btSEeNDTbthiCmDYdmf-OMTe7BgId0R4s3h_SrYKym_5YPVsHV"/>
+</div>
+<div>
+<h6 class="text-lg font-bold text-on-surface">Marcus Vane</h6>
+<p class="text-primary text-xs font-bold uppercase tracking-widest mt-1">Ops Director</p>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Ex-AWS Global Infrastructure Lead.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Action Footer -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-lg z-40">
+<div class="bg-surface-container/90 backdrop-blur-2xl rounded-full p-3 shadow-[0_20px_40px_rgba(6,14,32,0.6)] border border-outline-variant/20 flex items-center justify-between">
+<div class="pl-6">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Available Allocation</p>
+<p class="text-lg font-bold text-on-surface">₹5.8M Remaining</p>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary font-bold px-8 py-4 rounded-full shadow-[0_0_20px_rgba(78,222,163,0.3)] transition-all active:scale-95 text-sm uppercase tracking-widest">
+                Invest Now
+            </button>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-6 bg-[#0b1326]/90 backdrop-blur-2xl z-50 rounded-t-3xl border-t border-[#b7c8e1]/10 shadow-[0_-10px_40px_rgba(6,14,32,0.6)]">
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-4 py-1 hover:text-[#4edea3] transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1">explore</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold tracking-wider uppercase">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#4edea3] bg-[#10b981]/10 rounded-xl px-4 py-1 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold tracking-wider uppercase">Portfolio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-4 py-1 hover:text-[#4edea3] transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1">monitoring</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold tracking-wider uppercase">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-4 py-1 hover:text-[#4edea3] transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1">verified_user</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold tracking-wider uppercase">Vault</span>
+</a>
+</nav>
+</body></html>

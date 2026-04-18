@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Netra Invest | The Pitch</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#6ffbbe",
+                        "inverse-primary": "#006c49",
+                        "on-primary": "#003824",
+                        "surface-container-lowest": "#060e20",
+                        "surface-container-low": "#131b2e",
+                        "on-surface": "#dae2fd",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-dim": "#0b1326",
+                        "error-container": "#93000a",
+                        "surface-variant": "#2d3449",
+                        "on-surface-variant": "#bbcabf",
+                        "outline": "#86948a",
+                        "on-error": "#690005",
+                        "surface": "#0b1326",
+                        "primary-container": "#10b981",
+                        "surface-bright": "#31394d",
+                        "primary-fixed-dim": "#4edea3",
+                        "surface-tint": "#4edea3",
+                        "on-primary-fixed": "#002113",
+                        "on-tertiary-fixed-variant": "#842225",
+                        "on-secondary-fixed": "#0b1c30",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-primary-container": "#00422b",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#3c4a42",
+                        "on-secondary": "#213145",
+                        "on-tertiary-fixed": "#410005",
+                        "primary": "#4edea3",
+                        "surface-container-high": "#222a3d",
+                        "inverse-surface": "#dae2fd",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "surface-container-highest": "#2d3449",
+                        "tertiary": "#ffb3af",
+                        "surface-container": "#171f33",
+                        "secondary-container": "#3a4a5f",
+                        "secondary": "#b7c8e1",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-secondary-container": "#a9bad3",
+                        "on-tertiary-container": "#711419",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "tertiary-container": "#fc7c78",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#650911"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(24px);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #4edea3 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .primary-cta-gradient {
+            background: linear-gradient(135deg, #4edea3 0%, #10b981 100%);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0b1326; }
+        ::-webkit-scrollbar-thumb { background: #2d3449; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30">
+<!-- Top Navigation -->
+<nav class="fixed top-0 w-full z-50 bg-transparent backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+<div class="flex justify-between items-center px-8 h-20 w-full mx-auto max-w-screen-2xl">
+<div class="text-2xl font-bold tracking-tighter text-emerald-400 font-headline">Netra Invest</div>
+<div class="hidden md:flex items-center gap-10 font-headline tracking-tight text-sm">
+<a class="text-slate-400 hover:text-slate-200 transition-colors" href="#">Ecosystem</a>
+<a class="text-slate-400 hover:text-slate-200 transition-colors" href="#">Governance</a>
+<a class="text-slate-400 hover:text-slate-200 transition-colors" href="#">Assets</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors" data-icon="notifications">notifications</button>
+<button class="primary-cta-gradient text-on-primary font-headline font-bold px-6 py-2.5 rounded-lg scale-95 active:scale-90 duration-200 transition-all hover:shadow-[0_0_20px_rgba(78,222,163,0.3)]">
+                    Connect Wallet
+                </button>
+</div>
+</div>
+</nav>
+<main class="pt-32 pb-20 px-6 max-w-7xl mx-auto space-y-32">
+<!-- Hero Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-7 space-y-8">
+<div class="inline-flex items-center gap-2 bg-primary-container/15 px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-[10px] font-bold uppercase tracking-[0.1em] text-primary font-label">Series A Campaign Live</span>
+</div>
+<h1 class="text-6xl md:text-8xl font-headline font-extrabold tracking-tighter leading-none">
+                    Institutional <span class="text-gradient">Sovereignty</span> for the Modern Ledger.
+                </h1>
+<p class="text-on-surface-variant text-lg md:text-xl max-w-2xl leading-relaxed">
+                    Netra Invest bridges the gap between traditional banking infrastructure and the transparent efficiency of decentralised protocols.
+                </p>
+<div class="flex flex-wrap gap-4">
+<button class="primary-cta-gradient text-on-primary font-headline font-bold px-8 py-4 rounded-lg flex items-center gap-3 group">
+                        One-Click Invest
+                        <span class="material-symbols-outlined transition-transform group-hover:translate-x-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="bg-surface-variant/40 hover:bg-surface-variant/60 text-on-surface font-headline font-bold px-8 py-4 rounded-lg transition-all">
+                        View Deck
+                    </button>
+</div>
+</div>
+<div class="lg:col-span-5 relative">
+<div class="aspect-square glass-panel rounded-3xl p-8 flex flex-col justify-between border border-outline-variant/20 shadow-2xl relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+<div class="flex justify-between items-start relative z-10">
+<div class="space-y-1">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Current Valuation</span>
+<div class="text-4xl font-headline font-bold tracking-tight">₹350 Crore</div>
+</div>
+<div class="bg-primary/10 p-3 rounded-xl border border-primary/20">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="account_balance">account_balance</span>
+</div>
+</div>
+<!-- Decorative Chart Element -->
+<div class="h-32 flex items-end gap-2 relative z-10">
+<div class="flex-1 bg-surface-container-high rounded-t-lg h-1/2"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-lg h-2/3"></div>
+<div class="flex-1 bg-primary rounded-t-lg h-full"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-lg h-3/4"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-lg h-4/5"></div>
+</div>
+<div class="flex justify-between items-center pt-6 border-t border-outline-variant/20 relative z-10">
+<div class="flex -space-x-3">
+<img class="w-10 h-10 rounded-full border-2 border-surface" data-alt="portrait of professional financial investor with neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSAlknsTT-PfiX2t4cAfwwykMBY8mPTsiHTTxipMi3stSuXT0aTRUJeh3as1M8qCCN5vTs2YUJtXKQQ5Y_Oo7b4-yeJEq1yEP_kfPUVc0Vl5Oil7uBIj41v3eLrlah2MsXy8EpQW3qeU-Y3KQMAsd_vVP4Mp80SJWMHqBZ0bNxPExA3Q2Z-1kp__eUgpkxP3-GX3TwGxTUATeSUZBu0L_2xVFhnkGH0xBdnLLzbGe0CE3w8OY67H4VuJ5C7U2KEhcCuXrRsk0nQmA"/>
+<img class="w-10 h-10 rounded-full border-2 border-surface" data-alt="profile photo of executive male in corporate attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4O1MWDPnAXV6HvLun14Z5TLYeDpUIXtsNUSAdtqHrunP3pxYFHujxe8a7yQFwDOcTX9dXc8IQ0tjU0k3EXUdZsywxUlLZ74p6KICaOg7jhVSp1g-dfB3pt1zIeyybThGK_6Iyc3HCXujFtyLxHXrmg0o7tvvSeozQ2bMor4qiejpJThp0ca6mtYdwti4kcTs7c1oT5narQWH9_y6W59jHv1pV1oAOwk2iGxuORXyji-8hPmHHzq5Os9ntvXubjyLWoxbQBBkrn6w"/>
+<img class="w-10 h-10 rounded-full border-2 border-surface" data-alt="smiling female entrepreneur in bright modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF3UYXSPVh7ycPS6IiIrwiB0mue2gF-h18NEquaRjhK4SxxRkoCy5FfWMm8gK5HrezuZvpR32ijrywyZkl2dXm1vGDtjyajTJVOzYf6aUDD5VKENqoIcJoqmT-dLVLqtpObMDjZSjxZDALkUkT8KNnBf1PFz84An1SZFsqTT86I8Au_8MX8moPjsWXU2QnfhamrvNfAdIqjmkYpXr-RTDQjZuTx_IH1L7QVP1B6QhjDvrIYj-3EUVir-gdQF57IB7BFRbnwDy6bwQ"/>
+<div class="w-10 h-10 rounded-full border-2 border-surface bg-surface-container-high flex items-center justify-center text-[10px] font-bold">+120</div>
+</div>
+<span class="text-xs text-on-surface-variant font-label">Institutional Backers</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Milestones & Allocation Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Milestone Roadmap -->
+<div class="space-y-10">
+<div class="space-y-2">
+<h2 class="text-3xl font-headline font-bold">Campaign Milestones</h2>
+<p class="text-on-surface-variant">The path from concept to institutional leader.</p>
+</div>
+<div class="relative pl-8 space-y-12 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-px before:bg-outline-variant/30">
+<!-- Completed -->
+<div class="relative">
+<div class="absolute -left-[36px] top-1 w-4 h-4 rounded-full bg-primary ring-8 ring-primary/10"></div>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<h3 class="text-xl font-headline font-semibold">Seed Round Completion</h3>
+<div class="inline-flex items-center gap-1.5 bg-primary-container/10 px-2 py-0.5 rounded text-[10px] font-bold text-primary">
+<span class="material-symbols-outlined text-[12px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Verified on Chain
+                                </div>
+</div>
+<p class="text-on-surface-variant text-sm leading-relaxed">Secured ₹20 Crore in initial capital from tier-1 digital asset funds. Core smart contract architecture finalized.</p>
+</div>
+</div>
+<!-- Completed -->
+<div class="relative">
+<div class="absolute -left-[36px] top-1 w-4 h-4 rounded-full bg-primary ring-8 ring-primary/10"></div>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<h3 class="text-xl font-headline font-semibold">Regulatory Framework Beta</h3>
+<div class="inline-flex items-center gap-1.5 bg-primary-container/10 px-2 py-0.5 rounded text-[10px] font-bold text-primary">
+<span class="material-symbols-outlined text-[12px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Verified on Chain
+                                </div>
+</div>
+<p class="text-on-surface-variant text-sm leading-relaxed">Completion of multi-jurisdictional compliance audit for EU and Singapore institutional custody.</p>
+</div>
+</div>
+<!-- Active -->
+<div class="relative">
+<div class="absolute -left-[36px] top-1 w-4 h-4 rounded-full bg-surface border-2 border-primary ring-8 ring-primary/5"></div>
+<div class="space-y-3">
+<h3 class="text-xl font-headline font-semibold text-primary">Series A Live</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Open for institutional and qualified private investors. Targeting ₹125 Crore for global expansion.</p>
+</div>
+</div>
+<!-- Future -->
+<div class="relative opacity-50">
+<div class="absolute -left-[36px] top-1 w-4 h-4 rounded-full bg-surface border-2 border-outline-variant"></div>
+<div class="space-y-3">
+<h3 class="text-xl font-headline font-semibold">Netra Mainnet Launch</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Scheduled for Q4 2025. Full ecosystem migration to Sovereign Ledger architecture.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Fund Allocation -->
+<div class="bg-surface-container-low rounded-3xl p-10 space-y-10 border border-outline-variant/10">
+<div class="space-y-2">
+<h2 class="text-3xl font-headline font-bold">Allocation Strategy</h2>
+<p class="text-on-surface-variant">Strategic deployment of capital for long-term growth.</p>
+</div>
+<div class="flex flex-col md:flex-row items-center gap-12">
+<!-- Donut Chart -->
+<div class="relative w-56 h-56 flex-shrink-0">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<!-- Track -->
+<circle class="text-outline-variant/20" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="12"></circle>
+<!-- R&D (45%) -->
+<circle class="text-primary" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="282.7" stroke-dashoffset="155.5" stroke-linecap="round" stroke-width="12"></circle>
+<!-- Marketing (25%) -->
+<circle class="text-secondary" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="282.7" stroke-dashoffset="212" stroke-linecap="round" stroke-width="12" transform="rotate(162 50 50)"></circle>
+<!-- Compliance (30%) -->
+<circle class="text-tertiary-container" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="282.7" stroke-dashoffset="197.8" stroke-linecap="round" stroke-width="12" transform="rotate(252 50 50)"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-3xl font-headline font-black">₹125 Crore</span>
+<span class="text-[10px] uppercase font-label tracking-widest text-on-surface-variant">Target</span>
+</div>
+</div>
+<!-- Legend -->
+<div class="flex-1 space-y-6 w-full">
+<div class="flex justify-between items-center group">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-sm font-medium">Core Engineering</span>
+</div>
+<span class="font-headline font-bold">45%</span>
+</div>
+<div class="flex justify-between items-center group">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-tertiary-container"></div>
+<span class="text-sm font-medium">Compliance &amp; Legal</span>
+</div>
+<span class="font-headline font-bold">30%</span>
+</div>
+<div class="flex justify-between items-center group">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-secondary"></div>
+<span class="text-sm font-medium">Market Acquisition</span>
+</div>
+<span class="font-headline font-bold">25%</span>
+</div>
+<div class="pt-6 border-t border-outline-variant/20">
+<p class="text-xs text-on-surface-variant italic leading-relaxed">
+                                "* Allocation percentages are subject to adjustment based on market volatility and regulatory developments."
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Document Vault & Investment -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<!-- Vault -->
+<div class="lg:col-span-8 space-y-8">
+<div class="flex justify-between items-end">
+<div class="space-y-2">
+<h2 class="text-3xl font-headline font-bold">Document Vault</h2>
+<p class="text-on-surface-variant">Encrypted access to institutional-grade reporting.</p>
+</div>
+<button class="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+                        Request NDA Access
+                        <span class="material-symbols-outlined text-[18px]" data-icon="lock">lock</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="glass-panel p-6 rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-all flex items-center gap-5 group cursor-pointer">
+<div class="w-14 h-14 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="description">description</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold">Whitepaper v3.2</h4>
+<p class="text-xs text-on-surface-variant">PDF • 12.4 MB</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-y-1 transition-transform" data-icon="download">download</span>
+</div>
+<div class="glass-panel p-6 rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-all flex items-center gap-5 group cursor-pointer">
+<div class="w-14 h-14 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="gavel">gavel</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold">Legal Framework</h4>
+<p class="text-xs text-on-surface-variant">DOCX • 4.1 MB</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-y-1 transition-transform" data-icon="download">download</span>
+</div>
+<div class="glass-panel p-6 rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-all flex items-center gap-5 group cursor-pointer">
+<div class="w-14 h-14 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="verified_user">verified_user</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold">Security Audit</h4>
+<p class="text-xs text-on-surface-variant">By Trail of Bits</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-y-1 transition-transform" data-icon="download">download</span>
+</div>
+<div class="glass-panel p-6 rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-all flex items-center gap-5 group cursor-pointer">
+<div class="w-14 h-14 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold">Tokenomics Sheet</h4>
+<p class="text-xs text-on-surface-variant">XLSX • 1.2 MB</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-y-1 transition-transform" data-icon="download">download</span>
+</div>
+</div>
+</div>
+<!-- Investment Sidebar -->
+<div class="lg:col-span-4 h-full">
+<div class="bg-surface-container-high rounded-3xl p-8 border border-primary/20 shadow-[0_0_50px_rgba(78,222,163,0.05)] sticky top-32 space-y-8">
+<div class="space-y-4">
+<h3 class="text-2xl font-headline font-bold">Secure Investment</h3>
+<p class="text-sm text-on-surface-variant">Choose your preferred gateway to join the Netra Sovereign Ledger.</p>
+</div>
+<div class="space-y-4">
+<button class="w-full flex items-center justify-between p-4 bg-surface rounded-xl border border-outline-variant hover:border-primary transition-colors group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-bold">MetaMask</span>
+</div>
+<span class="text-[10px] uppercase font-label tracking-widest text-on-surface-variant">Direct</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-surface rounded-xl border border-outline-variant hover:border-primary transition-colors group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-400" data-icon="grid_view">grid_view</span>
+<span class="font-bold">WalletConnect</span>
+</div>
+<span class="text-[10px] uppercase font-label tracking-widest text-on-surface-variant">Mobile</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-surface rounded-xl border border-outline-variant hover:border-primary transition-colors group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-500" data-icon="account_balance">account_balance</span>
+<span class="font-bold">Institutional Wire</span>
+</div>
+<span class="text-[10px] uppercase font-label tracking-widest text-on-surface-variant">Swift</span>
+</button>
+</div>
+<div class="space-y-4 pt-4 border-t border-outline-variant/20">
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">Min. Investment (INR)</span>
+<span class="font-bold">₹20,00,000</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant">Campaign Deadline</span>
+<span class="font-bold">Jan 28, 2025</span>
+</div>
+<button class="w-full primary-cta-gradient text-on-primary font-headline font-black py-5 rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-3">
+                            One-Click Invest
+                            <span class="material-symbols-outlined" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</button>
+</div>
+<div class="flex items-center gap-2 justify-center">
+<span class="material-symbols-outlined text-[14px] text-primary/60" data-icon="shield">shield</span>
+<span class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest">End-to-End Encrypted</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 bg-slate-950 tonal-shift border-t border-slate-900">
+<div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+<div class="space-y-4">
+<div class="font-plus-jakarta-sans font-bold text-slate-200 text-xl">Netra Invest</div>
+<p class="font-inter text-xs tracking-wide text-slate-600 max-w-sm">
+                    © 2024 Netra Invest. All rights reserved. Sovereign Ledgers Inc.
+                    Institutional Grade Wealth Architecture.
+                </p>
+</div>
+<div class="flex flex-wrap justify-end gap-x-8 gap-y-4">
+<a class="font-inter text-xs tracking-wide text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4 opacity-80 hover:opacity-100" href="#">Whitepaper</a>
+<a class="font-inter text-xs tracking-wide text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4 opacity-80 hover:opacity-100" href="#">Audit Status</a>
+<a class="font-inter text-xs tracking-wide text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4 opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-inter text-xs tracking-wide text-slate-600 hover:text-emerald-400 transition-colors underline underline-offset-4 opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+</div>
+</div>
+</footer>
+</body></html>

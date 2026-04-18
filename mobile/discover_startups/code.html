@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Discover Startups | Netra Invest</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#0b1326",
+                    "tertiary-fixed": "#ffdad7",
+                    "primary": "#4edea3",
+                    "surface-container-lowest": "#060e20",
+                    "surface-container-highest": "#2d3449",
+                    "on-secondary-fixed": "#0b1c30",
+                    "on-primary-fixed": "#002113",
+                    "surface": "#0b1326",
+                    "surface-bright": "#31394d",
+                    "surface-container-high": "#222a3d",
+                    "surface-container-low": "#131b2e",
+                    "inverse-surface": "#dae2fd",
+                    "outline": "#86948a",
+                    "on-tertiary-fixed-variant": "#842225",
+                    "on-surface": "#dae2fd",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "primary-fixed-dim": "#4edea3",
+                    "on-secondary": "#213145",
+                    "surface-variant": "#2d3449",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary-container": "#711419",
+                    "secondary-fixed": "#d3e4fe",
+                    "primary-fixed": "#6ffbbe",
+                    "surface-dim": "#0b1326",
+                    "tertiary-container": "#fc7c78",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed": "#410005",
+                    "on-secondary-container": "#a9bad3",
+                    "on-primary-container": "#00422b",
+                    "on-primary": "#003824",
+                    "tertiary": "#ffb3af",
+                    "error": "#ffb4ab",
+                    "surface-tint": "#4edea3",
+                    "secondary": "#b7c8e1",
+                    "inverse-primary": "#006c49",
+                    "on-tertiary": "#650911",
+                    "on-background": "#dae2fd",
+                    "primary-container": "#10b981",
+                    "surface-container": "#171f33",
+                    "secondary-container": "#3a4a5f",
+                    "on-surface-variant": "#bbcabf",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#005236",
+                    "outline-variant": "#3c4a42",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "inverse-on-surface": "#283044",
+                    "tertiary-fixed-dim": "#ffb3af"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background antialiased selection:bg-primary/30 min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0b1326]/60 backdrop-blur-2xl bg-gradient-to-b from-[#0b1326] to-transparent shadow-[0_20px_40px_rgba(6,14,32,0.4)]">
+<div class="flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden ring-1 ring-primary/20">
+<img alt="Investor Profile" class="w-full h-full object-cover" data-alt="Close-up portrait of a professional male investor in a modern minimalist office environment, soft cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIJBrlrUHy0FXqrxWnzVnZ_NqhHQuma15WCZX-xMhogN_z1GwApVQPNvYpJCT4kJaCvwZErGXYcjvxWE7v9_zfcoQe7GRwG-HaSrrms-oCr0310qmc5S-NIQku5jEQHYWJZqug_agKfwd5Aup_gWRxhqKS1094AGABc6oVKAGpj_iGBcUk-t5XtPWU5D5m0vVfXmbCcB0y2VV-oIVQpW8UVlzJSScGHoqNs0Lr1h2tHKVKCjTgnh1CJB3PPDsD-K1ij9RDW1G5sJed"/>
+</div>
+<span class="text-lg font-bold text-[#4edea3] tracking-tighter font-['Plus_Jakarta_Sans'] antialiased">Netra Invest</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[#10b981]/10 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#4edea3]">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6">
+<!-- Hero Section -->
+<section class="mb-10">
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Explore</h1>
+<p class="text-on-surface-variant body-lg opacity-80">Discover early-stage ventures verified on the ledger.</p>
+</section>
+<!-- Search & Filter Bar -->
+<section class="mb-8 space-y-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50">search</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl py-4 pl-12 pr-4 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-1 focus:ring-primary/40 transition-all outline-none" placeholder="Search projects..." type="text"/>
+</div>
+<div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+<button class="px-5 py-2.5 bg-primary text-on-primary font-semibold rounded-md text-sm transition-all shadow-lg shadow-primary/20">All</button>
+<button class="px-5 py-2.5 bg-surface-container-low text-on-surface-variant font-medium rounded-md text-sm hover:bg-surface-container-high transition-colors">AI</button>
+<button class="px-5 py-2.5 bg-surface-container-low text-on-surface-variant font-medium rounded-md text-sm hover:bg-surface-container-high transition-colors">DeFi</button>
+<button class="px-5 py-2.5 bg-surface-container-low text-on-surface-variant font-medium rounded-md text-sm hover:bg-surface-container-high transition-colors">SaaS</button>
+<button class="px-5 py-2.5 bg-surface-container-low text-on-surface-variant font-medium rounded-md text-sm hover:bg-surface-container-high transition-colors">Gaming</button>
+</div>
+</section>
+<!-- Startup Cards Grid -->
+<div class="grid grid-cols-1 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-container rounded-xl p-5 group hover:translate-y-[-2px] transition-all duration-300 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] font-bold text-primary uppercase tracking-widest">Verified on Chain</span>
+</div>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-3xl">neurology</span>
+</div>
+<div class="pr-24">
+<h3 class="text-xl font-bold text-on-surface leading-tight">NeuralNode</h3>
+<span class="text-xs font-semibold text-primary uppercase tracking-tighter">AI Infrastructure</span>
+</div>
+</div>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Decentralized compute network for massive-scale LLM training and inference.</p>
+<div class="grid grid-cols-2 gap-4 pt-4 border-t border-outline-variant/10">
+<div>
+<p class="text-[10px] text-on-surface-variant/60 uppercase font-bold tracking-widest mb-1">Amount Raised</p>
+<p class="text-lg font-bold text-on-surface tracking-tight">₹4.2 Cr <span class="text-xs font-normal text-on-surface-variant">/ ₹10 Cr</span></p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant/60 uppercase font-bold tracking-widest mb-1">Investors</p>
+<div class="flex justify-end -space-x-2">
+<div class="w-6 h-6 rounded-full border border-surface-container bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a diverse young professional" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5xT7szsD_ZTfBmSeBwSJ2ozOZxqcsE5ddjZ4nLS-Our3eIISRLzu_pDPucBP0R1HXkDr5N3yU0tvZaKK39oqYhbvpfX1L3Q1vLdD1cFqZQ2On6_IX-VDLSygbxYQXowbirg-ENnlwiRhWof7_ztGBXlJwH1P_4WsC5HGQvkzNMPT6agMfEo-IXKvAr-QO_zRaLPdCFlE1aIWilNn9S2Lz6SvDOvuO1jFeOf-wrL-mtQb_JZXFH2xcptfRjTvUTpNvPBN7qwqP4u_0"/>
+</div>
+<div class="w-6 h-6 rounded-full border border-surface-container bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a smiling professional woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJm1ofdpUhFhKubS4n405Qq9NT8Lg2q3jtwVidF-OjRhf6wBG8olXrwYxy77a0pwNquUFUb8nbLniyUzjHqidTipkaMG-eJN05XllCaROC39It4tO_a8EOOsa0MMMSzCwG5jImcIj_jd-OQ4WsOX5aR0nQFrOq7LjKAuEtz7rIfbbG4V1xWP-XPw7WZB9SRP3T8-VWtzB_pUidJKwUsxZhuY4QW2Iu0emG0pNyoBVGfSmw-vaYzCsFZaLR9WeIY8tDcJvLEGDb3V2V"/>
+</div>
+<div class="w-6 h-6 rounded-full border border-surface-container bg-surface-container-high flex items-center justify-center text-[8px] text-on-surface">+12</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container rounded-xl p-5 group hover:translate-y-[-2px] transition-all duration-300 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] font-bold text-primary uppercase tracking-widest">Verified on Chain</span>
+</div>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<div class="w-14 h-14 rounded-xl bg-gradient-to-br from-secondary to-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-3xl">currency_exchange</span>
+</div>
+<div class="pr-24">
+<h3 class="text-xl font-bold text-on-surface leading-tight">LiquidFlow</h3>
+<span class="text-xs font-semibold text-primary uppercase tracking-tighter">DeFi Protocols</span>
+</div>
+</div>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Automated yield optimization across multi-chain liquidity pools via smart vaults.</p>
+<div class="grid grid-cols-2 gap-4 pt-4 border-t border-outline-variant/10">
+<div>
+<p class="text-[10px] text-on-surface-variant/60 uppercase font-bold tracking-widest mb-1">Amount Raised</p>
+<p class="text-lg font-bold text-on-surface tracking-tight">₹12.8 Cr <span class="text-xs font-normal text-on-surface-variant">/ ₹15 Cr</span></p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant/60 uppercase font-bold tracking-widest mb-1">Investors</p>
+<div class="flex justify-end -space-x-2">
+<div class="w-6 h-6 rounded-full border border-surface-container bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a businessman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCH_MMM_-L6irzGJ1PQ2Ndgn5Qu7pNS8rbCYa7G3rdUq-fBaPKlaw2SKu9DLOjeicuGV4BaXoX51Zl9Mddm5Lz1kKxsYgwnIWD13uiLDVXkpiVitLOg5nFD7NK5KkfSZRb1WPdg8TO6ziEHIeA3SADxWwWg2wE1ndOu3va0tn1_yHMGtcfz9NzQaFTc5iNxVMYRXka5byQkyP0hEnCA1JuhDMv5SrU2Ut_BWf67B8E8BOWmKJslvbs_m-bORO2gtp63hlNpbjEddnQQ"/>
+</div>
+<div class="w-6 h-6 rounded-full border border-surface-container bg-surface-container-high flex items-center justify-center text-[8px] text-on-surface">+45</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container rounded-xl p-5 group hover:translate-y-[-2px] transition-all duration-300 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 backdrop-blur-md">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] font-bold text-primary uppercase tracking-widest">Verified on Chain</span>
+</div>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<div class="w-14 h-14 rounded-xl bg-gradient-to-br from-surface-container-highest to-background flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">cloud_done</span>
+</div>
+<div class="pr-24">
+<h3 class="text-xl font-bold text-on-surface leading-tight">SaaSify</h3>
+<span class="text-xs font-semibold text-primary uppercase tracking-tighter">B2B SaaS</span>
+</div>
+</div>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">The operating system for modern revenue teams. Intelligence-driven CRM automation.</p>
+<div class="grid grid-cols-2 gap-4 pt-4 border-t border-outline-variant/10">
+<div>
+<p class="text-[10px] text-on-surface-variant/60 uppercase font-bold tracking-widest mb-1">Amount Raised</p>
+<p class="text-lg font-bold text-on-surface tracking-tight">₹1.2 Cr <span class="text-xs font-normal text-on-surface-variant">/ ₹5 Cr</span></p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant/60 uppercase font-bold tracking-widest mb-1">Investors</p>
+<div class="flex justify-end -space-x-2">
+<div class="w-6 h-6 rounded-full border border-surface-container bg-surface-container-high flex items-center justify-center text-[8px] text-on-surface">+8</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Asymmetric Bento-like Insight Card -->
+<div class="bg-gradient-to-br from-primary-container to-primary rounded-xl p-6 overflow-hidden relative min-h-[160px] flex flex-col justify-end">
+<div class="absolute top-[-20%] right-[-10%] w-40 h-40 bg-white/20 rounded-full blur-3xl"></div>
+<div class="relative z-10">
+<h4 class="text-on-primary text-2xl font-black tracking-tight leading-none mb-1 uppercase italic">Institutional Growth</h4>
+<p class="text-on-primary/80 text-sm font-medium">Early-stage funding trends reached a 12-month high in DeFi infrastructure.</p>
+</div>
+<div class="absolute top-4 right-4">
+<span class="material-symbols-outlined text-on-primary/40 text-4xl" style="font-variation-settings: 'FILL' 1;">insights</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full rounded-t-[2rem] z-50 pb-safe bg-[#0b1326]/80 backdrop-blur-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
+<div class="bg-[#3a4a5f]/10 flex justify-around items-center w-full px-4 h-20">
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1">account_balance_wallet</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase">Portfolio</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#10b981]/20 text-[#4edea3] rounded-2xl px-5 py-2 ring-1 ring-[#4edea3]/30 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1">verified_user</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase">Ledger</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

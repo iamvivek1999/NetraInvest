@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Netra Invest | Investor Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#0b1326",
+                    "tertiary-fixed": "#ffdad7",
+                    "primary": "#4edea3",
+                    "surface-container-lowest": "#060e20",
+                    "surface-container-highest": "#2d3449",
+                    "on-secondary-fixed": "#0b1c30",
+                    "on-primary-fixed": "#002113",
+                    "surface": "#0b1326",
+                    "surface-bright": "#31394d",
+                    "surface-container-high": "#222a3d",
+                    "surface-container-low": "#131b2e",
+                    "inverse-surface": "#dae2fd",
+                    "outline": "#86948a",
+                    "on-tertiary-fixed-variant": "#842225",
+                    "on-surface": "#dae2fd",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "primary-fixed-dim": "#4edea3",
+                    "on-secondary": "#213145",
+                    "surface-variant": "#2d3449",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary-container": "#711419",
+                    "secondary-fixed": "#d3e4fe",
+                    "primary-fixed": "#6ffbbe",
+                    "surface-dim": "#0b1326",
+                    "tertiary-container": "#fc7c78",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed": "#410005",
+                    "on-secondary-container": "#a9bad3",
+                    "on-primary-container": "#00422b",
+                    "on-primary": "#003824",
+                    "tertiary": "#ffb3af",
+                    "error": "#ffb4ab",
+                    "surface-tint": "#4edea3",
+                    "secondary": "#b7c8e1",
+                    "inverse-primary": "#006c49",
+                    "on-tertiary": "#650911",
+                    "on-background": "#dae2fd",
+                    "primary-container": "#10b981",
+                    "surface-container": "#171f33",
+                    "secondary-container": "#3a4a5f",
+                    "on-surface-variant": "#bbcabf",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#005236",
+                    "outline-variant": "#3c4a42",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "inverse-on-surface": "#283044",
+                    "tertiary-fixed-dim": "#ffb3af"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(23, 31, 51, 0.6);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0b1326]/60 backdrop-blur-2xl bg-gradient-to-b from-[#0b1326] to-transparent shadow-[0_20px_40px_rgba(6,14,32,0.4)]">
+<div class="flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden ring-1 ring-primary/20">
+<img alt="Investor Profile" class="w-full h-full object-cover" data-alt="professional headshot of a mature male investor with silver hair and sharp suit in a high-end corporate setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNUyFAT11PuebZZhiF4khCV4M3q3wV2uOv0h_zF9KC86CqvO8uF0QYgiDCiUGMy8gWxYc7tHCWEuksc21687t39jsMYTSqwKe8n81O4-ybgYDBMG4akJcZUnn-RjaAUZ0c_no4Fm00LE9hPDsSCDdKp6gaHmF3jpoDCi8_SaY96dRKagb6_UUwCU5xYxRKb_QMr1tAWld6svg0lHEfoiIvlwuskGNrivVYpSxNzeB-WSZnIftrFFaaQtdlOOLllntnVBJ-CbxqUYmn"/>
+</div>
+<h1 class="text-lg font-bold text-[#4edea3] tracking-tighter antialiased">Netra Invest</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[#10b981]/10 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#4edea3]" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-20 px-4 space-y-6">
+<!-- Portfolio Hero -->
+<section class="mt-4">
+<div class="p-6 rounded-3xl bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-2xl relative overflow-hidden">
+<div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+<p class="text-xs font-semibold opacity-80 uppercase tracking-widest mb-1">Total Portfolio Value</p>
+<div class="flex items-baseline gap-2">
+<h2 class="text-4xl font-extrabold tracking-tight">₹14,28,950</h2>
+<span class="text-sm font-medium bg-on-primary/20 px-2 py-0.5 rounded-full">+12.4%</span>
+</div>
+<div class="mt-8 grid grid-cols-2 gap-4">
+<div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl">
+<p class="text-[10px] uppercase opacity-70 mb-1">Active Deals</p>
+<p class="text-xl font-bold">24</p>
+</div>
+<div class="bg-white/10 backdrop-blur-md p-3 rounded-2xl">
+<p class="text-[10px] uppercase opacity-70 mb-1">Total Exits</p>
+<p class="text-xl font-bold">08</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Real-Time Fund Tracker Widget -->
+<section>
+<div class="flex items-center justify-between mb-4 px-2">
+<h3 class="text-lg font-bold tracking-tight text-on-surface">Fund Deployment</h3>
+<span class="text-[10px] text-primary bg-primary/10 px-3 py-1 rounded-full flex items-center gap-1 font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    BLOCKCHAIN SYNCED
+                </span>
+</div>
+<div class="glass-card p-5 rounded-[2rem] border border-outline-variant/10">
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-end mb-3">
+<div>
+<p class="text-xs text-on-surface-variant font-medium">Seed Series Alpha Fund</p>
+<p class="text-lg font-bold text-on-surface">₹5,00,000 Milestone</p>
+</div>
+<p class="text-primary font-bold">72%</p>
+</div>
+<div class="h-3 w-full bg-surface-container-highest rounded-full overflow-hidden p-0.5">
+<div class="h-full bg-gradient-to-r from-primary to-primary-container rounded-full w-[72%] shadow-[0_0_12px_rgba(78,222,163,0.4)]"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-low border border-outline-variant/5">
+<span class="material-symbols-outlined text-primary mb-1 text-lg" data-icon="rocket_launch">rocket_launch</span>
+<span class="text-[9px] uppercase font-bold text-on-surface-variant">R&amp;D</span>
+<span class="text-xs font-bold">₹120k</span>
+</div>
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-low border border-outline-variant/5">
+<span class="material-symbols-outlined text-primary mb-1 text-lg" data-icon="groups">groups</span>
+<span class="text-[9px] uppercase font-bold text-on-surface-variant">Hiring</span>
+<span class="text-xs font-bold">₹240k</span>
+</div>
+<div class="flex flex-col items-center p-2 rounded-xl bg-surface-container-low border border-outline-variant/5">
+<span class="material-symbols-outlined text-primary mb-1 text-lg" data-icon="campaign">campaign</span>
+<span class="text-[9px] uppercase font-bold text-on-surface-variant">GTM</span>
+<span class="text-xs font-bold">₹140k</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Risk Heatmap Visualization -->
+<section>
+<h3 class="text-lg font-bold tracking-tight text-on-surface mb-4 px-2">Startup Health Index</h3>
+<div class="glass-card p-5 rounded-[2rem] border border-outline-variant/10">
+<div class="grid grid-cols-4 gap-2 h-40">
+<!-- Column 1: High Health -->
+<div class="space-y-2 flex flex-col justify-end">
+<div class="h-1/3 bg-primary/20 rounded-xl border border-primary/30 flex items-center justify-center">
+<span class="text-[10px] font-bold text-primary">LY</span>
+</div>
+<div class="h-2/3 bg-primary rounded-xl flex items-center justify-center p-2 text-center">
+<span class="text-[10px] font-bold text-on-primary leading-tight">Neuro<br/>Link</span>
+</div>
+</div>
+<!-- Column 2: Mid Health -->
+<div class="space-y-2 flex flex-col justify-end">
+<div class="h-1/2 bg-primary/60 rounded-xl flex items-center justify-center p-2 text-center">
+<span class="text-[10px] font-bold text-on-primary leading-tight">Eco<br/>Fuel</span>
+</div>
+<div class="h-1/4 bg-primary/30 rounded-xl border border-primary/20 flex items-center justify-center">
+<span class="text-[10px] font-bold text-primary">BT</span>
+</div>
+</div>
+<!-- Column 3: Stable -->
+<div class="space-y-2 flex flex-col justify-end">
+<div class="h-full bg-surface-container-highest rounded-xl border border-outline-variant/20 flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5"></div>
+<span class="text-[10px] font-bold text-on-surface-variant vertical-text rotate-90 whitespace-nowrap">STEADY GROWTH</span>
+</div>
+</div>
+<!-- Column 4: High Risk -->
+<div class="space-y-2 flex flex-col justify-end">
+<div class="h-1/4 bg-tertiary-container/30 rounded-xl border border-tertiary-container/40 flex items-center justify-center">
+<span class="text-[10px] font-bold text-tertiary">RX</span>
+</div>
+<div class="h-1/3 bg-error-container/40 rounded-xl border border-error/20 flex items-center justify-center p-2 text-center">
+<span class="text-[10px] font-bold text-error leading-tight">Quantum<br/>X</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex justify-between items-center text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-1">
+<span>Critical Risk</span>
+<div class="h-1 flex-1 mx-4 bg-gradient-to-r from-error/40 via-surface-container-highest to-primary/40 rounded-full"></div>
+<span>Unicorn Potential</span>
+</div>
+</div>
+</section>
+<!-- Recent Transactions -->
+<section>
+<div class="flex justify-between items-center mb-4 px-2">
+<h3 class="text-lg font-bold tracking-tight text-on-surface">Recent Ledger</h3>
+<button class="text-primary text-xs font-bold uppercase tracking-wider">See All</button>
+</div>
+<div class="space-y-3">
+<div class="glass-card p-4 rounded-2xl flex items-center justify-between border border-outline-variant/5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div>
+<p class="text-sm font-bold">Dividend Payout</p>
+<p class="text-[10px] text-on-surface-variant">Solar Grid Solutions</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">+₹4,200.00</p>
+<p class="text-[10px] text-on-surface-variant">2h ago</p>
+</div>
+</div>
+<div class="glass-card p-4 rounded-2xl flex items-center justify-between border border-outline-variant/5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="contract">contract</span>
+</div>
+<div>
+<p class="text-sm font-bold">Capital Call</p>
+<p class="text-[10px] text-on-surface-variant">A.I. Genesis Fund</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">-₹15,000.00</p>
+<p class="text-[10px] text-on-surface-variant">Yesterday</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full rounded-t-[2rem] z-50 pb-safe bg-[#0b1326]/80 backdrop-blur-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
+<div class="flex justify-around items-center w-full px-4 h-20 bg-[#3a4a5f]/10">
+<!-- Active Tab: Portfolio -->
+<a class="flex flex-col items-center justify-center bg-[#10b981]/20 text-[#4edea3] rounded-2xl px-5 py-2 ring-1 ring-[#4edea3]/30 transition-transform active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase mt-1">Portfolio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase mt-1">Ledger</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#b7c8e1]/60 px-5 py-2 hover:text-[#4edea3] transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium tracking-wide uppercase mt-1">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

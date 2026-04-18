@@ -1,0 +1,172 @@
+[
+  { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true,  "internalType": "bytes32", "name": "campaignKey", "type": "bytes32" },
+      { "indexed": false, "internalType": "uint256", "name": "totalRaised",  "type": "uint256" }
+    ],
+    "name": "CampaignCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true,  "internalType": "bytes32", "name": "campaignKey",    "type": "bytes32" },
+      { "indexed": true,  "internalType": "address", "name": "startupWallet",  "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "fundingGoal",    "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "deadline",       "type": "uint256" },
+      { "indexed": false, "internalType": "uint8",   "name": "milestoneCount", "type": "uint8"   }
+    ],
+    "name": "CampaignCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true,  "internalType": "bytes32", "name": "campaignKey", "type": "bytes32" },
+      { "indexed": false, "internalType": "bool",    "name": "isOpen",      "type": "bool"    }
+    ],
+    "name": "CampaignStatusChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true,  "internalType": "bytes32", "name": "campaignKey", "type": "bytes32" },
+      { "indexed": true,  "internalType": "address", "name": "investor",    "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "amount",      "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "totalRaised", "type": "uint256" }
+    ],
+    "name": "InvestmentReceived",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true,  "internalType": "bytes32", "name": "campaignKey",     "type": "bytes32" },
+      { "indexed": false, "internalType": "uint8",   "name": "milestoneIndex",  "type": "uint8"   },
+      { "indexed": false, "internalType": "uint256", "name": "amount",          "type": "uint256" },
+      { "indexed": true,  "internalType": "address", "name": "recipient",       "type": "address" }
+    ],
+    "name": "MilestoneReleased",
+    "type": "event"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "name": "campaigns",
+    "outputs": [
+      { "internalType": "address", "name": "startupWallet",         "type": "address" },
+      { "internalType": "uint256", "name": "fundingGoal",           "type": "uint256" },
+      { "internalType": "uint256", "name": "deadline",              "type": "uint256" },
+      { "internalType": "uint256", "name": "totalRaised",           "type": "uint256" },
+      { "internalType": "uint8",   "name": "milestoneCount",        "type": "uint8"   },
+      { "internalType": "uint8",   "name": "currentMilestoneIndex", "type": "uint8"   },
+      { "internalType": "bool",    "name": "exists",                "type": "bool"    },
+      { "internalType": "bool",    "name": "isOpen",                "type": "bool"    }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32",   "name": "campaignKey",          "type": "bytes32"   },
+      { "internalType": "address",   "name": "startupWallet",        "type": "address"   },
+      { "internalType": "uint256",   "name": "fundingGoal",          "type": "uint256"   },
+      { "internalType": "uint256",   "name": "deadline",             "type": "uint256"   },
+      { "internalType": "uint8",     "name": "milestoneCount",       "type": "uint8"     },
+      { "internalType": "uint8[5]",  "name": "milestonePercentages", "type": "uint8[5]"  }
+    ],
+    "name": "createCampaign",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "campaignKey", "type": "bytes32" }],
+    "name": "getCampaign",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address",   "name": "startupWallet",         "type": "address"  },
+          { "internalType": "uint256",   "name": "fundingGoal",           "type": "uint256"  },
+          { "internalType": "uint256",   "name": "deadline",              "type": "uint256"  },
+          { "internalType": "uint256",   "name": "totalRaised",           "type": "uint256"  },
+          { "internalType": "uint8",     "name": "milestoneCount",        "type": "uint8"    },
+          { "internalType": "uint8",     "name": "currentMilestoneIndex", "type": "uint8"    },
+          { "internalType": "uint8[5]",  "name": "milestonePercentages",  "type": "uint8[5]" },
+          { "internalType": "bool",      "name": "exists",                "type": "bool"     },
+          { "internalType": "bool",      "name": "isOpen",                "type": "bool"     }
+        ],
+        "internalType": "struct InvestmentPlatform.Campaign",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "campaignKey", "type": "bytes32" },
+      { "internalType": "address", "name": "investor",    "type": "address" }
+    ],
+    "name": "getInvestment",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "campaignKey", "type": "bytes32" }],
+    "name": "getTotalRaised",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "campaignKey", "type": "bytes32" }],
+    "name": "invest",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "", "type": "bytes32" },
+      { "internalType": "address", "name": "", "type": "address" }
+    ],
+    "name": "investments",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "campaignKey",    "type": "bytes32" },
+      { "internalType": "uint8",   "name": "milestoneIndex", "type": "uint8"   }
+    ],
+    "name": "releaseMilestone",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "campaignKey", "type": "bytes32" },
+      { "internalType": "bool",    "name": "isOpen",      "type": "bool"    }
+    ],
+    "name": "setCampaignOpen",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  { "stateMutability": "payable", "type": "receive" }
+]

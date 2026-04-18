@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+logs
+.env
+.env.local
+.git
+.gitignore
+*.md
+# UPDATED FOR DEPLOYMENT PREP
