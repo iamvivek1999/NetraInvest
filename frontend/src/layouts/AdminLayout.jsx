@@ -66,6 +66,9 @@ export default function AdminLayout() {
           <NavLink to="/admin/milestones" style={navLinkStyle}>
             <span>💸</span> Milestone Disbursals
           </NavLink>
+          <NavLink to="/admin/sync" style={navLinkStyle}>
+            <span>🔄</span> Blockchain Sync
+          </NavLink>
         </nav>
 
         <div style={{ padding: '1.5rem' }}>

@@ -221,7 +221,7 @@ export default function Landing() {
               { icon: '💰', value: '₹23+ Cr', label: 'Total Invested' },
               { icon: '🌐', value: '100%', label: 'On-Chain Transparency' },
               { icon: '⚡', value: '99.2%', label: 'Milestone Accountability' },
-              { icon: '🛡️', value: 'CertiK', label: 'Smart Contract Audited' },
+              { icon: '🛡️', value: 'Escrow', label: 'Milestone-gated releases' },
               { icon: '👥', value: '12,400+', label: 'Active Investors' },
             ].map((s) => (
               <div className="trust-strip__item" key={s.label}>
@@ -306,7 +306,11 @@ export default function Landing() {
           {isDemo && (
             <div className="demo-notice">
               <span>🔔</span>
-              <span>Showing curated demo campaigns — <Link to="/login">log in</Link> to see live data.</span>
+              <span>
+                Showing sample cards because no live listings matched —{' '}
+                <Link to="/register">create a startup profile</Link> or{' '}
+                <Link to="/discover">open Discover</Link> for real campaigns.
+              </span>
             </div>
           )}
 
@@ -315,7 +319,11 @@ export default function Landing() {
               const pct = isDemo ? Math.round((c.currentRaised / c.fundingGoal) * 100) : fundingPercent(c.currentRaised, c.fundingGoal);
               const days = isDemo ? Math.round((new Date(c.deadline) - Date.now()) / 864e5) : daysRemaining(c.deadline);
               const color = c.color || '#10b981';
-              const score = c.credibility || 88;
+              const score = c.credibilityScore ?? c.credibility ?? 88;
+              const industry = c.startupProfileId?.industry || c.sector || 'Startup';
+              const stageLabel = c.fundingStage ? String(c.fundingStage).replace(/-/g, ' ') : '';
+              const badge =
+                c.startupProfileId?.isVerified ? '⬡ KYB Verified' : c.badge || '⬡ Listed';
               return (
                 <Link
                   to={isDemo ? '/discover' : `/campaigns/${c._id}`}
@@ -331,15 +339,15 @@ export default function Landing() {
                     </div>
                     <div>
                       <div className="startup-card__score-label">Credibility Score</div>
-                      <div className="startup-card__badge">{c.badge || '⬡ Verified'}</div>
+                      <div className="startup-card__badge">{badge}</div>
                     </div>
                   </div>
 
                   <h3 className="startup-card__title">{c.title}</h3>
 
                   <div className="startup-card__meta">
-                    <span className="startup-card__industry">{c.industry}</span>
-                    {c.stage && <span className="startup-card__stage">{c.stage}</span>}
+                    <span className="startup-card__industry">{industry}</span>
+                    {stageLabel && <span className="startup-card__stage">{stageLabel}</span>}
                   </div>
 
                   <p className="startup-card__desc">{c.summary}</p>

@@ -17,7 +17,7 @@
  *   VITE_POLYGONSCAN_URL — block explorer base URL
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ethers }                            from 'ethers';
 import { CHAIN_ID, AMOY_CHAIN_PARAMS }       from '../utils/constants';
 
@@ -27,24 +27,51 @@ import { CHAIN_ID, AMOY_CHAIN_PARAMS }       from '../utils/constants';
 //   isConnected:    bool   — at least one account linked
 //   account:        string — lowercase 0x… address (or null)
 //   chainId:        number — current chain ID (or null)
+//   balance:        string — raw bigInt balance in wei (as string)
+//   formattedBalance: string — decimal balance (e.g. "1.234")
 //   isCorrectChain: bool   — chainId === VITE_CHAIN_ID
 //   isConnecting:   bool   — waiting for MetaMask approval
 //   error:          string — last error message (or null)
 //   connect:        fn
 //   ensureNetwork:  fn
 //   disconnect:     fn
+//   refreshBalance: fn
 //   getSigner:      fn     — async, returns ethers.Signer
 // }
 
 export default function useWallet() {
   const [account,      setAccount]      = useState(null);
   const [chainId,      setChainId]      = useState(null);
+  const [balance,      setBalance]      = useState('0'); // stored as wei string
   const [isConnecting, setIsConnecting] = useState(false);
   const [error,        setError]        = useState(null);
+
+  const refreshTimerRef = useRef(null);
 
   const isInstalled    = typeof window !== 'undefined' && Boolean(window.ethereum);
   const isConnected    = Boolean(account);
   const isCorrectChain = chainId === CHAIN_ID;
+
+  const formattedBalance = parseFloat(ethers.formatEther(balance || '0')).toFixed(4);
+
+  // ── refreshBalance() ─────────────────────────────────────────────────────
+  const refreshBalance = useCallback(async (currentAccount, currentChainId) => {
+    const addr = currentAccount || account;
+    const cid  = currentChainId || chainId;
+
+    if (!isInstalled || !addr || cid !== CHAIN_ID) {
+      setBalance('0');
+      return;
+    }
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const b = await provider.getBalance(addr);
+      setBalance(b.toString());
+    } catch (err) {
+      console.error('Failed to fetch balance:', err);
+    }
+  }, [account, chainId, isInstalled]);
 
   // ── Read current state from MetaMask on mount ────────────────────────────
   useEffect(() => {
@@ -55,31 +82,50 @@ export default function useWallet() {
     // Rehydrate from existing connection (if user already approved)
     eth.request({ method: 'eth_accounts' })
       .then((accounts) => {
-        if (accounts.length > 0) setAccount(accounts[0].toLowerCase());
+        if (accounts.length > 0) {
+          const addr = accounts[0].toLowerCase();
+          setAccount(addr);
+          // Fetch initial balance
+          refreshBalance(addr, chainId);
+        }
       })
       .catch(() => {});
 
     eth.request({ method: 'eth_chainId' })
-      .then((hex) => setChainId(parseInt(hex, 16)))
+      .then((hex) => {
+        const cid = parseInt(hex, 16);
+        setChainId(cid);
+        if (account) refreshBalance(account, cid);
+      })
       .catch(() => {});
 
     // ── Event listeners ───────────────────────────────────────────────────
     const onAccountsChanged = (accounts) => {
-      setAccount(accounts[0]?.toLowerCase() ?? null);
+      const addr = accounts[0]?.toLowerCase() ?? null;
+      setAccount(addr);
+      if (addr) refreshBalance(addr, chainId);
     };
 
     const onChainChanged = (hex) => {
-      setChainId(parseInt(hex, 16));
+      const cid = parseInt(hex, 16);
+      setChainId(cid);
+      if (account) refreshBalance(account, cid);
     };
 
     eth.on('accountsChanged', onAccountsChanged);
     eth.on('chainChanged',    onChainChanged);
 
+    // Refresh balance every 30 seconds
+    refreshTimerRef.current = setInterval(() => {
+      if (account && chainId === CHAIN_ID) refreshBalance();
+    }, 30000);
+
     return () => {
       eth.removeListener('accountsChanged', onAccountsChanged);
       eth.removeListener('chainChanged',    onChainChanged);
+      if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
     };
-  }, [isInstalled]);
+  }, [isInstalled, account, chainId, refreshBalance]);
 
   // ── connect() ────────────────────────────────────────────────────────────
   const connect = useCallback(async () => {
@@ -94,7 +140,12 @@ export default function useWallet() {
       const addr = accounts[0]?.toLowerCase();
       setAccount(addr);
       const hex = await window.ethereum.request({ method: 'eth_chainId' });
-      setChainId(parseInt(hex, 16));
+      const cid = parseInt(hex, 16);
+      setChainId(cid);
+      
+      // Refresh balance immediately
+      await refreshBalance(addr, cid);
+      
       return addr;
     } catch (err) {
       const msg =
@@ -106,11 +157,9 @@ export default function useWallet() {
     } finally {
       setIsConnecting(false);
     }
-  }, [isInstalled]);
+  }, [isInstalled, refreshBalance]);
 
   // ── ensureNetwork() ──────────────────────────────────────────────────────
-  // Switches MetaMask to Polygon Amoy. If the chain is not yet added to
-  // MetaMask, uses wallet_addEthereumChain to add it first.
   const ensureNetwork = useCallback(async () => {
     if (!isInstalled) {
       throw new Error('MetaMask is not installed.');
@@ -122,6 +171,7 @@ export default function useWallet() {
         params: [{ chainId: targetHex }],
       });
       setChainId(CHAIN_ID);
+      if (account) refreshBalance(account, CHAIN_ID);
     } catch (err) {
       if (err.code === 4902) {
         // Chain not added yet → add it
@@ -130,13 +180,14 @@ export default function useWallet() {
           params: [AMOY_CHAIN_PARAMS],
         });
         setChainId(CHAIN_ID);
+        if (account) refreshBalance(account, CHAIN_ID);
       } else if (err.code === 4001) {
         throw new Error('You rejected the network switch.');
       } else {
         throw new Error(err.message || 'Failed to switch network.');
       }
     }
-  }, [isInstalled]);
+  }, [isInstalled, account, refreshBalance]);
 
   // ── getSigner() ──────────────────────────────────────────────────────────
   const getSigner = useCallback(async () => {
@@ -147,12 +198,10 @@ export default function useWallet() {
   }, [isInstalled, isConnected]);
 
   // ── disconnect() ─────────────────────────────────────────────────────────
-  // NOTE: MetaMask doesn't expose a true "disconnect" method from JS.
-  // This clears the local hook state only; the user must also disconnect
-  // from MetaMask's own UI if they want to fully revoke permission.
   const disconnect = useCallback(() => {
     setAccount(null);
     setChainId(null);
+    setBalance('0');
     setError(null);
   }, []);
 
@@ -163,10 +212,14 @@ export default function useWallet() {
     isConnecting,
     account,
     chainId,
+    balance,
+    formattedBalance,
     error,
     connect,
     ensureNetwork,
+    refreshBalance,
     getSigner,
     disconnect,
   };
 }
+

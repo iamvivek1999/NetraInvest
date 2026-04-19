@@ -74,53 +74,57 @@ export default function Login() {
     try {
       const { user, token } = await loginUser({ ...form, role });
       setAuth(user, token);
-      
+
       let nextRoute = from || ROLE_REDIRECT[user.role] || '/dashboard';
 
+      // Profile routing hints — never fail login if these requests error (network, 401 edge cases).
+      const authHeader = { headers: { Authorization: `Bearer ${token}` } };
       if (user.role === 'investor') {
         try {
-          const res = await client.get('/investors/me', { headers: { Authorization: `Bearer ${token}` } });
+          const res = await client.get('/investors/me', authHeader);
           const profile = res.data?.data?.profile;
           if (!profile || !profile.riskAppetite) {
             nextRoute = '/setup/investor';
           }
-        } catch (err) {
-          if (err.response?.status === 404) {
-            nextRoute = '/setup/investor';
-          }
+        } catch {
+          nextRoute = '/setup/investor';
         }
-      }
-
-      if (user.role === 'startup') {
+      } else if (user.role === 'startup') {
         try {
-          const res = await client.get('/startups/me', { headers: { Authorization: `Bearer ${token}` } });
+          const res = await client.get('/startups/me', authHeader);
           const profile = res.data?.data?.profile;
           if (!profile) {
-            // No profile yet — send to new multi-step onboarding
             nextRoute = '/startup/onboarding';
           } else if (profile.verificationStatus === 'approved' || profile.isVerified) {
-            // Fully verified — regular dashboard
             nextRoute = '/dashboard';
-          } else if (profile.verificationStatus === 'draft' || profile.verificationStatus === 'rejected' || profile.verificationStatus === 'more_info_required') {
-            // Has draft or was rejected — continue onboarding
+          } else if (
+            profile.verificationStatus === 'draft' ||
+            profile.verificationStatus === 'rejected' ||
+            profile.verificationStatus === 'more_info_required'
+          ) {
             nextRoute = '/startup/onboarding';
           } else {
-            // pending / in_review — show status page
             nextRoute = '/startup/pending-verification';
           }
-        } catch (err) {
-          if (err.response?.status === 404) {
-            // No profile yet
-            nextRoute = '/startup/onboarding';
-          }
-          // Other errors: fall through to dashboard
+        } catch {
+          nextRoute = '/startup/onboarding';
         }
       }
 
       toast.success(`Welcome back, ${user.fullName.split(' ')[0]}! 👋`);
       navigate(nextRoute, { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.message || 'Login failed. Please try again.');
+      const apiMsg = err?.response?.data?.message;
+      const netMsg =
+        err?.code === 'ERR_NETWORK' || err?.message === 'Network Error'
+          ? 'Cannot reach the API. Use VITE_API_URL=/api/v1 with npm run dev, or set your backend URL in .env.local.'
+          : null;
+      setError(
+        (typeof apiMsg === 'string' && apiMsg) ||
+          netMsg ||
+          err?.message ||
+          'Login failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }

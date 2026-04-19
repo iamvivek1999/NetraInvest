@@ -11,6 +11,8 @@ import useAuthStore from '../../store/authStore';
 import { getInvestorDashboard } from '../../api/investor.api';
 import { formatINR } from '../../utils/formatters';
 
+const POLYGONSCAN_URL = import.meta.env.VITE_POLYGONSCAN_URL || 'https://amoy.polygonscan.com/tx';
+
 export default function InvestorDashboard() {
   const { user } = useAuthStore();
 
@@ -80,38 +82,67 @@ export default function InvestorDashboard() {
         {/* List State */}
         {!isLoading && !isError && investments.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {investments.map((inv) => (
-               <Link 
-                 key={inv._id}
-                 to={`/campaigns/${inv.campaignId?._id}`}
-                 style={{
-                   display: 'flex',
-                   justifyContent: 'space-between',
-                   alignItems: 'center',
-                   padding: '1rem',
-                   background: 'rgba(255,255,255,0.02)',
-                   border: '1px solid var(--color-border)',
-                   borderRadius: 'var(--r-md)',
-                   textDecoration: 'none',
-                   color: 'inherit',
-                   transition: 'background 0.2s',
-                 }}
-                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                 onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-               >
-                 <div>
-                   <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '4px' }}>
-                     {inv.campaignId?.title || 'Unknown Campaign'}
-                   </div>
-                   <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                     {new Date(inv.createdAt).toLocaleDateString()} · {inv.status === 'confirmed' ? 'Verified' : 'Unverified (Stub)'}
-                   </div>
-                 </div>
-                 <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
-                   {inv.amount} {inv.currency}
-                 </div>
-               </Link>
-            ))}
+                <div 
+                  key={inv._id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '1rem',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--r-md)',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-primary-muted)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}
+                >
+                  <div style={{ flex: 1 }}>
+                    <Link 
+                      to={`/campaigns/${inv.campaignId?._id}`}
+                      style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-text)', textDecoration: 'none', display: 'block', marginBottom: '4px' }}
+                    >
+                      {inv.campaignId?.title || 'Unknown Campaign'}
+                    </Link>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem' }}>
+                      <span style={{ color: 'var(--color-text-muted)' }}>
+                        {new Date(inv.createdAt).toLocaleDateString()}
+                      </span>
+                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--color-border)' }} />
+                      
+                      {inv.status === 'confirmed' ? (
+                        <span style={{ color: 'var(--color-emerald-400)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-emerald-400)', boxShadow: '0 0 6px var(--color-emerald-400)' }} />
+                          Synced
+                        </span>
+                      ) : (
+                        <span style={{ color: 'var(--color-amber-400)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-amber-400)', animate: 'pulse 2s infinite' }} />
+                          Pending Sync
+                        </span>
+                      )}
+
+                      {inv.txHash && (
+                        <>
+                          <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--color-border)' }} />
+                          <a 
+                            href={`${POLYGONSCAN_URL}/${inv.txHash}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 500 }}
+                          >
+                            View Proof ↗
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-primary)' }}>
+                      {inv.amount} {inv.currency}
+                    </div>
+                  </div>
+                </div>
           </div>
         )}
 

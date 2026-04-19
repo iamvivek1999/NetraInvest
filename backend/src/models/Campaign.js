@@ -18,12 +18,24 @@
  * 4. milestonePercentages must sum to 100 and must have exactly
  *    milestoneCount elements. This mirrors what the smart contract will enforce.
  *
- * 5. currentRaised and currentReleased are tracked in MongoDB for fast reads.
- *    The smart contract is the financial source of truth — MongoDB is the
- *    read-optimized cache (reconcilable via txHash references on investments).
+ * 5. currentRaised / currentReleased track the display (INR) denomination in MongoDB
+ *    for fast human-readable reads. They are the read-optimized cache.
+ *    currentRaisedWei / currentReleasedWei are the authoritative on-chain amounts
+ *    stored as strings to safely represent values beyond JS 53-bit integer limit.
+ *    The smart contract is the financial source of truth — MongoDB is reconciled
+ *    via txHash references on investments.
+ *
+ * 6. fundingGoalPOL is the on-chain funding goal in POL decimal (e.g. "2.5").
+ *    It is passed to ethers.parseEther() when activating the campaign on-chain.
+ *    fundingGoal (Number) is the INR display target shown to investors in the UI.
+ *    These two fields serve completely separate purposes and must never be mixed.
  *
  * Status lifecycle:
- *   draft → active → funded → completed
+ *   localStatus: draft → submitted → under_review → approved
+ *              ↓
+ *           rejected
+ * 
+ *   onChainStatus: unregistered → active → funded → completed
  *              ↓
  *           paused → active
  *              ↓
@@ -137,10 +149,46 @@ const campaignSchema = new Schema(
     currency: {
       type: String,
       enum: {
-        values: ['INR', 'ETH'],
-        message: 'Currency must be INR or ETH',
+        values: ['INR', 'ETH', 'POL'],
+        message: 'Currency must be INR, ETH, or POL',
       },
       default: 'INR',
+    },
+
+    /**
+     * fundingGoalPOL: the on-chain funding goal expressed as a POL decimal string.
+     * (e.g. "2.5" for 2.5 POL → parsed via ethers.parseEther() on activation)
+     * Required before a campaign can be activated. Never used for INR display.
+     * Locked once campaign is activated (on-chain registration uses this value).
+     */
+    fundingGoalPOL: {
+      type: String,
+      default: null,
+    },
+
+    /**
+     * fundingGoalWei: the exact wei representation of fundingGoalPOL.
+     * Set by the activation controller after parseEther(fundingGoalPOL).
+     * Stored as String to safely represent uint256 values.
+     */
+    fundingGoalWei: {
+      type: String,
+      default: null,
+    },
+
+    /**
+     * minInvestmentWei / maxInvestmentWei: on-chain investment thresholds in wei.
+     * Derived from minInvestment (POL decimal) at activation time.
+     * Null until campaign is activated.
+     */
+    minInvestmentWei: {
+      type: String,
+      default: null,
+    },
+
+    maxInvestmentWei: {
+      type: String,
+      default: null,
     },
 
     minInvestment: {
@@ -168,20 +216,15 @@ const campaignSchema = new Schema(
 
     // ── Status ───────────────────────────────────────────────────────────────
     /**
-     * Status values:
+     * localStatus values (Administrative & Discovery prep):
      *
      *   draft          → Editable. Not visible.
      *   submitted      → Submitted by startup for admin review.
      *   under_review   → Admin currently reviewing.
-     *   approved       → Admin approved. Ready to activate.
+     *   approved       → Admin approved. Ready to activate on-chain.
      *   rejected       → Rejected by admin.
-     *   active         → Live and accepting investments. Contract deployed.
-     *   paused         → Temporarily stopped by startup.
-     *   funded         → fundingGoal reached. System-set.
-     *   completed      → All milestones released and closed.
-     *   cancelled      → Permanently cancelled.
      */
-    status: {
+    localStatus: {
       type: String,
       enum: {
         values: [
@@ -189,29 +232,78 @@ const campaignSchema = new Schema(
           'submitted',
           'under_review',
           'approved',
-          'rejected',
+          'rejected'
+        ],
+        message: 'Invalid campaign local status',
+      },
+      default: 'draft',
+    },
+
+    /**
+     * onChainStatus values (Blockchain smart contract mapping):
+     *
+     *   unregistered   → Contract state not yet initialized.
+     *   active         → Live and accepting investments. Contract deployed.
+     *   paused         → Temporarily stopped by startup on-chain.
+     *   funded         → fundingGoal reached. System-set.
+     *   completed      → All milestones released and closed on-chain.
+     *   cancelled      → Permanently cancelled on-chain.
+     */
+    onChainStatus: {
+      type: String,
+      enum: {
+        values: [
+          'unregistered',
           'active',
           'paused',
           'funded',
           'completed',
           'cancelled'
         ],
-        message: 'Invalid campaign status',
+        message: 'Invalid campaign on-chain status',
       },
-      default: 'draft',
+      default: 'unregistered',
     },
 
     // ── Progress Tracking ────────────────────────────────────────────────────
+    /**
+     * currentRaised: display-denomination total raised (INR or POL decimal).
+     * Updated on each confirmed investment for fast UI display.
+     * NOT the authoritative on-chain amount — use currentRaisedWei for contract logic.
+     */
     currentRaised: {
       type: Number,
       default: 0,
       min: [0, 'currentRaised cannot be negative'],
     },
 
+    /**
+     * totalRaisedWei: authoritative on-chain total raised stored as string.
+     * Accumulated from InvestmentReceived event amountWei values.
+     * Stored as String to safely represent uint256 values beyond JS 53-bit limit.
+     */
+    totalRaisedWei: {
+      type: String,
+      default: '0',
+    },
+
+    /**
+     * currentReleased: display-denomination total released (decimal).
+     * NOT the authoritative on-chain amount — use currentReleasedWei for contract logic.
+     */
     currentReleased: {
       type: Number,
       default: 0,
       min: [0, 'currentReleased cannot be negative'],
+    },
+
+    /**
+     * currentReleasedWei: authoritative on-chain total released as string.
+     * Updated by the admin releaseMilestone controller after on-chain confirmation.
+     */
+    currentReleasedWei: {
+      type: String,
+      default: '0',
     },
 
     investorCount: {
@@ -312,6 +404,19 @@ const campaignSchema = new Schema(
 
     // ── Blockchain Integration (populated after Phase 2 deployment) ──────────
     /**
+     * startupWallet: the wallet executing the campaign creation (if needed for indexings).
+     */
+    startupWallet: {
+      type: String,
+      default: null,
+      match: [
+        /^0x[a-fA-F0-9]{40}$/i,
+        'startupWallet must be a valid Ethereum address',
+      ],
+      lowercase: true,
+    },
+
+    /**
      * campaignKey: bytes32 key used inside the transparency registry.
      * Generated by the backend as a random bytes32 before calling createCampaign().
      * Stored here as a hex string (0x + 64 hex chars).
@@ -321,7 +426,7 @@ const campaignSchema = new Schema(
       type: String,
       default: null,
       match: [
-        /^0x[a-fA-F0-9]{64}$/,
+        /^0x[a-fA-F0-9]{64}$/i,
         'campaignKey must be a valid bytes32 hex string',
       ],
       // sparse unique: no two active campaigns share a key, nulls excluded
@@ -342,25 +447,39 @@ const campaignSchema = new Schema(
     },
 
     /**
-     * isContractDeployed: convenience flag.
-     * True once campaignKey is written to the on-chain contract.
-     * Allows quick filter: Campaign.find({ isContractDeployed: false, status: 'active' })
-     */
-    isContractDeployed: {
-      type: Boolean,
-      default: false,
-    },
-
-    /**
-     * activationTxHash: the on-chain tx hash from the createCampaign() call.
+     * createCampaignTxHash: the on-chain tx hash from the createCampaign() call.
      * Populated by activateCampaign controller after successful tx.wait().
      * Null for campaigns that were created before blockchain integration.
      */
-    activationTxHash: {
+    createCampaignTxHash: {
       type: String,
       default: null,
     },
 
+    createdAtBlock: {
+      type: Number,
+      default: null,
+    },
+
+    // ── Sync Metadata ────────────────────────────────────────────────────────
+    syncStatus: {
+      type: String,
+      enum: ['pending', 'confirmed', 'failed', 'resync_required'],
+      default: 'pending',
+    },
+
+    lastSyncedAt: {
+      type: Date,
+      default: null,
+    },
+
+    sourceOfTruth: {
+      type: String,
+      enum: ['blockchain', 'local'],
+      default: 'blockchain',
+    },
+
+    // Removed activationTxHash as it is superseded by createCampaignTxHash
     // ── Discovery ────────────────────────────────────────────────────────────
     tags: {
       type: [String],
@@ -396,21 +515,23 @@ campaignSchema.pre('validate', function (next) {
 
 campaignSchema.index({ startupProfileId: 1 });
 campaignSchema.index({ userId: 1 });
-campaignSchema.index({ status: 1 });
+campaignSchema.index({ localStatus: 1 });
+campaignSchema.index({ onChainStatus: 1 });
 campaignSchema.index({ deadline: 1 });
 campaignSchema.index({ currency: 1 });
 
 // Compound: find active campaigns efficiently for discovery page
-campaignSchema.index({ status: 1, createdAt: -1 });
+campaignSchema.index({ onChainStatus: 1, createdAt: -1 });
 
 // Indexes for common filters
 campaignSchema.index({ sector: 1 });
 campaignSchema.index({ riskScore: 1 });
 campaignSchema.index({ returnPotential: 1 });
 campaignSchema.index({ fundingStage: 1 });
+campaignSchema.index({ startupWallet: 1 });
 
 // Compound: find all campaigns for a startup (dashboard query)
-campaignSchema.index({ userId: 1, status: 1 });
+campaignSchema.index({ userId: 1, localStatus: 1, onChainStatus: 1 });
 
 // Sparse unique on campaignKey (nulls excluded)
 campaignSchema.index({ campaignKey: 1 }, { unique: true, sparse: true });

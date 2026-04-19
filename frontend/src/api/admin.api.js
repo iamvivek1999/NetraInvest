@@ -53,3 +53,24 @@ export const updateCampaignStatus = async (id, status, adminReviewNotes = '') =>
   const response = await apiClient.patch(`/admin/campaigns/${id}/status`, { status, adminReviewNotes });
   return response.data;
 };
+
+// --- Sync Management ---
+export const getSyncStatus = async () => {
+  const response = await apiClient.get('/admin/sync/status');
+  return response.data;
+};
+
+export const syncTransaction = async (txHash) => {
+  const response = await apiClient.post(`/admin/sync/transaction/${txHash}`);
+  return response.data;
+};
+
+export const syncBlockRange = async (from, to) => {
+  const response = await apiClient.post('/admin/sync/blocks', null, { params: { from, to } });
+  return response.data;
+};
+
+export const triggerSyncCycle = async () => {
+  const response = await apiClient.post('/admin/sync/trigger');
+  return response.data;
+};

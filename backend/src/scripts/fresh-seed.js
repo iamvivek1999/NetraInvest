@@ -98,16 +98,22 @@ async function seed() {
           startupProfileId: profile._id,
           userId: founder._id,
           title: `Startup ${titleCaseNumber} Seed Round`,
-          summary: `Raising ₹${500000} for operations and growth. This capital will help us dominate the market.`,
-          fundingGoal: 500000,
-          currency: 'INR',
-          minInvestment: 5000,
+          // fundingGoal: INR display target (UI only — never used in ethers.parseEther)
+          summary: `Raising ${2 + i} POL on-chain for operations and growth.`,
+          fundingGoal: 500000,              // INR display only
+          fundingGoalPOL: `${2 + i}.0`,     // actual on-chain goal in POL decimal
+          fundingGoalWei: null,             // set at activation time
+          currency: 'POL',
+          minInvestment: 0.01,              // POL decimal display
+          minInvestmentWei: null,           // set at activation time
           deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           status: 'active',
           milestoneCount: 2,
           milestonePercentages: [50, 50],
           currentMilestoneIndex: 0,
           currentRaised: 0,
+          currentRaisedWei: '0',
+          currentReleasedWei: '0',
           investorCount: 0,
           campaignKey: randomBytes32Hex(),
           isContractDeployed: false,

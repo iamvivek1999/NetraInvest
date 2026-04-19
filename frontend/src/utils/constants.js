@@ -4,13 +4,10 @@
  * Import from here instead of using import.meta.env directly.
  */
 
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-// UPDATED FOR DEPLOYMENT PREP: 
-// Force explicit API URL in production to prevent falling back to relative paths 
-// which can fail if the frontend and backend are hosted on different domains.
-export const API_URL =
-  import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:5000/api/v1' : '/api/v1');
+// Default to same-origin `/api/v1` so Vite’s dev proxy (see vite.config.js) forwards to
+// the backend — avoids CORS and works for both localhost and 127.0.0.1.
+// Set VITE_API_URL when the API is on another host (e.g. production API domain).
+export const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 export const CONTRACT_ADDRESS =
   import.meta.env.VITE_CONTRACT_ADDRESS || '';
@@ -35,7 +32,7 @@ export const STUB_MODE =
 export const AMOY_CHAIN_PARAMS = {
   chainId:         '0x13882', // 80002 in hex
   chainName:       'Polygon Amoy Testnet',
-  nativeCurrency:  { name: 'INR', symbol: 'INR', decimals: 18 },
+  nativeCurrency:  { name: 'POL', symbol: 'POL', decimals: 18 },
   rpcUrls:         ['https://rpc-amoy.polygon.technology/'],
   blockExplorerUrls: ['https://amoy.polygonscan.com/'],
 };

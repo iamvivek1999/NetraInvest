@@ -31,11 +31,12 @@ export const registerUser = async ({ fullName, email, password, role }) => {
     password,
     role,
   });
-  // data = { success, message, token, data: { user } }
-  return {
-    user:  data.data.user,
-    token: data.token,
-  };
+  const user = data?.data?.user;
+  const token = data?.token;
+  if (!user || !token) {
+    throw new Error('Invalid registration response from server. Check API URL and backend logs.');
+  }
+  return { user, token };
 };
 
 // ─── Login ───────────────────────────────────────────────────────────────────
@@ -47,10 +48,12 @@ export const registerUser = async ({ fullName, email, password, role }) => {
  */
 export const loginUser = async ({ email, password, role }) => {
   const { data } = await client.post('/auth/login', { email, password, role });
-  return {
-    user:  data.data.user,
-    token: data.token,
-  };
+  const user = data?.data?.user;
+  const token = data?.token;
+  if (!user || !token) {
+    throw new Error('Invalid login response from server. Check API URL and backend logs.');
+  }
+  return { user, token };
 };
 
 // ─── Get current user ────────────────────────────────────────────────────────
@@ -58,10 +61,17 @@ export const loginUser = async ({ email, password, role }) => {
 /**
  * Fetch the authenticated user from the server using the stored JWT.
  * Used on app mount to validate a persisted session.
+ *
+ * @param {string} [explicitToken] — pass the token from Zustand when localStorage
+ *   may not be flushed yet (persist middleware), so the axios interceptor can authorize.
  * @returns {{ user: object }}
  */
-export const getCurrentUser = async () => {
-  const { data } = await client.get('/auth/me');
+export const getCurrentUser = async (explicitToken) => {
+  const config =
+    explicitToken != null && explicitToken !== ''
+      ? { headers: { Authorization: `Bearer ${explicitToken}` } }
+      : {};
+  const { data } = await client.get('/auth/me', config);
   return { user: data.data.user };
 };
 

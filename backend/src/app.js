@@ -55,7 +55,7 @@ const allowedOrigins = env.isDev
   ? [
     env.FRONTEND_URL,
     'http://localhost:5173', 'http://127.0.0.1:5173',
-    'http://localhost:3000',
+    'http://localhost:3000', 'http://127.0.0.1:3000',
     'http://10.195.203.32',
     'http://10.195.203.32:3000',
     'http://10.195.203.32:5173',

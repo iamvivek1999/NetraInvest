@@ -22,6 +22,12 @@
  *   PATCH  /api/v1/campaigns/:campaignId/milestones/:id/approve  → approve            (admin)
  *   PATCH  /api/v1/campaigns/:campaignId/milestones/:id/reject   → reject             (admin)
  *   PATCH  /api/v1/campaigns/:campaignId/milestones/:id/release  → release on-chain   (admin)
+ *
+ * Nested evidence (mounted below, from milestoneEvidence.routes.js):
+ *   POST   /api/v1/campaigns/:campaignId/milestones/:milestoneIndex/evidence/upload
+ *   GET    /api/v1/campaigns/:campaignId/milestones/:milestoneIndex/evidence
+ *   GET    /api/v1/campaigns/:campaignId/milestones/:milestoneIndex/evidence/latest
+ *   PATCH  /api/v1/campaigns/:campaignId/milestones/:milestoneIndex/evidence/submit-onchain
  */
 const express = require('express');
 const router = express.Router();
@@ -93,5 +99,21 @@ router.post(
 
 const milestoneRouter = require('./milestone.routes');
 router.use('/:campaignId/milestones', milestoneRouter);
+
+// ── Nested: Evidence upload sub-routes ────────────────────────────────────────
+// Mounted at /:campaignId/milestones/:milestoneIndex/evidence
+// milestoneIndex is a number (0–4), not a Mongo ObjectId.
+// Note: this MUST come after the milestone router to avoid routing conflicts.
+// New admin endpoints at /anchor, /approve, /reject, /release.
+const { campaignEvidenceRouter } = require('./milestoneEvidence.routes');
+router.use('/:campaignId/milestones/:milestoneIndex/evidence', campaignEvidenceRouter);
+
+// ── Evidence dashboard status (single-call for all milestones) ────────────────
+// GET /api/v1/campaigns/:campaignId/milestones/evidence-status
+// Returns onChainStatus + hashes + tx links for all 5 milestones.
+// Must be registered AFTER the milestone router but before /:campaignId catch-all.
+const { getCampaignEvidenceStatus } = require('../controllers/evidenceStatus.controller');
+const { protect: _p, optionalAuth: _oa } = require('../middleware/auth');
+router.get('/:campaignId/milestones/evidence-status', _p, getCampaignEvidenceStatus);
 
 module.exports = router;

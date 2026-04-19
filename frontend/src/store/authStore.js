@@ -15,8 +15,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios    from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+import { API_URL } from '../utils/constants';
 
 const useAuthStore = create(
   persist(
@@ -63,7 +62,7 @@ const useAuthStore = create(
         if (token) {
           // Fire-and-forget — don't block UI
           axios
-            .post(`${API_BASE}/auth/logout`, {}, { headers: { Authorization: `Bearer ${token}` } })
+            .post(`${API_URL}/auth/logout`, {}, { headers: { Authorization: `Bearer ${token}` } })
             .catch(() => {/* ignore — token may already be expired */});
         }
 

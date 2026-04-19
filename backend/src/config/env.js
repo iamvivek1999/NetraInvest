@@ -31,10 +31,9 @@ const required = [
 ];
 
 if (isProduction) {
-  // In production, we also MUST have a production frontend URL and Razorpay keys
+  // In production, we MUST have a frontend URL and JWT expiry.
+  // Razorpay keys are NOT required — that route is now deprecated (/payments-legacy).
   required.push('FRONTEND_URL');
-  required.push('RAZORPAY_KEY_ID');
-  required.push('RAZORPAY_KEY_SECRET');
   required.push('JWT_EXPIRE');
 }
 
@@ -62,13 +61,26 @@ const env = {
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRE: process.env.JWT_EXPIRE || '7d',
 
-  // Blockchain (optional at startup — features degrade if missing)
-  ALCHEMY_RPC_URL:                    process.env.ALCHEMY_RPC_URL                    || '',
-  ADMIN_WALLET_PRIVATE_KEY:           process.env.ADMIN_WALLET_PRIVATE_KEY           || '',
+  // Blockchain (optional at startup — investment endpoint fails fast if missing without stub mode)
+  ALCHEMY_RPC_URL:          process.env.ALCHEMY_RPC_URL          || '',
+  ADMIN_WALLET_PRIVATE_KEY: process.env.ADMIN_WALLET_PRIVATE_KEY || '',
+  CONTRACT_ADDRESS:         process.env.CONTRACT_ADDRESS         || '',
+  // Legacy — retained for existing blockchainLogging.service references only
   INVESTMENT_LOGGER_CONTRACT_ADDRESS: process.env.INVESTMENT_LOGGER_CONTRACT_ADDRESS || '',
 
-  // UPDATED FOR DEPLOYMENT PREP — Strict production guards
-  // These flags MUST be false in production regardless of what is in the .env file.
+  // Evidence storage — local filesystem (Phase 5)
+  // Override to an absolute path if you want files outside the repo.
+  // When migrating to IPFS/S3, remove this and add the new storage env vars here.
+  EVIDENCE_STORAGE_ROOT: process.env.EVIDENCE_STORAGE_ROOT || '',
+
+  // ── Dev-only bypass flags — NEVER true in production ──────────────────────
+  // These flags are zeroed out in the post-load production guard below.
+
+  // DEV_STUB_BLOCKCHAIN_MODE=true  → POST /investments skips on-chain verification.
+  // Investments get status:'stub' (distinct from 'confirmed') + a console.warn each call.
+  // Use for local development without a deployed contract or RPC node.
+  DEV_STUB_BLOCKCHAIN_MODE: !isProduction && process.env.DEV_STUB_BLOCKCHAIN_MODE === 'true',
+
   DEV_SKIP_BLOCKCHAIN: !isProduction && process.env.DEV_SKIP_BLOCKCHAIN === 'true',
   DEV_BYPASS_PAYMENT:  !isProduction && process.env.DEV_BYPASS_PAYMENT  === 'true',
   STUB_MODE:           !isProduction && (process.env.STUB_MODE === 'true'),
@@ -87,11 +99,18 @@ const env = {
 
 // ─── Post-Load Assurance ──────────────────────────────────────────────────────
 if (isProduction) {
-  if (env.DEV_BYPASS_PAYMENT || env.DEV_SKIP_BLOCKCHAIN || env.STUB_MODE) {
-    console.error('[CRITICAL SECURITY ALERT] Developer bypass flags detected as TRUE while in production mode! Force-disabling.'.red.bold);
-    env.DEV_BYPASS_PAYMENT  = false;
-    env.DEV_SKIP_BLOCKCHAIN = false;
-    env.STUB_MODE           = false;
+  const bypassFlags = [
+    env.DEV_BYPASS_PAYMENT,
+    env.DEV_SKIP_BLOCKCHAIN,
+    env.STUB_MODE,
+    env.DEV_STUB_BLOCKCHAIN_MODE,
+  ];
+  if (bypassFlags.some(Boolean)) {
+    console.error('[CRITICAL SECURITY ALERT] Developer bypass flags detected as TRUE in production! Force-disabling.'.red.bold);
+    env.DEV_BYPASS_PAYMENT       = false;
+    env.DEV_SKIP_BLOCKCHAIN      = false;
+    env.STUB_MODE                = false;
+    env.DEV_STUB_BLOCKCHAIN_MODE = false;
   }
 }
 

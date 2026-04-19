@@ -32,7 +32,7 @@ exports.getDashboardStats = async (req, res) => {
       { $group: { _id: null, totalRaised: { $sum: '$amount' }, count: { $sum: 1 } } }
     ]),
     Campaign.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } }
+      { $group: { _id: '$localStatus', count: { $sum: 1 } } }
     ]),
     StartupProfile.countDocuments({ verificationStatus: 'pending' }),
     InvestorProfile.countDocuments({ verificationStatus: 'pending' })
@@ -272,7 +272,7 @@ exports.getCampaignsForReview = async (req, res) => {
   const skip = (page - 1) * limit;
 
   // We look for campaigns that are submitted or under review.
-  const query = { status: { $in: ['submitted', 'under_review'] } };
+  const query = { localStatus: { $in: ['submitted', 'under_review'] } };
 
   const campaigns = await Campaign.find(query)
     .populate('startupId', 'companyName companyLogo')
@@ -296,9 +296,9 @@ exports.updateCampaignStatus = async (req, res) => {
   const { id } = req.params;
   const { status, adminReviewNotes } = req.body;
 
-  const validStatuses = ['draft', 'under_review', 'approved', 'rejected', 'active', 'paused', 'funded', 'completed', 'cancelled'];
+  const validStatuses = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
   if (!validStatuses.includes(status)) {
-    throw new ApiError('Invalid campaign status provided', 400);
+    throw new ApiError('Invalid campaign local status provided for administrative review', 400);
   }
 
   const campaign = await Campaign.findById(id);
@@ -306,7 +306,7 @@ exports.updateCampaignStatus = async (req, res) => {
     throw new ApiError('Campaign not found', 404);
   }
 
-  campaign.status = status;
+  campaign.localStatus = status;
   if (adminReviewNotes) {
     campaign.adminReviewNotes = adminReviewNotes;
   }

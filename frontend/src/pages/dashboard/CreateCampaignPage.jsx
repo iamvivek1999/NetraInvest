@@ -31,8 +31,9 @@ export default function CreateCampaignPage() {
     category: 'Token',
     sector: 'DeFi',
     fundingStage: 'Pre-Seed',
-    fundingGoal: '',
-    currency: 'ETH',
+    fundingGoal: '',          // INR display target (for UI stats only)
+    fundingGoalPOL: '',       // on-chain POL decimal (feeds ethers.parseEther at activation)
+    currency: 'POL',
     minInvestment: '',
     expectedTimelineMonths: '',
     projectedRevenue: '',
@@ -58,7 +59,8 @@ export default function CreateCampaignPage() {
         sector: c.sector || 'DeFi',
         fundingStage: c.fundingStage || 'Pre-Seed',
         fundingGoal: c.fundingGoal || '',
-        currency: c.currency || 'ETH',
+        fundingGoalPOL: c.fundingGoalPOL || '',
+        currency: c.currency || 'POL',
         minInvestment: c.minInvestment || '',
         expectedTimelineMonths: c.expectedTimelineMonths || '',
         projectedRevenue: c.projectedRevenue || '',
@@ -257,24 +259,64 @@ export default function CreateCampaignPage() {
 
         {step === 2 && (
           <div className="animate-fade-in">
-            <h3 style={{ marginBottom: '1rem' }}>Step 2: Economics</h3>
+            <h3 style={{ marginBottom: '0.5rem' }}>Step 2: Economics</h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+              Set your on-chain funding goal in POL and an optional INR display target for investors.
+            </p>
+
+            {/* ── On-Chain Goal (primary, required for activation) ──────────── */}
+            <div style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-primary)', borderRadius: 'var(--r-md)', padding: '1rem', marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                🔗 On-Chain Funding Goal (required for activation)
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                <div className="form-group mb-0">
+                  <label className="form-label">Funding Goal (POL decimal)</label>
+                  <input
+                    className="form-input"
+                    type="number"
+                    step="0.0001"
+                    name="fundingGoalPOL"
+                    value={form.fundingGoalPOL}
+                    onChange={handleChange}
+                    placeholder="e.g. 2.5"
+                  />
+                  <small style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                    This value is passed to ethers.parseEther() — never mix with INR.
+                  </small>
+                </div>
+                <div className="form-group mb-0">
+                  <label className="form-label">Minimum Investment (POL)</label>
+                  <input
+                    className="form-input"
+                    type="number"
+                    step="0.0001"
+                    name="minInvestment"
+                    value={form.minInvestment}
+                    onChange={handleChange}
+                    placeholder="e.g. 0.01"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── Display Target (INR, off-chain only) ─────────────────────── */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label">Funding Goal ({form.currency})</label>
-                <input className="form-input" type="number" name="fundingGoal" value={form.fundingGoal} onChange={handleChange} placeholder="e.g. 50000" />
+                <label className="form-label">Display Goal — INR <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(UI only)</span></label>
+                <input className="form-input" type="number" name="fundingGoal" value={form.fundingGoal} onChange={handleChange} placeholder="e.g. 500000" />
+                <small style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>Shown to investors as the fundraising target. Not used on-chain.</small>
               </div>
               <div className="form-group">
                 <label className="form-label">Currency</label>
                 <select className="form-input" name="currency" value={form.currency} onChange={handleChange}>
+                  <option value="POL">POL (on-chain native)</option>
+                  <option value="INR">INR (display/off-chain)</option>
                   <option value="ETH">ETH</option>
-                  <option value="INR">INR</option>
                 </select>
               </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Minimum Investment ({form.currency})</label>
-              <input className="form-input" type="number" name="minInvestment" value={form.minInvestment} onChange={handleChange} placeholder="e.g. 100" />
-            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Projected Annual Revenue</label>
@@ -288,6 +330,7 @@ export default function CreateCampaignPage() {
             <div className="form-group">
               <label className="form-label">Risk Factors</label>
               <textarea className="form-input" name="riskFactors" value={form.riskFactors} onChange={handleChange} placeholder="What are the main risks to executing this project?" rows={3} />
+              <p className="text-muted text-xs mt-1">Investors see this on your public page. Honest disclosure improves your credibility index.</p>
             </div>
           </div>
         )}

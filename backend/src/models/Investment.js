@@ -7,11 +7,14 @@
  * ─── Design Decisions ────────────────────────────────────────────────────────
  *
  * 1. Amount storage (both fields kept):
- *    - amount:    Number  (INR, human-readable decimal, e.g. 5.0)
- *                Used for currentRaised updates and display queries.
- *    - amountWei: String (exact wei from blockchain event, e.g. "5000000000000000000")
+ *    - amount:    Number  (POL decimal, human-readable, e.g. 0.5)
+ *                In on-chain mode: decoded from InvestmentReceived event via formatEther.
+ *                In stub mode: taken directly from request body.
+ *                Used for MongoDB display queries (currentRaised display cache).
+ *    - amountWei: String (exact wei from blockchain event, e.g. "500000000000000000")
  *                Stored as String to avoid JavaScript's 53-bit integer limit.
  *                Null in stub mode (no on-chain event to decode).
+ *                This is the authoritative financial value.
  *
  * 2. Idempotency:
  *    txHash has a sparse unique index — once a txHash is recorded it cannot be
@@ -76,16 +79,16 @@ const investmentSchema = new Schema(
     },
 
     /**
-     * walletAddress: the investor's EOA that signed the invest() transaction.
+     * investorWallet: the investor's EOA that signed the invest() transaction.
      * Sourced from the InvestmentReceived event in on-chain mode.
      * Provided by the investor in stub mode.
      */
-    walletAddress: {
+    investorWallet: {
       type: String,
       default: null,
       match: [
-        /^0x[a-fA-F0-9]{40}$/,
-        'walletAddress must be a valid Ethereum address',
+        /^0x[a-fA-F0-9]{40}$/i,
+        'investorWallet must be a valid Ethereum address',
       ],
       lowercase: true,
     },
@@ -129,32 +132,13 @@ const investmentSchema = new Schema(
       default: null,
     },
 
-    // UPDATED FOR BLOCKCHAIN TRANSPARENCY LAYER
-    blockchainTxHash: {
-      type: String,
-      default: null,
-      match: [
-        /^0x[a-fA-F0-9]{64}$/,
-        'txHash must be a valid Ethereum transaction hash (0x + 64 hex chars)',
-      ],
-    },
-    blockchainStatus: {
-      type: String,
-      enum: ['pending', 'logged', 'failed', 'skipped'],
-      default: 'skipped',
-    },
-    blockchainError: {
-      type: String,
-      default: null,
-    },
-
     // ── Amount ────────────────────────────────────────────────────────────────
 
     /**
-     * amount: investment in INR as a decimal number.
+     * amount: investment in POL as a decimal number (formatEther output).
      * In on-chain mode: decoded from InvestmentReceived event, converted via formatEther.
      * In stub mode: taken directly from the request body.
-     * This is the authoritative amount for MongoDB state (currentRaised).
+     * This is used for display only — amountWei is the authoritative value.
      */
     amount: {
       type: Number,
@@ -165,8 +149,8 @@ const investmentSchema = new Schema(
     /**
      * amountWei: exact wei value from the blockchain event as a string.
      * Stored as String to safely represent values beyond JavaScript's safe integer.
-     * Null in stub mode.
-     * Example: "5000000000000000000" for 5 INR.
+     * This is the authoritative financial value. Null in stub mode.
+     * Example: "500000000000000000" for 0.5 POL.
      */
     amountWei: {
       type: String,
@@ -178,10 +162,10 @@ const investmentSchema = new Schema(
     currency: {
       type: String,
       enum: {
-        values: ['INR', 'ETH', 'INR', 'USD'],
-        message: 'Currency must be INR, ETH, INR or USD',
+        values: ['INR', 'ETH', 'POL', 'USD'],
+        message: 'Currency must be INR, ETH, POL, or USD',
       },
-      default: 'INR',
+      default: 'POL',
     },
 
     /**
@@ -204,22 +188,31 @@ const investmentSchema = new Schema(
     // ── Status / Verification ─────────────────────────────────────────────────
 
     /**
-     * status values:
-     *   confirmed   → txHash verified, event decoded, amounts match (on-chain mode)
-     *   unverified  → stub mode: accepted without blockchain verification
-     *   failed      → txHash found but tx reverted, or verification mismatch
-     *
-     * Note: 'pending' status is not stored in the DB. The backend performs
-     * synchronous verification before inserting. If verification fails, it
-     * throws and nothing is inserted.
+     * syncStatus values:
+     *   pending          — submitted, waiting for on-chain confirmation
+     *   confirmed        — verified on-chain, amounts match
+     *   failed           — tx reverted or verification failed
+     *   resync_required  — mismatch detected during node sync, needs manual/auto re-eval
+     *   stub             — DEV_STUB_BLOCKCHAIN_MODE only; no real on-chain proof exists
      */
-    status: {
+    syncStatus: {
       type: String,
       enum: {
-        values: ['confirmed', 'unverified', 'failed'],
-        message: 'Invalid investment status',
+        values: ['pending', 'confirmed', 'failed', 'resync_required', 'stub'],
+        message: 'Invalid investment syncStatus',
       },
-      required: [true, 'Investment status is required'],
+      required: [true, 'Investment sync status is required'],
+      default: 'pending',
+    },
+
+    /**
+     * sourceOfTruth: determines if this record is authoritative mapped from blockchain,
+     * or manually overridden/bypassed (e.g. stub or off-chain demo).
+     */
+    sourceOfTruth: {
+      type: String,
+      enum: ['blockchain', 'local'],
+      default: 'blockchain',
     },
 
     /**
@@ -238,6 +231,23 @@ const investmentSchema = new Schema(
      */
     blockNumber: {
       type: Number,
+      default: null,
+    },
+
+    /**
+     * logIndex: the specific log event index in the block.
+     * Needed if a single tx handles multiple events.
+     */
+    logIndex: {
+      type: Number,
+      default: null,
+    },
+
+    /**
+     * lastSyncedAt: Last time the worker verified this tx.
+     */
+    lastSyncedAt: {
+      type: Date,
       default: null,
     },
 
@@ -275,7 +285,7 @@ investmentSchema.index({ startupProfileId: 1, createdAt: -1 });
 investmentSchema.index({ campaignId: 1, investorUserId: 1 });
 
 // Status-based admin queries
-investmentSchema.index({ status: 1, createdAt: -1 });
+investmentSchema.index({ syncStatus: 1, createdAt: -1 });
 
 const Investment = mongoose.model('Investment', investmentSchema);
 

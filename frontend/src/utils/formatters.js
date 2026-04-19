@@ -58,6 +58,29 @@ export const fundingPercent = (raised, goal) => {
   return Math.min(100, Math.round((raised / goal) * 100));
 };
 
+/**
+ * Format a POL decimal amount (Number) for display.
+ * e.g. 1.5 → "1.5000 POL"
+ * Takes a Number (formatEther output), NOT a wei string. Use wei.js formatPOL for wei strings.
+ */
+export const formatPOL = (pol, decimals = 4) => {
+  if (pol == null || isNaN(pol)) return '—';
+  return `${parseFloat(pol).toFixed(decimals)} POL`;
+};
+
+/**
+ * Compact POL display for stat cards.
+ * e.g. 1500 → "1500 POL"   |   0.001 → "0.0010 POL"
+ * Takes a Number (formatEther output), NOT a wei string.
+ */
+export const compactPOL = (pol) => {
+  if (pol == null || isNaN(pol)) return '—';
+  const n = parseFloat(pol);
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M POL`;
+  if (n >= 1_000)     return `${(n / 1_000).toFixed(2)}K POL`;
+  return `${n.toFixed(4)} POL`;
+};
+
 /** Compact number → "1.2k", "3.5M" (generic, non-INR) */
 export const compactNumber = (n) => {
   if (n == null) return '—';

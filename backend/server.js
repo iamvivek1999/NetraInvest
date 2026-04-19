@@ -15,9 +15,12 @@
 'use strict';
 
 // Must be first — loads .env before any other module reads process.env
-const env = require('./src/config/env');
-const connectDB = require('./src/config/db');
-const app = require('./src/app');
+const env        = require('./src/config/env');
+const connectDB  = require('./src/config/db');
+const app        = require('./src/app');
+const { validateBlockchainEnvOrWarn } = require('./src/config/blockchain');
+const anchorRetryJob = require('./src/jobs/anchorRetry.job');
+const { startSyncService, stopSyncService } = require('./src/services/blockchainSync.service');
 
 // ─── Uncaught Exception Guard ────────────────────────────────────────────────
 // Catches synchronous errors that escape all try/catch blocks
@@ -42,16 +45,18 @@ const start = async () => {
     console.log(`[SERVER] API Base: http://localhost:${env.PORT}/api/v1`.cyan);
     console.log(`[SERVER] Health:   http://localhost:${env.PORT}/api/v1/health`.cyan);
 
-    // UPDATED FOR LOCAL QA PREP — show which dev modes are active at startup
-    if (env.isDev) {
-      const razorpayOk    = !!(env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET);
-      const blockchainOk  = !!(env.ALCHEMY_RPC_URL && env.ADMIN_WALLET_PRIVATE_KEY && env.INVESTMENT_LOGGER_CONTRACT_ADDRESS);
-      console.log('\n[CONFIG] ─────────────────────────────────────────');
-      console.log(`[CONFIG] Razorpay configured   : ${razorpayOk   ? '✅ yes' : '⚠️  no  (DEV_BYPASS_PAYMENT required to test payments)'}`);
-      console.log(`[CONFIG] Blockchain configured : ${blockchainOk ? '✅ yes' : '⚠️  no  (transparency logging will degrade gracefully)'}`);
-      console.log(`[CONFIG] DEV_BYPASS_PAYMENT    : ${env.DEV_BYPASS_PAYMENT   ? '🚧 ON  ← dev only, never use in prod' : 'off'}`);
-      console.log(`[CONFIG] DEV_SKIP_BLOCKCHAIN   : ${env.DEV_SKIP_BLOCKCHAIN  ? '🚧 ON  ← dev only, never use in prod' : 'off'}`);
-      console.log('[CONFIG] ─────────────────────────────────────────\n');
+    // Surface blockchain config state at every startup.
+    validateBlockchainEnvOrWarn();
+
+    // Start the anchor retry job — polls every 2 min for unanchored bundles.
+    // The job silently skips if blockchain is not configured (dev/stub mode).
+    anchorRetryJob.start();
+
+    // Start background sync service to listen to on-chain events and keep MongoDB in sync
+    startSyncService();
+
+    if (env.isDev && env.DEV_STUB_BLOCKCHAIN_MODE) {
+      console.warn('[CONFIG] 🚧 DEV_STUB_BLOCKCHAIN_MODE=true — on-chain verification bypassed (dev only)');
     }
   });
 
@@ -70,6 +75,7 @@ const start = async () => {
   // 4. Graceful shutdown on SIGTERM (e.g. from Docker, Railway, Render)
   process.on('SIGTERM', () => {
     console.log('[SERVER] SIGTERM received. Closing HTTP server...'.yellow);
+    stopSyncService();
     server.close(() => {
       console.log('[SERVER] HTTP server closed.'.yellow);
       process.exit(0);

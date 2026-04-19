@@ -7,45 +7,41 @@
  *   POST /api/v1/investments
  *   Role: investor only
  *
- *   Called AFTER the investor's frontend has submitted the invest() transaction
- *   and received a txHash from tx.wait(). The backend then:
+ *   The ONLY way to record an investment. Called AFTER the investor's frontend
+ *   has submitted the invest() transaction and tx.wait(1) has resolved.
  *
- *     On-chain mode (blockchain configured):
- *       1. Validates campaign is active and on-chain
- *       2. Idempotency check: reject if txHash already recorded
- *       3. Calls verifyInvestmentTx() → provider receipt + event decode
- *       4. Amount is taken from the chain event (not trusted from client)
- *       5. Investment document created with status: 'confirmed'
- *       6. Campaign.currentRaised incremented by verified amount
- *       7. Campaign.investorCount incremented if first investment from this investor
+ *   On-chain mode (blockchain configured):
+ *     1. Fail fast if blockchain config is missing and DEV_STUB_BLOCKCHAIN_MODE=false
+ *     2. txHash and walletAddress are REQUIRED
+ *     3. Idempotency: if txHash already recorded → return 200 with existing record
+ *     4. verifyInvestmentTx() → fetch receipt + decode InvestmentReceived event
+ *     5. Amount is taken from the chain event (client claimed amount ignored)
+ *     6. Investment created with status: 'confirmed'
+ *     7. Campaign.currentRaisedWei updated atomically via BigInt arithmetic
+ *     8. Campaign.investorCount incremented if first investment from this investor
  *
- *     Stub mode (no blockchain env vars):
- *       Steps 3–4 skipped. Amount taken from request body.
- *       Investment created with status: 'unverified', chain: 'stub'.
- *       All MongoDB state updates still apply.
- *       This lets the full investment flow be demonstrated without a deployed contract.
+ *   Stub mode (DEV_STUB_BLOCKCHAIN_MODE=true, non-production only):
+ *     Steps 4–5 skipped.
+ *     Amount taken from request body (claimedAmount).
+ *     Investment created with status: 'stub' (distinct from 'confirmed').
+ *     A console.warn is emitted every time — never invisible.
+ *     NEVER active in production (env.js post-load guard zeros it out).
  *
- * ─── getMyInvestments ────────────────────────────────────────────────────────
- *   GET /api/v1/investments/my
- *   Role: investor only
- *   Returns all investments for the authenticated investor with campaign details.
+ *   REMOVED from this controller:
+ *     - paymentProvider / paymentId (Razorpay path moved to /payments-legacy)
+ *     - Silent fallback when !blockchainEnabled (now fails with 503)
+ *     - 409 on duplicate txHash (now returns 200 idempotently)
  *
- * ─── getCampaignInvestments ──────────────────────────────────────────────────
- *   GET /api/v1/investments/campaign/:campaignId
- *   Role: startup (own campaigns), admin
- *   Returns paginated investments for a specific campaign.
- *
- * ─── getStartupInvestments ───────────────────────────────────────────────────
- *   GET /api/v1/investments/startup
- *   Role: startup only
- *   Returns all investments across all of the startup's campaigns (dashboard view).
+ * ─── getMyInvestments, getCampaignInvestments, getStartupInvestments ─────────
+ *   Unchanged — see below.
  */
 
+const mongoose   = require('mongoose');
 const Campaign   = require('../models/Campaign');
 const Investment = require('../models/Investment');
 const sendResponse = require('../utils/sendResponse');
 const { ApiError } = require('../middleware/errorHandler');
-const { isBlockchainConfigured } = require('../config/blockchain');
+const { requireBlockchainOrStub } = require('../config/blockchain');
 const { verifyInvestmentTx, deriveChain } = require('../services/txVerification.service');
 const notify     = require('../utils/notify');
 
@@ -59,40 +55,51 @@ const recordInvestment = async (req, res) => {
     txHash,
     walletAddress,
     amount: claimedAmount,
-    currency = 'INR',
-    // UPDATED FOR NON-BLOCKCHAIN PAYMENT FLOW
-    paymentId,
-    paymentProvider,
+    currency = 'POL',
   } = req.body;
 
-  // ── 1. Validate request fields ───────────────────────────────────────────────
+  // ── 1. Fail fast: blockchain must be configured or stub explicitly enabled ────
+  //
+  // requireBlockchainOrStub() throws a 503 ApiError if:
+  //   - ALCHEMY_RPC_URL, ADMIN_WALLET_PRIVATE_KEY, or CONTRACT_ADDRESS is missing
+  //   - AND DEV_STUB_BLOCKCHAIN_MODE is not true
+  //
+  // This prevents silent investment acceptance when the verification stack is
+  // unavailable. No hidden fallback. No unverified records created implicitly.
+
+  const { configured, stubMode } = requireBlockchainOrStub();
+
+  // ── 2. Validate required fields ───────────────────────────────────────────────
 
   if (!campaignId) throw new ApiError('campaignId is required.', 400);
-  // UPDATED FOR NON-BLOCKCHAIN PAYMENT FLOW: walletAddress is optional now
 
-  const blockchainEnabled = isBlockchainConfigured();
-
-  if (blockchainEnabled && !txHash) {
-    throw new ApiError(
-      'txHash is required when blockchain is configured. ' +
-        'Submit the invest() transaction first, then provide the txHash.',
-      400
-    );
+  // In blockchain mode, both txHash and walletAddress are mandatory.
+  // In stub mode (explicit dev-only), they're optional — stub records are
+  // clearly tagged status:'stub' and never count as on-chain confirmations.
+  if (configured) {
+    if (!txHash) {
+      throw new ApiError(
+        'txHash is required. Submit the invest() transaction via MetaMask first, ' +
+        'wait for tx.wait() to resolve, then send the txHash here.',
+        400
+      );
+    }
+    if (!walletAddress) {
+      throw new ApiError(
+        'walletAddress is required for on-chain investment verification.',
+        400
+      );
+    }
   }
 
-  if (!blockchainEnabled && (!claimedAmount || claimedAmount <= 0)) {
+  if (stubMode && (!claimedAmount || claimedAmount <= 0)) {
     throw new ApiError('amount must be a positive number in stub mode.', 400);
   }
 
-  // ── Address normalization ─────────────────────────────────────────────────
-  // Normalize both addresses to lowercase exactly once here, before any
-  // comparison, idempotency check, or storage operation. This prevents the
-  // same transaction hash (e.g. 0xABCD... vs 0xabcd...) from bypassing the
-  // unique index and being recorded twice.
+  // ── 3. Normalize addresses ────────────────────────────────────────────────────
 
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
-  // UPDATED FOR NON-BLOCKCHAIN PAYMENT FLOW
-  let normalizedWallet = walletAddress ? walletAddress.toLowerCase() : '0x0000000000000000000000000000000000000000';
+  let normalizedWallet = walletAddress ? walletAddress.toLowerCase() : null;
   if (walletAddress && !ethAddressRegex.test(normalizedWallet)) {
     throw new ApiError('walletAddress must be a valid Ethereum address (0x + 40 hex chars).', 400);
   }
@@ -106,17 +113,14 @@ const recordInvestment = async (req, res) => {
     normalizedTxHash = txHash.toLowerCase();
   }
 
-  // ── 2. Load campaign and validate it accepts investments ──────────────────────
+  // ── 4. Load campaign and validate it accepts investments ──────────────────────
 
   const campaign = await Campaign.findById(campaignId);
   if (!campaign) throw new ApiError('Campaign not found.', 404);
 
-  // This check applies to BOTH on-chain mode and stub mode.
-  // Stub mode does not bypass it — only active campaigns accept investments
-  // regardless of whether blockchain is configured.
-  if (campaign.status !== 'active') {
+  if (campaign.onChainStatus !== 'active') {
     throw new ApiError(
-      `Campaign is not accepting investments (status: "${campaign.status}"). ` +
+      `Campaign is not accepting investments (onChainStatus: "${campaign.onChainStatus}"). ` +
         'Only active campaigns accept investments.',
       400
     );
@@ -126,7 +130,9 @@ const recordInvestment = async (req, res) => {
     throw new ApiError('Campaign deadline has passed. Investments are no longer accepted.', 400);
   }
 
-  // ── 3. Validate investment amount limits (stub + on-chain pre-check) ──────────
+  // ── 5. Pre-check investment amount limits ──────────────────────────────────────
+  // In on-chain mode we also check AFTER verification (chain amount is authoritative).
+  // This pre-check uses claimedAmount for a fast UI-friendly error before burning gas.
 
   if (claimedAmount && campaign.minInvestment && claimedAmount < campaign.minInvestment) {
     throw new ApiError(
@@ -134,7 +140,6 @@ const recordInvestment = async (req, res) => {
       400
     );
   }
-
   if (claimedAmount && campaign.maxInvestment && claimedAmount > campaign.maxInvestment) {
     throw new ApiError(
       `Maximum investment is ${campaign.maxInvestment} ${currency}. You provided ${claimedAmount}.`,
@@ -142,52 +147,60 @@ const recordInvestment = async (req, res) => {
     );
   }
 
-  // ── 4. Idempotency check ──────────────────────────────────────────────────────
-  // normalizedTxHash is lowercase — the Investment model's sparse unique index
-  // enforces DB-level uniqueness, but we check here first for a clear 409 error
-  // rather than a raw Mongoose duplicate key error.
-  // Guards against the same txHash being submitted with different letter casing.
+  // ── 6. Idempotency check ──────────────────────────────────────────────────────
+  // Changed from 409 → 200 so that frontend "Retry Sync" is safe:
+  // If the same txHash was already recorded (race condition or user retry),
+  // return the existing record instead of an error. The investment already succeeded.
 
   if (normalizedTxHash) {
-    const existingByTx = await Investment.findOne({ txHash: normalizedTxHash });
+    const existingByTx = await Investment.findOne({ txHash: normalizedTxHash })
+      .populate('campaignId', 'title fundingGoal fundingGoalWei currentRaised currentRaisedWei currency')
+      .populate('investorUserId', 'fullName email')
+      .lean();
+
     if (existingByTx) {
-      throw new ApiError(
-        `Transaction ${normalizedTxHash} has already been recorded. ` +
-          'Each transaction can only be submitted once. ' +
-          'currentRaised has NOT been updated again.',
-        409
-      );
+      return sendResponse(res, 200, 'Transaction already recorded (idempotent sync).', {
+        investment:   existingByTx,
+        verification: { mode: 'idempotent', status: 'already_confirmed', note: 'txHash was already recorded — no duplicate created' },
+      });
     }
   }
 
-  // ── 5. On-chain verification vs stub path ─────────────────────────────────────
+  // ── 7. On-chain verification vs stub path ─────────────────────────────────────
 
   let finalAmount     = claimedAmount;
   let amountWei       = null;
   let blockNumber     = null;
   let confirmedAt     = null;
-  let status          = 'unverified';
-  let verificationNote = 'stub: no blockchain verification performed';
+  let syncStatus      = 'unverified';
+  let verificationNote = 'not verified';
   const chain         = deriveChain();
 
-  // UPDATED FOR NON-BLOCKCHAIN PAYMENT FLOW
-  if (paymentProvider === 'stub') {
-    // skip blockchain verification directly create investment record
-    confirmedAt = new Date();
-    status = 'confirmed';
-    verificationNote = 'Payment simulated successfully';
-  } else if (blockchainEnabled) {
-    // Campaign must be on-chain before it can receive verified investments
-    if (!campaign.isContractDeployed || !campaign.campaignKey) {
+  if (stubMode) {
+    // ── STUB PATH ─────────────────────────────────────────────────────────────
+    // Only reached when DEV_STUB_BLOCKCHAIN_MODE=true AND NODE_ENV !== production.
+    // Logged loudly every single call — never silent.
+    console.warn(
+      `\n[DEV_STUB_BLOCKCHAIN_MODE] ⚠️  Skipping on-chain verification for investment.\n` +
+      `  Campaign: ${campaign.title} (${campaignId})\n` +
+      `  Amount:   ${claimedAmount} ${currency}\n` +
+      `  This mode MUST NOT be active in production.\n`
+    );
+    confirmedAt      = new Date();
+    syncStatus       = 'stub';
+    verificationNote = 'DEV_STUB_BLOCKCHAIN_MODE: no on-chain proof — not a real investment';
+
+  } else {
+    // ── ON-CHAIN VERIFICATION PATH (default / production) ────────────────────
+    // Campaign must be activated on-chain before receiving investments.
+    if (campaign.onChainStatus !== 'active' || !campaign.campaignKey) {
       throw new ApiError(
-        'Campaign is not yet registered in the transparency log. ' +
+        'Campaign is not yet registered on-chain. ' +
           'The startup must activate the campaign (POST /campaigns/:id/activate) before investments can be recorded.',
         400
       );
     }
 
-    // normalizedWallet is passed so the comparison inside verifyInvestmentTx
-    // uses the same canonical value that will be stored in the DB.
     const result = await verifyInvestmentTx({
       txHash:               normalizedTxHash,
       expectedCampaignKey:  campaign.campaignKey,
@@ -195,62 +208,44 @@ const recordInvestment = async (req, res) => {
     });
 
     if (!result.success) {
-      // Verification failed — throw a 422 (Unprocessable Entity) with the reason
-      throw new ApiError(
-        `Transaction verification failed: ${result.error}`,
-        422
-      );
+      throw new ApiError(`Transaction verification failed: ${result.error}`, 422);
     }
 
-    // Use the authoritative amount from the chain (ignore client's claimed amount)
-    finalAmount      = result.amountINR;
+    // Amount comes from the chain event — client's claimed amount is ignored
+    finalAmount      = result.amountPOL;
     amountWei        = result.amountWei;
     blockNumber      = result.blockNumber;
     confirmedAt      = result.confirmedAt;
-    status           = 'confirmed';
+    syncStatus       = 'confirmed';
     verificationNote = result.note;
-  } else {
-    // Stub mode: use claimed amount, mark confirmed at now
-    confirmedAt = new Date();
   }
 
-  // ── 6. Check if this is the investor's first investment in this campaign ────────
-  //
-  // Queried BEFORE creating the new document, so the current record doesn't
-  // interfere with the count. Only prior 'confirmed' or 'unverified' investments
-  // count — 'failed' status investments do not affect investorCount.
-  //
-  // investorCount is incremented by exactly 1 on the first investment, and by 0
-  // on every subsequent investment by the same investor in the same campaign.
-  // This is enforced here (application layer) and separately by the compound
-  // index { campaignId, investorUserId } that enables fast lookups for this check.
+  // ── 8. First-investment check ─────────────────────────────────────────────────
+  // Queried BEFORE creating the new document so the count is accurate.
 
   const isFirstInvestment = !(await Investment.exists({
     campaignId,
     investorUserId: userId,
-    status:         { $in: ['confirmed', 'unverified'] },
+    syncStatus: { $in: ['confirmed', 'unverified', 'stub'] },
   }));
 
-  // ── 7. Record the investment ──────────────────────────────────────────────────
+  // ── 9. Record the investment ──────────────────────────────────────────────────
 
   const investmentData = {
     campaignId,
     startupProfileId:  campaign.startupProfileId,
     investorUserId:    userId,
-    walletAddress:     normalizedWallet,        // always lowercase — normalized once at step 1
+    walletAddress:     normalizedWallet,
     campaignKey:       campaign.campaignKey || null,
     contractAddress:   campaign.contractAddress || null,
     amount:            finalAmount,
     amountWei,
     currency,
     chain,
-    status,
+    syncStatus,
     confirmedAt,
     blockNumber,
     verificationNote,
-    // UPDATED FOR NON-BLOCKCHAIN PAYMENT FLOW
-    paymentId,
-    paymentProvider,
   };
 
   if (normalizedTxHash) {
@@ -259,26 +254,35 @@ const recordInvestment = async (req, res) => {
 
   const investment = await Investment.create(investmentData);
 
-  // ── 8. Update campaign totals ─────────────────────────────────────────────────
-  // Only reached if Investment.create() succeeded — atomic enough for MVP.
-  // Phase 2 can wrap steps 7+8 in a MongoDB session/transaction for full ACID.
+  // ── 10. Update campaign totals ────────────────────────────────────────────────
+  // BigInt-safe currentRaisedWei update (only if we have an authoritative wei value)
+
+  const prevRaisedWei = campaign.currentRaisedWei || '0';
+  const newRaisedWei  = amountWei
+    ? (BigInt(prevRaisedWei) + BigInt(amountWei)).toString()
+    : prevRaisedWei;
 
   await Campaign.findByIdAndUpdate(campaignId, {
     $inc: {
-      currentRaised:  finalAmount,
-      investorCount:  isFirstInvestment ? 1 : 0,
+      currentRaised: finalAmount || 0,
+      investorCount: isFirstInvestment ? 1 : 0,
     },
+    ...(amountWei ? { $set: { totalRaisedWei: newRaisedWei } } : {}),
   });
 
+  // ── 11. Populate for response (includes updated campaign wei fields) ───────────
+
   const populated = await Investment.findById(investment._id)
-    .populate('campaignId', 'title fundingGoal currentRaised currency')
+    .populate('campaignId', 'title fundingGoal fundingGoalWei currentRaised totalRaisedWei currency')
     .populate('investorUserId', 'fullName email');
 
-  // ── 9. Trigger notifications (fire-and-forget) ────────────────────────────────
-  const amountLabel = `₹${finalAmount?.toLocaleString('en-IN') ?? finalAmount}`;
+  // ── 12. Fire-and-forget notifications ────────────────────────────────────────
+
+  const amountLabel = amountWei
+    ? `${finalAmount?.toFixed(4) ?? finalAmount} POL`
+    : `${finalAmount?.toLocaleString('en-IN') ?? finalAmount} (stub)`;
   const campaignTitle = campaign.title ?? 'a campaign';
 
-  // Notify the investor that their investment was confirmed
   notify(
     userId,
     'investment_confirmed',
@@ -286,7 +290,6 @@ const recordInvestment = async (req, res) => {
     { campaignId: campaign._id, investmentId: investment._id }
   );
 
-  // Notify the startup that they received an investment
   if (campaign.userId) {
     notify(
       campaign.userId,
@@ -299,8 +302,8 @@ const recordInvestment = async (req, res) => {
   sendResponse(res, 201, 'Investment recorded successfully.', {
     investment: populated,
     verification: {
-      mode:   blockchainEnabled ? 'on-chain' : 'stub',
-      status,
+      mode:   stubMode ? 'stub' : 'on-chain',
+      syncStatus,
       note:   verificationNote,
     },
   });
@@ -311,18 +314,14 @@ const recordInvestment = async (req, res) => {
 /**
  * GET /api/v1/investments/my
  * Role: investor only
- *
- * Query params:
- *   status → filter by status ('confirmed', 'unverified', 'failed')
- *   page   → page number (default 1)
- *   limit  → per page (default 10, max 50)
  */
 const getMyInvestments = async (req, res) => {
   const { userId } = req.user;
   const { status, page = 1, limit = 10 } = req.query;
 
   const filter = { investorUserId: userId };
-  if (status) filter.status = status;
+  if (req.query.syncStatus) filter.syncStatus = req.query.syncStatus;
+  else if (req.query.status) filter.syncStatus = req.query.status;
 
   const pageNum  = Math.max(1, parseInt(page, 10) || 1);
   const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 10));
@@ -330,7 +329,7 @@ const getMyInvestments = async (req, res) => {
 
   const [investments, total] = await Promise.all([
     Investment.find(filter)
-      .populate('campaignId', 'title fundingGoal currentRaised currency status deadline')
+      .populate('campaignId', 'title fundingGoal fundingGoalWei currentRaised currentRaisedWei currency status deadline')
       .populate('startupProfileId', 'startupName industry')
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -339,9 +338,10 @@ const getMyInvestments = async (req, res) => {
     Investment.countDocuments(filter),
   ]);
 
-  // Investor-level aggregate summary across ALL their investments (unverified/confirmed)
+  // Investor-level aggregate (confirmed + stub for dev, exclude failed)
+  // NOTE: Mongoose does NOT auto-cast string IDs in aggregate() — must cast manually.
   const summaryAgg = await Investment.aggregate([
-    { $match: { investorUserId: userId, status: { $in: ['confirmed', 'unverified'] } } },
+    { $match: { investorUserId: new mongoose.Types.ObjectId(userId), syncStatus: { $in: ['confirmed', 'unverified', 'stub'] } } },
     {
       $group: {
         _id: null,
@@ -357,10 +357,7 @@ const getMyInvestments = async (req, res) => {
     },
   ]);
 
-  const summary = summaryAgg[0] || {
-    totalAmount: 0,
-    campaignCount: 0,
-  };
+  const summary = summaryAgg[0] || { totalAmount: 0, campaignCount: 0 };
 
   sendResponse(
     res,
@@ -383,13 +380,6 @@ const getMyInvestments = async (req, res) => {
 /**
  * GET /api/v1/investments/campaign/:campaignId
  * Role: startup (own campaigns only), admin
- *
- * Investors cannot see the investor list for privacy; only the campaign owner can.
- * Admin can see any campaign's investments.
- *
- * Query params:
- *   page  → default 1
- *   limit → default 20, max 50
  */
 const getCampaignInvestments = async (req, res) => {
   const { campaignId } = req.params;
@@ -399,7 +389,6 @@ const getCampaignInvestments = async (req, res) => {
   const campaign = await Campaign.findById(campaignId).select('userId startupProfileId title');
   if (!campaign) throw new ApiError('Campaign not found.', 404);
 
-  // Ownership: startup can only see their own campaign's investments
   if (role === 'startup' && campaign.userId.toString() !== userId) {
     throw new ApiError('You are not authorized to view investments for this campaign.', 403);
   }
@@ -418,20 +407,19 @@ const getCampaignInvestments = async (req, res) => {
     Investment.countDocuments({ campaignId }),
   ]);
 
-  // Aggregate totals for this campaign
   const totals = await Investment.aggregate([
-    { $match: { campaignId: campaign._id, status: { $in: ['confirmed', 'unverified'] } } },
+    { $match: { campaignId: campaign._id, syncStatus: { $in: ['confirmed', 'unverified', 'stub'] } } },
     {
       $group: {
-        _id:           null,
-        totalAmount:   { $sum: '$amount' },
+        _id:             null,
+        totalAmount:     { $sum: '$amount' },
         uniqueInvestors: { $addToSet: '$investorUserId' },
       },
     },
     {
       $project: {
-        totalAmount:    1,
-        investorCount:  { $size: '$uniqueInvestors' },
+        totalAmount:   1,
+        investorCount: { $size: '$uniqueInvestors' },
       },
     },
   ]);
@@ -459,13 +447,6 @@ const getCampaignInvestments = async (req, res) => {
 /**
  * GET /api/v1/investments/startup
  * Role: startup only
- *
- * Dashboard view: all investments across all of the startup's campaigns.
- * Groups by campaign for an overview.
- *
- * Query params:
- *   page  → default 1
- *   limit → default 20, max 50
  */
 const getStartupInvestments = async (req, res) => {
   const { userId } = req.user;
@@ -475,9 +456,8 @@ const getStartupInvestments = async (req, res) => {
   const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 20));
   const skip     = (pageNum - 1) * limitNum;
 
-  // Get all campaign IDs for this startup first
-  const campaigns = await Campaign.find({ userId }).select('_id').lean();
-  const campaignIds = campaigns.map((c) => c._id);
+  const campaigns    = await Campaign.find({ userId }).select('_id').lean();
+  const campaignIds  = campaigns.map((c) => c._id);
 
   if (campaignIds.length === 0) {
     return sendResponse(res, 200, 'No campaigns found for your account.', {
@@ -490,7 +470,7 @@ const getStartupInvestments = async (req, res) => {
 
   const [investments, total] = await Promise.all([
     Investment.find(filter)
-      .populate('campaignId', 'title status currency')
+      .populate('campaignId', 'title status currency fundingGoalWei currentRaisedWei')
       .populate('investorUserId', 'fullName')
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -499,21 +479,20 @@ const getStartupInvestments = async (req, res) => {
     Investment.countDocuments(filter),
   ]);
 
-  // Portfolio-level aggregate summary
   const summary = await Investment.aggregate([
-    { $match: { campaignId: { $in: campaignIds }, status: { $in: ['confirmed', 'unverified'] } } },
+    { $match: { campaignId: { $in: campaignIds }, syncStatus: { $in: ['confirmed', 'unverified', 'stub'] } } },
     {
       $group: {
-        _id:            null,
-        totalAmount:    { $sum: '$amount' },
+        _id:             null,
+        totalAmount:     { $sum: '$amount' },
         uniqueInvestors: { $addToSet: '$investorUserId' },
       },
     },
     {
       $project: {
-        totalAmount:      1,
-        investorCount:    { $size: '$uniqueInvestors' },
-        campaignCount:    { $literal: campaignIds.length },
+        totalAmount:   1,
+        investorCount: { $size: '$uniqueInvestors' },
+        campaignCount: { $literal: campaignIds.length },
       },
     },
   ]);

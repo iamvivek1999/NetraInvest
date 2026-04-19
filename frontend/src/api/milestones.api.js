@@ -43,47 +43,67 @@ export const getMilestones = async (campaignId) => {
   return data.data.milestones;
 };
 
-// ─── Milestone Lifecycle Actions ─────────────────────────────────────────────
+// ─── Milestone Evidence & Lifecycle Actions ───────────────────────────────────
 
 /**
- * Startup submits proof for a milestone.
+ * Fetch the overview of all evidence for all milestones of a campaign.
  */
-export const submitProof = async (campaignId, milestoneId, payload) => {
-  const { data } = await client.patch(
-    `/campaigns/${campaignId}/milestones/${milestoneId}/submit`,
-    payload
-  );
-  return data.data.milestone;
+export const getCampaignEvidenceStatus = async (campaignId) => {
+  const { data } = await client.get(`/campaigns/${campaignId}/milestones/evidence-status`);
+  return data.data;
 };
 
 /**
- * Admin approves a milestone submission.
+ * Startup uploads proof for a milestone.
  */
-export const approveMilestone = async (campaignId, milestoneId) => {
-  const { data } = await client.patch(
-    `/campaigns/${campaignId}/milestones/${milestoneId}/approve`
+export const uploadEvidence = async (campaignId, milestoneIndex, files) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('files', file));
+
+  const { data } = await client.post(
+    `/campaigns/${campaignId}/milestones/${milestoneIndex}/evidence/upload`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
   );
-  return data.data.milestone;
+  return data.data;
 };
 
 /**
- * Admin rejects a milestone submission.
+ * Admin approves a milestone evidence.
  */
-export const rejectMilestone = async (campaignId, milestoneId, rejectionReason) => {
-  const { data } = await client.patch(
-    `/campaigns/${campaignId}/milestones/${milestoneId}/reject`,
-    { rejectionReason }
+export const approveMilestone = async (campaignId, milestoneIndex) => {
+  const { data } = await client.post(
+    `/campaigns/${campaignId}/milestones/${milestoneIndex}/evidence/approve`
   );
-  return data.data.milestone;
+  return data.data;
 };
 
 /**
- * Admin strictly records disbursals mapping payments made via 3rd party tooling or wire explicitly.
+ * Admin rejects a milestone evidence.
  */
-export const markDisbursed = async (campaignId, milestoneId, disbursalData = {}) => {
-  const { data } = await client.patch(
-    `/campaigns/${campaignId}/milestones/${milestoneId}/disburse`,
-    disbursalData
+export const rejectMilestone = async (campaignId, milestoneIndex, rejectionReason) => {
+  const { data } = await client.post(
+    `/campaigns/${campaignId}/milestones/${milestoneIndex}/evidence/reject`,
+    { reason: rejectionReason }
   );
-  return { milestone: data.data.milestone };
+  return data.data;
+};
+
+/**
+ * Admin releases funds for a milestone.
+ */
+export const markDisbursed = async (campaignId, milestoneIndex) => {
+  // Now triggers the on-chain release transaction
+  const { data } = await client.post(
+    `/campaigns/${campaignId}/milestones/${milestoneIndex}/evidence/release`
+  );
+  return data.data;
+};
+
+/**
+ * Fetch the AI summary JSON for a bundle.
+ */
+export const getEvidenceSummary = async (bundleId) => {
+  const { data } = await client.get(`/evidence/files/${bundleId}/summary`);
+  return data; // Returns raw JSON directly or standard wrapper depending on backend
 };

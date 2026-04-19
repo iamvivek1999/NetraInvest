@@ -11,6 +11,8 @@ import { Link }                  from 'react-router-dom';
 import { useQuery }              from '@tanstack/react-query';
 import { listCampaigns }         from '../api/campaigns.api';
 import { fundingPercent, daysRemaining } from '../utils/formatters';
+import { getCampaignViewStatus } from '../utils/campaignDisplay';
+import { ethers } from 'ethers';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const SORT_OPTIONS = [
@@ -19,6 +21,7 @@ const SORT_OPTIONS = [
   { value: 'raised',   label: 'Most Funded' },
   { value: 'goal',     label: 'Largest Goal' },
   { value: 'highest_return', label: 'Highest Return' },
+  { value: 'credibility', label: 'Credibility Score' },
 ];
 
 const SECTORS = ['DeFi', 'Gaming', 'AI', 'Infrastructure', 'Social', 'Consumer', 'Other'];
@@ -27,12 +30,13 @@ const STAGES = ['pre-seed', 'seed', 'series-a', 'series-b', 'series-c', 'growth'
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function statusBadge(status) {
   const map = {
-    active:    'badge--active',
-    funded:    'badge--approved',
-    paused:    'badge--pending',
-    draft:     'badge--draft',
-    cancelled: 'badge--rejected',
-    completed: 'badge--approved',
+    active:       'badge--active',
+    funded:       'badge--approved',
+    paused:       'badge--pending',
+    draft:        'badge--draft',
+    unregistered: 'badge--warning',
+    cancelled:    'badge--rejected',
+    completed:    'badge--approved',
   };
   return map[status] || 'badge--pending';
 }
@@ -60,6 +64,8 @@ function CampaignCard({ campaign }) {
   const days    = daysRemaining(campaign.deadline);
   const startup = campaign.startupProfileId;
   const risk    = riskBadge(campaign.riskScore);
+  const viewStatus = getCampaignViewStatus(campaign);
+  const cred = campaign.credibilityScore;
 
   return (
     <Link to={`/campaigns/${campaign._id}`} style={{ textDecoration: 'none' }}>
@@ -68,14 +74,21 @@ function CampaignCard({ campaign }) {
 
           {/* Status & Risk row */}
           <div className="flex items-center justify-between mb-4">
-            <span className={`badge ${statusBadge(campaign.status)}`}>
-              {campaign.status}
+            <span className={`badge ${statusBadge(viewStatus)}`}>
+              {viewStatus}
             </span>
+            <div className="flex items-center gap-2">
+              {cred != null && (
+                <span className="badge badge--draft" title="Platform credibility index (disclosure + KYB + chain + milestones)">
+                  ★ {cred}
+                </span>
+              )}
             {campaign.riskScore && (
-              <span className={`badge ${risk.class}`} title={`Risk Score: ${campaign.riskScore}/10`}>
+              <span className={`badge ${risk.class}`} title={`Self-reported risk: ${campaign.riskScore}/10 (10 = highest risk)`}>
                 {risk.label}
               </span>
             )}
+            </div>
           </div>
 
           {/* Title + startup */}
@@ -112,9 +125,16 @@ function CampaignCard({ campaign }) {
           </div>
           <div className="flex justify-between mt-2">
             <span className="text-sm font-semibold text-gradient">{pct}% funded</span>
-            <span className="text-muted text-xs font-mono">
-              {(campaign.currentRaised ?? 0).toLocaleString()} / {campaign.fundingGoal.toLocaleString()} {campaign.currency}
-            </span>
+            <div style={{ textAlign: 'right' }}>
+              <div className="text-muted text-xs font-mono">
+                {(campaign.currentRaised ?? 0).toLocaleString()} / {campaign.fundingGoal.toLocaleString()} {campaign.currency}
+              </div>
+              {campaign.totalRaisedWei && campaign.totalRaisedWei !== '0' && (
+                <div className="text-xs" style={{ color: 'var(--color-primary)', fontFamily: 'monospace', fontSize: '0.65rem', marginTop: '2px' }}>
+                  ≈ {parseFloat(ethers.formatEther(campaign.totalRaisedWei)).toFixed(4)} POL
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

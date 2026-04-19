@@ -49,4 +49,22 @@ router.get('/campaigns', adminController.getCampaignsForReview);
 // Update campaign status
 router.patch('/campaigns/:id/status', adminController.updateCampaignStatus);
 
+const adminSyncController = require('../controllers/adminSync.controller');
+
+// ... existing routes ...
+
+// ─── Blockchain Sync Management ──────────────────────────────────────────────
+
+// Get sync status and health metrics
+router.get('/sync/status', adminSyncController.getSyncStatus);
+
+// Manually trigger a background sync cycle
+router.post('/sync/trigger', adminSyncController.triggerSyncCycle);
+
+// Manually sync a specific transaction hash
+router.post('/sync/tx/:txHash', adminSyncController.syncTransaction);
+
+// Manually sync a range of blocks
+router.post('/sync/blocks', adminSyncController.syncBlockRange);
+
 module.exports = router;

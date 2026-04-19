@@ -9,3 +9,7 @@ secrets.txt
 # Ignore OS-specific files
 .DS_Store
 Thumbs.db
+
+# Evidence storage (local temp — not committed)
+/storage/
+/storage/**

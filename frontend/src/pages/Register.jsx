@@ -113,7 +113,17 @@ export default function Register() {
         navigate('/dashboard', { replace: true });
       }
     } catch (err) {
-      setError(err?.response?.data?.message || 'Registration failed. Please try again.');
+      const apiMsg = err?.response?.data?.message;
+      const netMsg =
+        err?.code === 'ERR_NETWORK' || err?.message === 'Network Error'
+          ? 'Cannot reach the API. Set VITE_API_URL=/api/v1 in .env.local and restart Vite, or fix the backend URL.'
+          : null;
+      setError(
+        (typeof apiMsg === 'string' && apiMsg) ||
+          netMsg ||
+          err?.message ||
+          'Registration failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }

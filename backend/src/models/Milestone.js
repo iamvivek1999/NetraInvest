@@ -22,12 +22,16 @@
  * 4. proofSubmission is an embedded subdoc (not a separate collection).
  *    Proof is immutable once submitted — only the status changes.
  *
- * 5. releaseTxHash, releasedAmount, releasedAt are null until Phase 2
- *    (blockchain fund release). Zero model changes needed in Phase 2.
+ * 5. On-chain release tracking: releasedAmountWei, releaseTxHash, releasedAt.
+ *    These are null until admin calls releaseMilestone() on-chain (Phase 2).
+ *    The contract emits MilestoneReleased(campaignKey, index, amount) which the
+ *    backend decodes and stores here. These are the authoritative release records.
+ *    The legacy off-chain disbursal fields (disbursedAmount, disbursalReference)
+ *    are kept for historical compatibility but should not be used for new releases.
  *
  * Status lifecycle:
- *   pending → submitted → approved → disbursed  (happy path)
- *             submitted → rejected → submitted  (resubmit after rejection)
+ *   reviewStatus: pending → submitted → under_review → approved/rejected
+ *   onChainStatus: unreleased → released
  */
 
 const mongoose = require('mongoose');
@@ -116,7 +120,7 @@ const milestoneSchema = new Schema(
      * Unique per campaign — enforced by compound index below.
      * Milestones must be processed sequentially (index 0 → 1 → 2).
      */
-    index: {
+    milestoneIndex: {
       type: Number,
       required: [true, 'Milestone index is required'],
       min: [0, 'Index must be 0 or greater'],
@@ -157,14 +161,24 @@ const milestoneSchema = new Schema(
     },
 
     /**
-     * estimatedAmount = campaign.fundingGoal × percentage / 100
+     * targetAmount = campaign.fundingGoal × percentage / 100
      * Snapshot at creation time. Read-only after creation.
+     * This is in the same denomination as campaign.fundingGoal (INR display).
+     * For on-chain amounts, use targetAmountWei and releasedAmountWei after release.
      * Actual released amount may differ if fundingGoal is not fully reached.
      */
-    estimatedAmount: {
+    targetAmount: {
       type: Number,
       required: true,
-      min: [0, 'Estimated amount cannot be negative'],
+      min: [0, 'Target amount cannot be negative'],
+    },
+
+    /**
+     * targetAmountWei: EXACT mapped wei derived from fundingGoalWei * percentage.
+     */
+    targetAmountWei: {
+      type: String,
+      default: null,
     },
 
     // Tracks current progress incrementally prior to submission
@@ -177,38 +191,64 @@ const milestoneSchema = new Schema(
 
     // ── Status ───────────────────────────────────────────────────────────────
     /**
-     * Status values:
+     * reviewStatus values (Administrative off-chain state):
      *
-     *   pending    → Initial state. Startup has not yet submitted proof.
-     *   submitted  → Startup submitted proof. Awaiting admin review.
-     *   approved   → Admin approved. Funds scheduled for off-chain disbursal.
-     *   rejected   → Admin rejected submission. Startup must resubmit.
-     *   disbursed  → Funds disbursed off-chain. Terminal state.
-     *
-     * State transitions:
-     *   pending   → submitted  (startup calls /submit)
-     *   submitted → approved   (admin calls /approve)
-     *   submitted → rejected   (admin calls /reject)
-     *   rejected  → submitted  (startup resubmits)
-     *   approved  → disbursed  (system sets after off-chain funds clear)
+     *   pending       → Initial state. Startup has not yet submitted proof.
+     *   submitted     → Startup submitted proof. Awaiting admin review.
+     *   under_review  → Admin is actively reviewing.
+     *   approved      → Admin approved. Ready for on-chain fund release.
+     *   rejected      → Admin rejected submission. Startup must resubmit.
      */
-    status: {
+    reviewStatus: {
       type: String,
       enum: {
-        values: ['pending', 'submitted', 'approved', 'rejected', 'disbursed'],
-        message: 'Invalid milestone status',
+        values: ['pending', 'submitted', 'under_review', 'approved', 'rejected'],
+        message: 'Invalid milestone review status',
       },
       default: 'pending',
     },
 
-    // ── Proof Submission ─────────────────────────────────────────────────────
     /**
-     * Set when startup calls /submit.
-     * On resubmission after rejection, previous proof is overwritten.
-     * Rejection history is preserved in rejectionReason.
+     * onChainStatus values:
+     * 
+     *   unreleased → Funds are locked in the smart contract.
+     *   released   → Funds have been successfully transferred to Startup wallet.
      */
-    proofSubmission: {
-      type: proofSubmissionSchema,
+    onChainStatus: {
+      type: String,
+      enum: {
+        values: ['unreleased', 'released'],
+        message: 'Invalid milestone on-chain status',
+      },
+      default: 'unreleased',
+    },
+
+    /**
+     * Array of references to EvidenceBundle IDs for historical tracking.
+     */
+    evidenceBundles: [{
+      type: Schema.Types.ObjectId,
+      ref: 'EvidenceBundle',
+    }],
+
+    // ── Extracted Artifact Anchors (Denormalized from Evidence Bundle) ─────────
+    localStoragePaths: {
+      type: [String],
+      default: [],
+    },
+
+    summaryHash: {
+      type: String,
+      default: null,
+    },
+
+    evidenceHash: {
+      type: String,
+      default: null,
+    },
+
+    evidenceAnchorTxHash: {
+      type: String,
       default: null,
     },
 
@@ -267,6 +307,59 @@ const milestoneSchema = new Schema(
       trim: true,
       default: null,
     },
+
+    // ── On-Chain Release Tracking (authoritative for Web3 path) ─────────────────
+    /**
+     * releasedAmountWei: exact wei released for this milestone from the contract.
+     * Decoded from MilestoneReleased event. Stored as String for uint256 safety.
+     * Null until admin triggers releaseMilestone() on-chain.
+     */
+    releasedAmountWei: {
+      type: String,
+      default: null,
+    },
+
+    /**
+     * releaseTxHash: the on-chain tx hash from admin's releaseMilestone() call.
+     * Used for audit trails and explorer links.
+     */
+    releaseTxHash: {
+      type: String,
+      default: null,
+      match: [
+        /^0x[a-fA-F0-9]{64}$/,
+        'releaseTxHash must be a valid Ethereum transaction hash',
+      ],
+    },
+
+    /**
+     * releasedAt: block timestamp of the MilestoneReleased event.
+     * Set by the backend after decoding the on-chain event.
+     */
+    releasedAt: {
+      type: Date,
+      default: null,
+    },
+    
+    /**
+     * releasedAtBlock: the block number of the MilestoneReleased event
+     */
+    releasedAtBlock: {
+      type: Number,
+      default: null,
+    },
+
+    // ── Sync Metadata ────────────────────────────────────────────────────────
+    syncStatus: {
+      type: String,
+      enum: ['pending', 'confirmed', 'failed', 'resync_required'],
+      default: 'pending',
+    },
+
+    lastSyncedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -276,20 +369,21 @@ const milestoneSchema = new Schema(
 // ─── Indexes ──────────────────────────────────────────────────────────────────
 
 // Primary compound: enforces unique index per campaign, enables ordered queries
-milestoneSchema.index({ campaignId: 1, index: 1 }, { unique: true });
+milestoneSchema.index({ campaignId: 1, milestoneIndex: 1 }, { unique: true });
 
 // Status-based queries (admin review queue)
-milestoneSchema.index({ status: 1 });
+milestoneSchema.index({ reviewStatus: 1 });
+milestoneSchema.index({ onChainStatus: 1 });
 
 // Startup's own milestone view
 milestoneSchema.index({ userId: 1 });
 milestoneSchema.index({ startupProfileId: 1 });
 
 // Admin approval queue: all submitted milestones across all campaigns
-milestoneSchema.index({ status: 1, createdAt: -1 });
+milestoneSchema.index({ reviewStatus: 1, createdAt: -1 });
 
 // Phase 2: find milestones pending release
-milestoneSchema.index({ campaignId: 1, status: 1 });
+milestoneSchema.index({ campaignId: 1, reviewStatus: 1, onChainStatus: 1 });
 
 const Milestone = mongoose.model('Milestone', milestoneSchema);
 

@@ -3,7 +3,8 @@
  *
  * On-chain transaction verification for investor invest() calls.
  *
- * Responsibilities:
+ * Responsibilities
+ * ────────────────
  *   verifyInvestmentTx()
  *     1. Fetch the transaction receipt from the RPC node
  *     2. Confirm the tx succeeded (status === 1)
@@ -17,24 +18,27 @@
  *     Infers which chain name to store based on env configuration.
  *     Never trusted from client input.
  *
- * ─── Ethers v5 API Notes ──────────────────────────────────────────────────────
+ * ─── Ethers v6 API Notes ──────────────────────────────────────────────────────
  *   provider.getTransactionReceipt(txHash) → TransactionReceipt | null
  *   receipt.status                         → 1 (success) | 0 (reverted)
  *   receipt.to                             → the contract address the tx called
  *   receipt.logs                           → raw log array
- *   contract.interface.parseLog(log)       → { name, args }
- *   ethers.utils.formatEther(BigNumber)    → decimal string (INR)
+ *   contract.interface.parseLog(log)       → { name, args } — same in v5/v6
+ *   ethers.formatEther(bigint)             → string (decimal POL)
+ *   args.amount                            → native bigint in v6 (was BigNumber in v5)
+ *   bigint.toString()                      → safe string representation of wei
  */
 
 const { ethers } = require('ethers');
 const { getProvider, getReadContract, isBlockchainConfigured } = require('../config/blockchain');
 const env = require('../config/env');
+const BlockchainSyncLedger = require('../models/BlockchainSyncLedger');
 
 // ─── Chain name derivation ────────────────────────────────────────────────────
 
 /**
  * Derives the canonical chain name from the ALCHEMY_RPC_URL env variable.
- * This is stored on every Investment document and never trusted from the client.
+ * Stored on every Investment document — never trusted from client input.
  *
  * @returns {'polygon-amoy'|'polygon'|'hardhat'|'stub'}
  */
@@ -45,10 +49,9 @@ const deriveChain = () => {
 
   if (url.includes('amoy'))     return 'polygon-amoy';
   if (url.includes('mainnet'))  return 'polygon';
-  if (url.includes('mumbai'))   return 'polygon-amoy'; // Mumbai is deprecated, treat as amoy
   if (url.includes('localhost') || url.includes('127.0.0.1')) return 'hardhat';
 
-  // Fallback for any other configured RPC (e.g. QuickNode custom endpoint)
+  // Fallback: any other configured RPC (e.g. QuickNode custom endpoint) → assume Amoy
   return 'polygon-amoy';
 };
 
@@ -69,23 +72,42 @@ const deriveChain = () => {
  *
  * @typedef {object} VerificationResult
  * @property {boolean} success
- * @property {string}  [error]              - present on failure
- * @property {string}  [amountWei]          - exact wei from event, as string
- * @property {number}  [amountINR]        - INR as float
+ * @property {string}  [error]          - present on failure
+ * @property {string}  [amountWei]      - exact wei as string (from event — authoritative)
+ * @property {number}  [amountPOL]      - POL decimal (for display/logging only)
  * @property {number}  [blockNumber]
  * @property {Date}    [confirmedAt]
- * @property {string}  note                 - description of what was checked
+ * @property {string}  note             - description of what was checked
  */
 const verifyInvestmentTx = async ({
   txHash,
   expectedCampaignKey,
   expectedInvestorAddr,
 }) => {
+  const normalizedTxHash = txHash.toLowerCase();
+
+  // ── Step 0: check sync ledger ──────────────────────────────────────────────
+  // If already processed, we can return success immediately (idempotency)
+  try {
+    const existing = await BlockchainSyncLedger.findOne({ txHash: normalizedTxHash });
+    if (existing && existing.status === 'processed') {
+      return {
+        success: true,
+        amountWei: existing.metadata?.amount || '0',
+        blockNumber: existing.blockNumber,
+        confirmedAt: existing.processedAt,
+        note: 'transaction already verified and recorded in sync ledger',
+      };
+    }
+  } catch (err) {
+    console.warn(`[txVerification] Failed to check sync ledger for ${txHash}:`, err.message);
+  }
+
   // ── Step 1: fetch receipt from node ────────────────────────────────────────
 
   let receipt;
   try {
-    receipt = await getProvider().getTransactionReceipt(txHash);
+    receipt = await getProvider().getTransactionReceipt(normalizedTxHash);
   } catch (err) {
     return {
       success: false,
@@ -107,7 +129,7 @@ const verifyInvestmentTx = async ({
   if (receipt.status !== 1) {
     return {
       success: false,
-      error: 'Transaction was reverted (status = 0). The call failed.',
+      error: 'Transaction was reverted (status = 0). The call failed on-chain.',
       note: 'tx reverted',
     };
   }
@@ -131,6 +153,9 @@ const verifyInvestmentTx = async ({
   //   uint256 amount,
   //   uint256 totalRaised
   // )
+  //
+  // Ethers v6: parseLog() returns { name, args } — same shape as v5.
+  // args.amount is a native bigint in v6 (BigNumber in v5).
 
   const readContract = getReadContract();
   let investmentLog = null;
@@ -138,7 +163,7 @@ const verifyInvestmentTx = async ({
   for (const log of receipt.logs) {
     try {
       const parsed = readContract.interface.parseLog(log);
-      if (parsed.name === 'InvestmentReceived') {
+      if (parsed && parsed.name === 'InvestmentReceived') {
         investmentLog = parsed;
         break;
       }
@@ -157,7 +182,7 @@ const verifyInvestmentTx = async ({
 
   // ── Step 5: validate campaignKey ────────────────────────────────────────────
 
-  // campaignKey is indexed (bytes32) — ethers v5 returns it as a bytes32 hex string
+  // campaignKey is indexed (bytes32) — v6 returns it as a 0x-prefixed hex string
   const eventCampaignKey = investmentLog.args.campaignKey.toLowerCase();
   if (eventCampaignKey !== expectedCampaignKey.toLowerCase()) {
     return {
@@ -181,20 +206,22 @@ const verifyInvestmentTx = async ({
 
   // ── Step 7: extract amount ───────────────────────────────────────────────────
 
-  // investmentLog.args.amount is a BigNumber (ethers v5)
-  const amountBN    = investmentLog.args.amount;
-  const amountWei   = amountBN.toString();                      // safe string representation
-  const amountINR = parseFloat(ethers.utils.formatEther(amountBN)); // INR decimal
+  // v6: investmentLog.args.amount is a native bigint.
+  // .toString() on bigint produces an exact decimal string (safe for MongoDB storage).
+  // ethers.formatEther(bigint) converts wei bigint → decimal POL string.
+  const amountBigInt = investmentLog.args.amount;                       // bigint (wei)
+  const amountWei    = amountBigInt.toString();                          // "1000000000000000000"
+  const amountPOL    = parseFloat(ethers.formatEther(amountBigInt));    // 1.0 (display only)
 
   // ── All checks passed ────────────────────────────────────────────────────────
 
   return {
     success:     true,
     amountWei,
-    amountINR,
+    amountPOL,
     blockNumber: receipt.blockNumber,
     confirmedAt: new Date(),
-    note:        'on-chain: InvestmentReceived event verified',
+    note:        'on-chain: InvestmentReceived event verified (ethers v6)',
   };
 };
 

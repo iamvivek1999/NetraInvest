@@ -18,12 +18,14 @@ import { getCampaign }       from '../api/campaigns.api';
 import { getMilestones }     from '../api/milestones.api';
 import useAuthStore          from '../store/authStore';
 import InvestModal           from '../components/InvestModal';
+import { ethers }            from 'ethers';
 import {
   fundingPercent,
   daysRemaining,
   formatDate,
   formatINR,
 } from '../utils/formatters';
+import { getCampaignViewStatus } from '../utils/campaignDisplay';
 
 // ─── Status badge class map ────────────────────────────────────────────────────
 function statusBadge(status) {
@@ -41,13 +43,14 @@ function statusBadge(status) {
 // ─── Milestone status badge ────────────────────────────────────────────────────
 function milestoneIcon(status) {
   const map = {
-    pending:   { icon: '⏳', cls: 'badge--pending'  },
-    submitted: { icon: '📩', cls: 'badge--pending'  },
-    approved:  { icon: '✅', cls: 'badge--approved' },
-    rejected:  { icon: '❌', cls: 'badge--rejected' },
-    disbursed: { icon: '💸', cls: 'badge--active'   },
+    pending:      { icon: '⚪', cls: 'badge--pending',  label: 'Unsubmitted' },
+    submitted:    { icon: '⏳', cls: 'badge--pending',  label: 'Awaiting' },
+    under_review: { icon: '🔍', cls: 'badge--pending',  label: 'Reviewing' },
+    approved:     { icon: '✅', cls: 'badge--approved', label: 'Approved' },
+    rejected:     { icon: '❌', cls: 'badge--rejected', label: 'Rejected' },
+    released:     { icon: '💰', cls: 'badge--active',   label: 'Released' },
   };
-  return map[status] || { icon: '⏳', cls: 'badge--pending' };
+  return map[status] || { icon: '⏳', cls: 'badge--pending', label: status };
 }
 
 // ─── Skeleton block ────────────────────────────────────────────────────────────
@@ -152,8 +155,13 @@ export default function CampaignDetail() {
   const raised   = (campaign.currentRaised ?? 0) + extraRaised;
   const pct      = fundingPercent(raised, campaign.fundingGoal);
   const days     = daysRemaining(campaign.deadline);
-  const isClosed = ['completed', 'cancelled'].includes(campaign.status);
-  const canInvest = campaign.status === 'active' && !isClosed && isLoggedIn && role === 'investor';
+  const viewStatus = getCampaignViewStatus(campaign);
+  const isClosed = ['completed', 'cancelled'].includes(viewStatus);
+  const canInvest = viewStatus === 'active' && !isClosed && isLoggedIn && role === 'investor';
+
+  const uof = Array.isArray(campaign.useOfFunds) ? campaign.useOfFunds : [];
+  const uofPctSum = uof.reduce((s, row) => s + (Number(row.percentage) || 0), 0);
+  const allocationWarning = uof.length > 0 && (uofPctSum < 95 || uofPctSum > 105);
 
   const handleInvestSuccess = ({ investment }) => {
     setInvestOpen(false);
@@ -170,11 +178,21 @@ export default function CampaignDetail() {
             <Link to="/discover" className="text-muted text-sm">← Back to Discover</Link>
           </div>
           <div className="flex items-center gap-3 mb-3" style={{ flexWrap: 'wrap' }}>
-            <span className={`badge ${statusBadge(campaign.status)}`}>{campaign.status}</span>
+            <span className={`badge ${statusBadge(viewStatus)}`}>{viewStatus}</span>
             {startup?.industry && <span className="text-muted text-sm">{startup.industry}</span>}
             {startup?.isVerified && <span className="text-xs" style={{ color: 'var(--color-success)' }}>✅ Verified Startup</span>}
             {campaign.isContractDeployed && (
-              <span className="text-xs" style={{ color: 'var(--color-accent)' }}>⛓️ Audit Recorded</span>
+              <span className="text-xs" style={{ color: 'var(--color-accent)' }}>⛓️ On-chain registry</span>
+            )}
+            {campaign.credibilityScore != null && (
+              <span className="text-xs font-semibold" style={{ color: 'var(--color-secondary)' }} title="Heuristic index: disclosure, KYB, chain, milestones, allocation plan">
+                Credibility {campaign.credibilityScore}/100
+              </span>
+            )}
+            {campaign.riskScore != null && (
+              <span className="text-xs text-muted" title="Self-reported risk (1 = lowest, 10 = highest)">
+                Risk disclosure: {campaign.riskScore}/10
+              </span>
             )}
           </div>
           <h1 style={{ marginBottom: '0.5rem' }}>{campaign.title}</h1>
@@ -215,9 +233,9 @@ export default function CampaignDetail() {
               <p style={{ lineHeight: 1.8, maxWidth: 'none', whiteSpace: 'pre-wrap' }}>
                 {campaign.summary}
               </p>
-              {campaign.description && (
+              {campaign.detailedDescription && String(campaign.detailedDescription).trim() !== '' && (
                 <p style={{ lineHeight: 1.8, maxWidth: 'none', marginTop: '1rem', whiteSpace: 'pre-wrap' }}>
-                  {campaign.description}
+                  {campaign.detailedDescription}
                 </p>
               )}
 
@@ -249,6 +267,56 @@ export default function CampaignDetail() {
               </div>
             </div>
 
+            {/* Planned allocation — transparency into how the raise will be used */}
+            {uof.length > 0 && (
+              <div className="card">
+                <h3 style={{ marginBottom: '1rem' }}>Planned fund allocation</h3>
+                <p className="text-muted text-sm" style={{ marginBottom: '1rem' }}>
+                  How the startup intends to deploy capital (declared at campaign creation). Milestone releases are enforced on-chain after verification.
+                </p>
+                {allocationWarning && (
+                  <p className="text-sm" style={{ color: 'var(--color-warning)', marginBottom: '0.75rem' }}>
+                    Heads-up: category percentages sum to {uofPctSum.toFixed(0)}% (target 100%). Ask the team to reconcile in their plan.
+                  </p>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {uof.map((row, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto',
+                        gap: '0.5rem 1rem',
+                        alignItems: 'center',
+                        padding: '0.75rem 1rem',
+                        background: 'var(--color-surface)',
+                        borderRadius: 'var(--r-md)',
+                        border: '1px solid var(--color-border)',
+                      }}
+                    >
+                      <span className="font-medium text-sm">{row.category}</span>
+                      <span className="text-sm font-mono" style={{ textAlign: 'right' }}>
+                        {row.percentage != null ? `${row.percentage}%` : '—'}
+                        {row.amount != null && ` · ${formatINR(row.amount)}`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {campaign.credibilityBreakdown && (
+                  <p className="text-xs text-muted" style={{ marginTop: '1rem' }}>
+                    Credibility index partly rewards a clear allocation plan that sums to ~100%.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {campaign.riskFactors && String(campaign.riskFactors).trim() !== '' && (
+              <div className="card" style={{ borderColor: 'rgba(245,158,11,0.35)' }}>
+                <h3 style={{ marginBottom: '0.75rem' }}>Disclosed risks</h3>
+                <p style={{ lineHeight: 1.7, whiteSpace: 'pre-wrap', fontSize: '0.95rem' }}>{campaign.riskFactors}</p>
+              </div>
+            )}
+
             {/* Milestone roadmap */}
             <div className="card">
               <h3 style={{ marginBottom: '1.5rem' }}>📍 Milestone Roadmap</h3>
@@ -263,7 +331,8 @@ export default function CampaignDetail() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {milestones.map((m, idx) => {
-                    const ms    = milestoneIcon(m.status);
+                    const status = m.onChainStatus === 'released' ? 'released' : (m.reviewStatus || 'pending');
+                    const ms = milestoneIcon(status);
                     const isCur = idx === (campaign.currentMilestoneIndex ?? 0);
                     return (
                       <div
@@ -312,7 +381,7 @@ export default function CampaignDetail() {
                           )}
                           <div className="flex items-center gap-3">
                             <span className={`badge ${ms.cls}`} style={{ fontSize: '0.7rem' }}>
-                              {ms.icon} {m.status}
+                              {ms.icon} {ms.label}
                             </span>
                             <span className="text-muted text-xs">
                               {m.percentage}% · ≈ {((m.percentage / 100) * campaign.fundingGoal).toLocaleString()} INR
@@ -443,7 +512,14 @@ export default function CampaignDetail() {
                   <span className="font-bold" style={{ fontSize: '1.5rem' }}>
                     {raised.toLocaleString()} INR
                   </span>
-                  <span className="text-muted text-sm">raised</span>
+                  <span className="text-muted text-sm" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <span>raised</span>
+                    {campaign.totalRaisedWei && campaign.totalRaisedWei !== '0' && (
+                      <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)', fontFamily: 'monospace' }}>
+                        ({parseFloat(ethers.formatEther(campaign.totalRaisedWei)).toFixed(4)} POL)
+                      </span>
+                    )}
+                  </span>
                 </div>
                 <div className="progress-bar">
                   <div className="progress-bar__fill" style={{ width: `${pct}%` }} />
@@ -476,8 +552,8 @@ export default function CampaignDetail() {
               {/* ── Invest CTA area ─────────────────────────────────────── */}
               {isClosed ? (
                 <div style={{ textAlign: 'center', padding: '0.5rem' }}>
-                  <span className={`badge ${statusBadge(campaign.status)}`} style={{ fontSize: '0.85rem', padding: '6px 14px' }}>
-                    Campaign {campaign.status}
+                  <span className={`badge ${statusBadge(viewStatus)}`} style={{ fontSize: '0.85rem', padding: '6px 14px' }}>
+                    Campaign {viewStatus}
                   </span>
                   <p className="text-muted text-xs mt-3">This campaign is no longer accepting investments.</p>
                 </div>
@@ -495,10 +571,10 @@ export default function CampaignDetail() {
                     <p className="text-muted text-xs mt-2">You're signed in as a startup. Switch to an investor account to invest.</p>
                   )}
                 </div>
-              ) : campaign.status !== 'active' ? (
+              ) : viewStatus !== 'active' ? (
                 <div style={{ textAlign: 'center', padding: '0.5rem' }}>
                   <p className="text-muted text-sm">
-                    This campaign is <strong>{campaign.status}</strong> and not accepting investments.
+                    This campaign is <strong>{viewStatus}</strong> and not accepting investments.
                   </p>
                 </div>
               ) : (

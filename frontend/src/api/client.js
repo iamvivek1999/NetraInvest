@@ -56,7 +56,9 @@ const client = axios.create({
 client.interceptors.request.use(
   (config) => {
     const token = getStoredToken();
-    if (token) {
+    // Do not override an explicit Authorization (e.g. right after login when persist
+    // has not written localStorage yet but the caller passed the token).
+    if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

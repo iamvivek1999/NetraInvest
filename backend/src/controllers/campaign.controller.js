@@ -28,6 +28,7 @@ const User              = require('../models/User');
 const sendResponse      = require('../utils/sendResponse');
 const { ApiError }      = require('../middleware/errorHandler');
 const blockchainService = require('../services/blockchain.service');
+const { enrichCampaignForClient } = require('../utils/credibility.util');
 
 // ─── Fields locked once campaign is active ────────────────────────────────────
 // These mirror what the transparency registry encodes at activation time.
@@ -87,7 +88,7 @@ const createCampaign = async (req, res) => {
   // Enforce one active campaign per startup
   const existingActive = await Campaign.findOne({
     userId,
-    status: { $in: ['active', 'paused', 'funded'] },
+    onChainStatus: { $in: ['active', 'paused', 'funded'] },
   });
   if (existingActive) {
     throw new ApiError(
@@ -149,12 +150,16 @@ const createCampaign = async (req, res) => {
     riskFactors,
     campaignDocuments: campaignDocuments || [],
     milestonePlans: milestonePlans || [],
-    status: 'draft', // always starts as draft
+    localStatus: 'draft',
+    onChainStatus: 'unregistered',
   });
 
   const populated = await Campaign.findById(campaign._id)
     .populate('startupProfileId', 'startupName industry isVerified profileCompleteness')
-    .populate('userId', 'fullName email');
+    .populate('userId', 'fullName email')
+    .lean();
+
+  enrichCampaignForClient(populated);
 
   sendResponse(res, 201, 'Campaign created successfully', { campaign: populated });
 };
@@ -180,8 +185,8 @@ const submitCampaign = async (req, res) => {
   }
 
   // Can only submit if it is a draft or rejected
-  if (!['draft', 'rejected'].includes(campaign.status)) {
-    throw new ApiError(400, `Cannot submit campaign. Current status is '${campaign.status}'`);
+  if (!['draft', 'rejected'].includes(campaign.localStatus)) {
+    throw new ApiError(400, `Cannot submit campaign. Current local status is '${campaign.localStatus}'`);
   }
 
   // Verification requirements before submit (ensure required fields are somewhat populated)
@@ -208,11 +213,17 @@ const submitCampaign = async (req, res) => {
     // For safety, let's just leave it to admin to review.
   }
 
-  campaign.status = 'approved';
+  campaign.localStatus = 'submitted'; // Properly transition to submitted
   // campaign.adminReviewNotes = ''; // clear any old rejection notes on fresh submission
   await campaign.save();
 
-  sendResponse(res, 200, 'Campaign published successfully', { campaign });
+  const submitted = await Campaign.findById(campaign._id)
+    .populate('startupProfileId', 'startupName industry isVerified profileCompleteness')
+    .populate('userId', 'fullName email')
+    .lean();
+  enrichCampaignForClient(submitted);
+
+  sendResponse(res, 200, 'Campaign published successfully', { campaign: submitted });
 };
 
 // ─── Update Campaign ──────────────────────────────────────────────────────────
@@ -247,19 +258,16 @@ const updateCampaign = async (req, res) => {
   }
 
   // Terminal states — no updates allowed
-  if (['completed', 'cancelled'].includes(campaign.status)) {
+  if (['completed', 'cancelled'].includes(campaign.onChainStatus)) {
     throw new ApiError(
-      `Campaign is ${campaign.status} and cannot be modified.`,
+      `Campaign is ${campaign.onChainStatus} and cannot be modified.`,
       400
     );
   }
 
   // Validate status transition if status is being changed
-  const newStatus = req.body.status;
-  if (newStatus && newStatus !== campaign.status) {
-    // 'draft → active' is handled exclusively by POST /campaigns/:id/activate.
-    // That route generates the campaignKey and registers the campaign on-chain.
-    // Allowing it here would bypass blockchain registration.
+  const newStatus = req.body.status || req.body.localStatus;
+  if (newStatus && newStatus !== campaign.localStatus && newStatus !== campaign.onChainStatus) {
     if (newStatus === 'active') {
       throw new ApiError(
         'To activate a campaign, use POST /api/v1/campaigns/:id/activate. ' +
@@ -267,33 +275,18 @@ const updateCampaign = async (req, res) => {
         400
       );
     }
-
-    const validTransitions = {
-      draft:   ['cancelled'],
-      active:  ['paused', 'cancelled'],
-      paused:  ['active', 'cancelled'],
-      funded:  ['cancelled'],
-    };
-
-    const allowed = validTransitions[campaign.status] || [];
-    if (!allowed.includes(newStatus)) {
-      throw new ApiError(
-        `Cannot transition campaign from "${campaign.status}" to "${newStatus}". ` +
-          `Allowed transitions: ${allowed.join(', ') || 'none'}.`,
-        400
-      );
-    }
+    // We only allow certain local metadata updates right now
   }
 
   // Lock financial/milestone fields once campaign leaves draft
   const lockedFields =
-    campaign.status !== 'draft' ? LOCKED_WHEN_ACTIVE : [];
+    campaign.localStatus !== 'draft' && campaign.onChainStatus !== 'unregistered' ? LOCKED_WHEN_ACTIVE : [];
 
   const updates = pickUpdates(req.body, lockedFields);
 
   if (Object.keys(updates).length === 0) {
     throw new ApiError(
-      campaign.status !== 'draft'
+      (campaign.localStatus !== 'draft' && campaign.onChainStatus !== 'unregistered')
         ? 'No updatable fields provided. Financial configuration fields are locked once a campaign is active.'
         : 'No valid fields provided for update.',
       400
@@ -305,10 +298,13 @@ const updateCampaign = async (req, res) => {
     { $set: updates },
     { new: true, runValidators: true }
   )
-    .populate('startupProfileId', 'startupName industry isVerified')
+    .populate('startupProfileId', 'startupName industry isVerified profileCompleteness')
     .populate('userId', 'fullName email');
 
-  sendResponse(res, 200, 'Campaign updated successfully', { campaign: updated });
+  const updatedPlain = updated.toObject();
+  enrichCampaignForClient(updatedPlain);
+
+  sendResponse(res, 200, 'Campaign updated successfully', { campaign: updatedPlain });
 };
 
 // ─── Get Single Campaign ──────────────────────────────────────────────────────
@@ -337,8 +333,10 @@ const getCampaign = async (req, res) => {
   let payload = campaign.toObject();
   if (!isOwner && !isPrivileged) {
     delete payload.campaignKey;
-    delete payload.activationTxHash;
+    delete payload.createCampaignTxHash;
   }
+
+  enrichCampaignForClient(payload);
 
   sendResponse(res, 200, 'Campaign retrieved', { campaign: payload });
 };
@@ -355,7 +353,7 @@ const getCampaign = async (req, res) => {
  *   search      → text search on title + summary
  *   page        → page number  (default: 1)
  *   limit       → per page     (default: 12, max: 50)
- *   sortBy      → 'newest' | 'deadline' | 'goal' | 'raised'
+ *   sortBy      → 'newest' | 'deadline' | 'goal' | 'raised' | 'credibility'
  */
 const getAllCampaigns = async (req, res) => {
   const {
@@ -369,9 +367,24 @@ const getAllCampaigns = async (req, res) => {
 
   const filter = {};
 
-  if (status) {
+  if (req.query.localStatus) {
+    const statuses = req.query.localStatus.split(',').map((s) => s.trim());
+    filter.localStatus = statuses.length === 1 ? statuses[0] : { $in: statuses };
+  }
+
+  if (req.query.onChainStatus) {
+    const statuses = req.query.onChainStatus.split(',').map((s) => s.trim());
+    filter.onChainStatus = statuses.length === 1 ? statuses[0] : { $in: statuses };
+  }
+
+  // Backwards compatibility with frontend querying by "status"
+  if (status && !req.query.onChainStatus && !req.query.localStatus) {
     const statuses = status.split(',').map((s) => s.trim());
-    filter.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
+    if (statuses.includes('draft') || statuses.includes('submitted') || statuses.includes('approved') || statuses.includes('rejected')) {
+        filter.localStatus = statuses.length === 1 ? statuses[0] : { $in: statuses };
+    } else {
+        filter.onChainStatus = statuses.length === 1 ? statuses[0] : { $in: statuses };
+    }
   }
 
   if (currency) filter.currency = currency;
@@ -424,27 +437,54 @@ const getAllCampaigns = async (req, res) => {
   const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 12));
   const skip     = (pageNum - 1) * limitNum;
 
-  // Sorting
+  const total = await Campaign.countDocuments(filter);
+
+  // Sort by computed credibility (loads all matches — fine for typical catalogue size)
+  if (sortBy === 'credibility') {
+    const all = await Campaign.find(filter)
+      .populate('startupProfileId', 'startupName industry isVerified tagline profileCompleteness')
+      .populate('userId', 'fullName')
+      .lean();
+    all.forEach(enrichCampaignForClient);
+    all.sort((a, b) => (b.credibilityScore || 0) - (a.credibilityScore || 0));
+    const campaigns = all.slice(skip, skip + limitNum);
+    return sendResponse(
+      res,
+      200,
+      'Campaigns retrieved',
+      { campaigns },
+      {
+        meta: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          pages: Math.ceil(total / limitNum),
+          sortBy: 'credibility',
+        },
+      }
+    );
+  }
+
+  // Sorting (Mongo)
   const sortMap = {
     newest:          { createdAt: -1 },
     deadline:        { deadline: 1 },
     goal:            { fundingGoal: -1 },
-    raised:          { currentRaised: -1 },
-    most_funded:     { currentRaised: -1 },
-    highest_return:  { returnPotential: -1 }, // Assuming text sort 'moonshot', 'high', 'medium', 'low' not perfect, better on frontend or mapping, but works for now.
+    raised:          { totalRaisedWei: -1 },
+    most_funded:     { totalRaisedWei: -1 },
+    highest_return:  { returnPotential: -1 },
   };
   const sort = sortMap[sortBy] || sortMap.newest;
 
-  const [campaigns, total] = await Promise.all([
-    Campaign.find(filter)
-      .populate('startupProfileId', 'startupName industry isVerified tagline')
-      .populate('userId', 'fullName')
-      .sort(sort)
-      .skip(skip)
-      .limit(limitNum)
-      .lean(),
-    Campaign.countDocuments(filter),
-  ]);
+  const campaigns = await Campaign.find(filter)
+    .populate('startupProfileId', 'startupName industry isVerified tagline profileCompleteness')
+    .populate('userId', 'fullName')
+    .sort(sort)
+    .skip(skip)
+    .limit(limitNum)
+    .lean();
+
+  campaigns.forEach(enrichCampaignForClient);
 
   sendResponse(
     res,
@@ -475,9 +515,11 @@ const getMyCampaigns = async (req, res) => {
   const { userId } = req.user;
 
   const campaigns = await Campaign.find({ userId })
-    .populate('startupProfileId', 'startupName industry isVerified')
+    .populate('startupProfileId', 'startupName industry isVerified profileCompleteness')
     .sort({ createdAt: -1 })
     .lean();
+
+  campaigns.forEach(enrichCampaignForClient);
 
   sendResponse(res, 200, 'Your campaigns retrieved', { campaigns });
 };
@@ -517,15 +559,15 @@ const activateCampaign = async (req, res) => {
     throw new ApiError('You are not authorized to activate this campaign.', 403);
   }
 
-  if (campaign.status !== 'draft' && campaign.status !== 'approved') {
+  if (campaign.localStatus !== 'draft' && campaign.localStatus !== 'approved') {
     throw new ApiError(
-      `Campaign cannot be activated from status "${campaign.status}". ` +
+      `Campaign cannot be activated from local status "${campaign.localStatus}". ` +
         'Only draft or approved campaigns can be activated.',
       400
     );
   }
 
-  if (campaign.isContractDeployed) {
+  if (campaign.onChainStatus !== 'unregistered') {
     throw new ApiError(
       'Campaign is already registered. It cannot be activated again.',
       409
@@ -571,15 +613,24 @@ const activateCampaign = async (req, res) => {
 
 
   // \u2500\u2500 6. Generate campaignKey (random bytes32) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  // ── 5a. Validate fundingGoalPOL is set (required for on-chain registration) ────
+  if (!campaign.fundingGoalPOL || parseFloat(campaign.fundingGoalPOL) <= 0) {
+    throw new ApiError(
+      'fundingGoalPOL must be set before activating. ' +
+        'Update the campaign with a valid POL amount (e.g. "2.5" for 2.5 POL) before activating.',
+      400
+    );
+  }
+
   // ── 6. Generate campaignKey (random bytes32) ────────────────────────────────
-  // ethers v5: ethers.utils.hexlify(ethers.utils.randomBytes(32))
-  const campaignKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+  // ethers v6: top-level helpers (no ethers.utils.* namespace)
+  const campaignKey = ethers.hexlify(ethers.randomBytes(32));
 
   // ── 7. Register on-chain (or dev-mode bypass) ───────────────────────────────
   //
   // STUB_MODE=true bypasses the actual contract call so the full
   // app can function in an isolated local environment without Polygon access.
-  // Useful for local testing of the "manage milestones" flow without spending INR.
+  // Useful for local testing of the "manage milestones" flow.
   //
   // NEVER set STUB_MODE=true in production.
 
@@ -599,8 +650,8 @@ const activateCampaign = async (req, res) => {
     // blockchainService will throw ApiError(503) if env vars are missing
     ({ txHash, contractAddress } = await blockchainService.activateCampaignOnChain({
       campaignKey,
-      startupWallet:        user.walletAddress || "0x0000000000000000000000000000000000000000",
-      fundingGoalINR:     campaign.fundingGoal,
+      startupWallet:        user.walletAddress || '0x0000000000000000000000000000000000000000',
+      fundingGoalPOL:       campaign.fundingGoalPOL,
       deadline:             campaign.deadline,
       milestoneCount:       campaign.milestoneCount,
       milestonePercentages: campaign.milestonePercentages,
@@ -608,29 +659,45 @@ const activateCampaign = async (req, res) => {
   }
 
   // ── 8. Persist blockchain data + activate ────────────────────────────────
+  // Compute wei amounts from the POL decimals for storage.
+  // ethers v6: parseEther() is a top-level export — returns bigint.
+  // .toString() converts bigint → safe decimal string for MongoDB.
+  const fundingGoalWei  = ethers.parseEther(String(campaign.fundingGoalPOL)).toString();
+  const minInvestWei    = campaign.minInvestment
+    ? ethers.parseEther(String(campaign.minInvestment)).toString()
+    : null;
+  const maxInvestWei    = campaign.maxInvestment
+    ? ethers.parseEther(String(campaign.maxInvestment)).toString()
+    : null;
+
   const updatedCampaign = await Campaign.findByIdAndUpdate(
     campaignId,
     {
       $set: {
-        status:             'active',
+        localStatus:        'approved',
+        onChainStatus:      'active',
         campaignKey,
         contractAddress,
-        // Keep false so the UI knows this is a stub campaign
-        isContractDeployed: env.STUB_MODE !== 'true', // false in dev-mode
-        activationTxHash:   txHash,
+        createCampaignTxHash:   txHash,
+        fundingGoalWei,
+        minInvestmentWei:   minInvestWei,
+        maxInvestmentWei:   maxInvestWei,
       },
     },
     { new: true, runValidators: true }
   )
-    .populate('startupProfileId', 'startupName industry isVerified')
+    .populate('startupProfileId', 'startupName industry isVerified profileCompleteness')
     .populate('userId', 'fullName email');
+
+  const activatedPlain = updatedCampaign.toObject();
+  enrichCampaignForClient(activatedPlain);
 
   const devNote = env.STUB_MODE === 'true'
     ? ' (Stub mode enabled. No transaction broadcasted.)'
     : '';
 
   return sendResponse(res, 200, `Campaign activated successfully${devNote}`, {
-    campaign: updatedCampaign,
+    campaign: activatedPlain,
     activation: {
       campaignKey: activeCampaignKey,
       devMode: env.STUB_MODE === 'true',

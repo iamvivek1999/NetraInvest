@@ -1,27 +1,27 @@
 /**
  * src/routes/investment.routes.js
  *
- * Investment routes.
- *
- * IMPORTANT route ordering:
- *   /my, /startup, /campaign/:campaignId must all be registered BEFORE
- *   any /:investmentId route (which doesn't exist yet, but kept for future-proofing).
- *   Express matches left-to-right; literal path segments beat named params.
+ * Investment routes — Web3-first, Polygon Amoy.
  *
  * Route map:
- *   POST  /api/v1/investments                          → record investment        (investor)
- *   GET   /api/v1/investments/my                       → investor's own list      (investor)
- *   GET   /api/v1/investments/startup                  → startup portfolio view   (startup)
- *   GET   /api/v1/investments/campaign/:campaignId     → investments for a campaign (startup/admin)
+ *   POST  /api/v1/investments                          → record on-chain investment  (investor)
+ *   GET   /api/v1/investments/my                       → investor's own list          (investor)
+ *   GET   /api/v1/investments/startup                  → startup portfolio view       (startup)
+ *   GET   /api/v1/investments/campaign/:campaignId     → investments for a campaign   (startup/admin)
  *
- * Access:
- *   All routes require authentication (protect middleware).
- *   Role-specific access is enforced in the controller (not via authorize middleware)
- *   because getCampaignInvestments accepts both startup and admin roles.
+ * Validation rules:
+ *   - txHash: required in on-chain mode (optional only if DEV_STUB_BLOCKCHAIN_MODE=true)
+ *   - walletAddress: required in on-chain mode
+ *   - currency: POL (on-chain native) or ETH — NOT INR
+ *   - paymentProvider / paymentId: REMOVED (Razorpay deprecated to /payments-legacy)
+ *
+ * Note: env-conditional txHash requirement is partially enforced here and
+ * fully enforced in the controller (requireBlockchainOrStub pattern).
  */
 
 const express  = require('express');
 const { body, param } = require('express-validator');
+const env      = require('../config/env');
 
 const router   = express.Router();
 const { protect, authorize }           = require('../middleware/auth');
@@ -42,29 +42,48 @@ const recordInvestmentValidation = [
     .isMongoId()
     .withMessage('campaignId must be a valid MongoDB ObjectId'),
 
+  // txHash: required in blockchain mode; optional only in explicit stub dev mode
   body('txHash')
+    .if(() => !env.DEV_STUB_BLOCKCHAIN_MODE)
+    .notEmpty()
+    .withMessage('txHash is required. Call invest() on the contract first, then send the txHash.')
+    .bail()
+    .matches(/^0x[a-fA-F0-9]{64}$/)
+    .withMessage('txHash must be a valid Ethereum transaction hash (0x + 64 hex chars)'),
+
+  // When stub mode is active — txHash is optional but still validated if provided
+  body('txHash')
+    .if(() => env.DEV_STUB_BLOCKCHAIN_MODE)
     .optional({ nullable: true })
     .matches(/^0x[a-fA-F0-9]{64}$/)
     .withMessage('txHash must be a valid Ethereum transaction hash (0x + 64 hex chars)'),
 
-  // UPDATED FOR NON-BLOCKCHAIN PAYMENT FLOW
+  // walletAddress: required in blockchain mode; optional in stub mode
   body('walletAddress')
+    .if(() => !env.DEV_STUB_BLOCKCHAIN_MODE)
+    .notEmpty()
+    .withMessage('walletAddress is required for on-chain investment verification.')
+    .bail()
+    .matches(/^0x[a-fA-F0-9]{40}$/)
+    .withMessage('walletAddress must be a valid Ethereum address (0x + 40 hex chars)'),
+
+  body('walletAddress')
+    .if(() => env.DEV_STUB_BLOCKCHAIN_MODE)
     .optional({ nullable: true })
     .matches(/^0x[a-fA-F0-9]{40}$/)
     .withMessage('walletAddress must be a valid Ethereum address (0x + 40 hex chars)'),
 
-  body('paymentId').optional(),
-  body('paymentProvider').optional(),
-
+  // amount: required in stub mode only (on-chain mode uses chain event amount)
   body('amount')
     .optional()
     .isFloat({ gt: 0 })
     .withMessage('amount must be a positive number'),
 
+  // currency: POL for Polygon Amoy native token — NOT INR
   body('currency')
     .optional()
-    .isIn(['INR', 'ETH'])
-    .withMessage('currency must be INR or ETH'),
+    .isIn(['POL', 'ETH'])
+    .withMessage("currency must be 'POL' (Polygon native) or 'ETH'. Use the correct on-chain currency."),
 ];
 
 // ─── Validation: campaign investments query ───────────────────────────────────
@@ -78,8 +97,8 @@ const campaignIdParam = [
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
 // POST /api/v1/investments
-// Records an investment after frontend tx.wait() completes.
-// Investor role enforced.
+// Records an on-chain investment after frontend tx.wait(1) completes.
+// Investor role enforced. txHash required in blockchain mode.
 router.post(
   '/',
   protect,
@@ -91,7 +110,7 @@ router.post(
 
 // GET /api/v1/investments/my
 // Returns the authenticated investor's investment history.
-// Note: registered before /campaign/:id so 'my' isn't parsed as a param.
+// Note: registered before /campaign/:id so 'my' is not parsed as a param.
 router.get(
   '/my',
   protect,

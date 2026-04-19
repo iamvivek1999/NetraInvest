@@ -18,6 +18,7 @@
  *   *                  → 404 Not Found
  */
 
+import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -59,6 +60,7 @@ import AdminMilestones    from './pages/dashboard/AdminMilestones';
 import AdminLogin         from './pages/admin/AdminLogin';
 import AdminLayout        from './layouts/AdminLayout';
 import AdminDashboard     from './pages/admin/AdminDashboard';
+import AdminSyncManager from './pages/admin/AdminSyncManager';
 import InvestorProfileSetup from './pages/InvestorProfileSetup';
 import Notifications      from './pages/Notifications';
 
@@ -99,11 +101,20 @@ function RoleSwitch({ investor, startup }) {
 // ─── Session aware router ─────────────────────────────────────────────────────
 
 function AppRoutes() {
+  const [persistReady, setPersistReady] = useState(() => useAuthStore.persist.hasHydrated());
+
+  useEffect(() => {
+    if (useAuthStore.persist.hasHydrated()) setPersistReady(true);
+    const unsub = useAuthStore.persist.onFinishHydration(() => setPersistReady(true));
+    return unsub;
+  }, []);
+
   const { isRestoring } = useSessionRestore();
 
-  // While verifying the stored JWT, show a minimal full-page spinner
-  // so ProtectedRoute doesn't flash a /login redirect on valid sessions
-  if (isRestoring) {
+  // Wait for Zustand persist to rehydrate from localStorage before routing; otherwise
+  // isLoggedIn is briefly false and ProtectedRoute redirects to /login.
+  // While verifying the stored JWT, show a minimal full-page spinner.
+  if (!persistReady || isRestoring) {
     return (
       <div style={{
         display:         'flex',
@@ -140,6 +151,7 @@ function AppRoutes() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="milestones" element={<AdminMilestones />} />
+        <Route path="sync" element={<AdminSyncManager />} />
       </Route>
 
       {/* AppShell wraps all pages — provides Navbar + Footer via <Outlet> */}

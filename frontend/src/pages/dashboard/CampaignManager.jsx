@@ -32,34 +32,44 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link }      from 'react-router-dom';
 import toast                                  from 'react-hot-toast';
+import { ethers }                             from 'ethers';
 
 import useAuthStore         from '../../store/authStore';
-import { getCampaign, updateCampaign, activateCampaign } from '../../api/campaigns.api';
-import { getMilestones, submitProof }    from '../../api/milestones.api';
+import { getCampaign, updateCampaign, activateCampaign, submitMilestoneProof } from '../../api/campaigns.api';
+import { getMilestones }    from '../../api/milestones.api';
 import { linkWalletAddress } from '../../api/auth.api';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STATUS_META = {
-  draft:     { color: 'var(--color-warning)',   bg: 'rgba(245,158,11,0.1)',  label: 'Draft',     icon: '📝' },
-  active:    { color: 'var(--color-success)',   bg: 'rgba(16,185,129,0.1)',  label: 'Active',    icon: '🟢' },
-  paused:    { color: 'var(--color-warning)',   bg: 'rgba(245,158,11,0.1)',  label: 'Paused',    icon: '⏸️'  },
-  funded:    { color: 'var(--color-secondary)', bg: 'rgba(139,92,246,0.1)', label: 'Funded',    icon: '🎉' },
-  completed: { color: 'var(--color-primary)',   bg: 'rgba(99,102,241,0.1)', label: 'Completed', icon: '✅' },
-  cancelled: { color: 'var(--color-error)',     bg: 'rgba(239,68,68,0.1)',  label: 'Cancelled', icon: '❌' },
+  // Local (Review) Statuses
+  draft:        { color: 'var(--color-text-muted)', bg: 'rgba(107,114,128,0.1)', label: 'Draft',             icon: '📝' },
+  submitted:    { color: 'var(--color-warning)',    bg: 'rgba(245,158,11,0.1)',  label: 'Awaiting Review',   icon: '⏳' },
+  under_review: { color: 'var(--color-primary)',    bg: 'rgba(99,102,241,0.1)',  label: 'Under Review',      icon: '🔍' },
+  approved:     { color: 'var(--color-success)',    bg: 'rgba(16,185,129,0.1)',  label: 'Approved (Ready)',  icon: '✅' },
+  rejected:     { color: 'var(--color-error)',      bg: 'rgba(239,68,68,0.1)',   label: 'Changes Required',  icon: '❌' },
+  
+  // On-Chain (Life-cycle) Statuses
+  active:       { color: 'var(--color-success)',    bg: 'rgba(16,185,129,0.1)', label: 'Fundraising',  icon: '🟢' },
+  paused:       { color: 'var(--color-warning)',    bg: 'rgba(245,158,11,0.1)',  label: 'Paused',       icon: '⏸️' },
+  funded:       { color: 'var(--color-secondary)',  bg: 'rgba(139,92,246,0.1)', label: 'Goal Reached', icon: '🎉' },
+  completed:    { color: 'var(--color-primary)',    bg: 'rgba(99,102,241,0.1)', label: 'Completed',    icon: '✅' },
+  cancelled:    { color: 'var(--color-error)',      bg: 'rgba(239,68,68,0.1)',  label: 'Cancelled',    icon: '🚫' },
 };
 
 const MILESTONE_STATUS_META = {
-  pending:   { color: 'var(--color-text-muted)', label: 'Pending'    },
-  submitted: { color: 'var(--color-warning)',    label: 'Submitted'  },
-  approved:  { color: 'var(--color-success)',    label: 'Approved'   },
-  rejected:  { color: 'var(--color-error)',      label: 'Rejected'   },
-  disbursed: { color: 'var(--color-secondary)',  label: 'Disbursed 💸' },
+  pending:      { color: 'var(--color-text-muted)', label: 'Pending',     icon: '⚪' },
+  submitted:    { color: 'var(--color-warning)',    label: 'Submitted',   icon: '⏳' },
+  under_review: { color: 'var(--color-primary)',    label: 'Reviewing',   icon: '🔍' },
+  approved:     { color: 'var(--color-success)',    label: 'Approved',    icon: '✅' },
+  rejected:     { color: 'var(--color-error)',      label: 'Rejected',    icon: '❌' },
+  released:     { color: 'var(--color-secondary)',  label: 'Released 💸', icon: '💰' },
 };
 
 // ─── Small helpers ────────────────────────────────────────────────────────────
 
-function StatusBadge({ status, large = false }) {
+function StatusBadge({ campaign, large = false }) {
+  const status = campaign.onChainStatus !== 'unregistered' ? campaign.onChainStatus : campaign.localStatus;
   const m = STATUS_META[status] || STATUS_META.draft;
   return (
     <span style={{
@@ -112,7 +122,10 @@ function SubmitProofModal({ milestone, campaign, onClose, onSuccess }) {
     setSubmitting(true);
     try {
       const links = proofLinks.split(',').map(l => l.trim()).filter(Boolean);
-      await submitProof(campaign._id, milestone._id, { description, proofLinks: links });
+      await submitMilestoneProof(campaign._id, milestone._id, { 
+        description, 
+        proofLinks: links 
+      });
       toast.success('Proof submitted successfully!');
       onSuccess();
     } catch (err) {
@@ -166,8 +179,12 @@ function SubmitProofModal({ milestone, campaign, onClose, onSuccess }) {
 }
 
 function MilestoneRow({ ms, idx, campaignStatus, onOpenSubmit }) {
-  const meta = MILESTONE_STATUS_META[ms.status] || MILESTONE_STATUS_META.pending;
-  const canSubmit = campaignStatus === 'active' && (ms.status === 'pending' || ms.status === 'rejected');
+  // Alignment: prioritized released (on-chain) over administrative reviewStatus
+  const status = ms.onChainStatus === 'released' ? 'released' : (ms.reviewStatus || 'pending');
+  const meta = MILESTONE_STATUS_META[status] || MILESTONE_STATUS_META.pending;
+  const canSubmit = campaignStatus === 'active' && 
+                   ['pending', 'rejected'].includes(ms.reviewStatus) && 
+                   ms.onChainStatus !== 'released';
 
   return (
     <div style={{
@@ -176,7 +193,7 @@ function MilestoneRow({ ms, idx, campaignStatus, onOpenSubmit }) {
       gap:          '0.75rem',
       padding:      '0.7rem 0.9rem',
       borderRadius: 'var(--r-md)',
-      background:   ms.status === 'disbursed' ? 'rgba(139,92,246,0.05)' : 'rgba(99,102,241,0.02)',
+      background:   status === 'released' ? 'rgba(139,92,246,0.05)' : 'rgba(99,102,241,0.02)',
       border:       '1px solid var(--color-border)',
       marginBottom: '0.5rem',
       flexWrap:     'wrap',
@@ -185,7 +202,7 @@ function MilestoneRow({ ms, idx, campaignStatus, onOpenSubmit }) {
       <div style={{
         width: 28, height: 28,
         borderRadius: '50%',
-        background: ms.status === 'disbursed'
+        background: status === 'released'
           ? 'linear-gradient(135deg,var(--color-secondary),var(--color-primary))'
           : 'linear-gradient(135deg,var(--color-primary),var(--color-accent))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -213,7 +230,7 @@ function MilestoneRow({ ms, idx, campaignStatus, onOpenSubmit }) {
         background: 'rgba(0,0,0,0.15)',
         borderRadius: 99,
       }}>
-        {meta.label}
+        {meta.icon} {meta.label}
       </span>
 
       {/* Action */}
@@ -534,10 +551,10 @@ export default function CampaignManager() {
   if (!campaign) return null;
 
   const statusMeta    = STATUS_META[campaign.status] || STATUS_META.draft;
-  const isDraft       = campaign.status === 'draft' || campaign.status === 'approved';
-  const isActive      = campaign.status === 'active';
-  const isEditable    = isDraft;
-  const isTerminal    = ['completed', 'cancelled'].includes(campaign.status);
+  const isDraft       = (campaign.onChainStatus === 'unregistered') && (campaign.localStatus === 'draft' || campaign.localStatus === 'approved');
+  const isActive      = campaign.onChainStatus === 'active';
+  const isEditable    = campaign.onChainStatus === 'unregistered' && ['draft', 'rejected'].includes(campaign.localStatus);
+  const isTerminal    = ['completed', 'cancelled'].includes(campaign.onChainStatus);
 
   const raised        = campaign.currentRaised   ?? 0;
   const goal          = campaign.fundingGoal      ?? 1;
@@ -566,7 +583,7 @@ export default function CampaignManager() {
               {campaign.summary}
             </p>
           </div>
-          <StatusBadge status={campaign.status} large />
+          <StatusBadge campaign={campaign} large />
         </div>
 
         {/* Tag strip */}
@@ -604,6 +621,9 @@ export default function CampaignManager() {
           <div>
             <div style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem', marginBottom: '0.15rem' }}>Raised</div>
             <div style={{ fontWeight: 700 }}>{raised.toLocaleString()} {currency}</div>
+            <div style={{ fontSize: '0.65rem', color: 'var(--color-primary)', fontWeight: 500, fontFamily: 'monospace', marginTop: '0.1rem' }}>
+              {campaign.totalRaisedWei !== '0' ? `(${parseFloat(ethers.formatEther(campaign.totalRaisedWei || '0')).toFixed(4)} POL)` : '(0 POL)'}
+            </div>
           </div>
           <div>
             <div style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem', marginBottom: '0.15rem' }}>Goal</div>

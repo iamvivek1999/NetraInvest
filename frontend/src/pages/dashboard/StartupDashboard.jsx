@@ -16,6 +16,8 @@ import { getMyStartupProfile }     from '../../api/startups.api';
 import { getMyCampaigns }          from '../../api/campaigns.api';
 import { formatINR }               from '../../utils/formatters';
 
+const POLYGONSCAN_URL = import.meta.env.VITE_POLYGONSCAN_URL || 'https://amoy.polygonscan.com/tx';
+
 // ─── Status badge ─────────────────────────────────────────────────────────────
 const STATUS_META = {
   draft:     { color: 'var(--color-text-muted)',   bg: 'rgba(148,163,184,0.1)',  label: 'Draft'     },
@@ -53,27 +55,35 @@ function CampaignCard({ campaign }) {
   const isDraft  = campaign.status === 'draft';
 
   return (
-    <div style={{
-      background:   isDraft ? 'rgba(245,158,11,0.025)' : 'rgba(99,102,241,0.03)',
-      border:       `1px solid ${isDraft ? 'rgba(245,158,11,0.2)' : 'var(--color-border)'}`,
-      borderRadius: 'var(--r-lg)',
-      padding:      '1rem 1.25rem',
-      marginBottom: '0.75rem',
-      transition:   'border-color 0.2s ease, box-shadow 0.2s ease',
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.borderColor = isDraft ? 'rgba(245,158,11,0.4)' : 'rgba(99,102,241,0.4)';
-      e.currentTarget.style.boxShadow   = isDraft ? '0 0 0 1px rgba(245,158,11,0.1)' : '0 0 0 1px rgba(99,102,241,0.15)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.borderColor = isDraft ? 'rgba(245,158,11,0.2)' : 'var(--color-border)';
-      e.currentTarget.style.boxShadow  = 'none';
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-        <div style={{ fontWeight: 600, fontSize: '0.92rem', flex: 1, marginRight: '0.5rem' }}>
-          {campaign.title}
+    <div
+      style={{
+        background:   isDraft ? 'rgba(245,158,11,0.025)' : 'rgba(99,102,241,0.03)',
+        border:       `1px solid ${isDraft ? 'rgba(245,158,11,0.2)' : 'var(--color-border)'}`,
+        borderRadius: 'var(--r-lg)',
+        padding:      '1rem 1.25rem',
+        marginBottom: '0.75rem',
+        transition:   'border-color 0.2s ease, box-shadow 0.2s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = isDraft ? 'rgba(245,158,11,0.4)' : 'rgba(99,102,241,0.4)';
+        e.currentTarget.style.boxShadow   = isDraft ? '0 0 0 1px rgba(245,158,11,0.1)' : '0 0 0 1px rgba(99,102,241,0.15)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = isDraft ? 'rgba(245,158,11,0.2)' : 'var(--color-border)';
+        e.currentTarget.style.boxShadow  = 'none';
+      }}
+    >
+      {/* Title + Status row */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{campaign.title}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <StatusBadge status={campaign.status} />
+          {campaign.syncStatus === 'confirmed' ? (
+            <span title="On-chain Verified" style={{ color: 'var(--color-success)', display: 'flex', fontSize: '0.7rem', fontWeight: 700 }}>✓ Verified</span>
+          ) : campaign.syncStatus === 'pending' && campaign.status !== 'draft' ? (
+            <span title="Syncing with Blockchain..." style={{ color: 'var(--color-warning)', animation: 'pulse 2s infinite', fontSize: '10px', fontWeight: 700 }}>SYNCING</span>
+          ) : null}
         </div>
-        <StatusBadge status={campaign.status} />
       </div>
 
       {/* Progress bar */}
@@ -93,13 +103,23 @@ function CampaignCard({ campaign }) {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
             📅 {new Date(campaign.deadline).toLocaleDateString()}
           </span>
           <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
             👥 {campaign.investorCount ?? 0} investor{(campaign.investorCount ?? 0) !== 1 ? 's' : ''}
           </span>
+          {campaign.createCampaignTxHash && (
+             <a
+               href={`${POLYGONSCAN_URL}/${campaign.createCampaignTxHash}`}
+               target="_blank"
+               rel="noreferrer"
+               style={{ fontSize: '0.7rem', color: 'var(--color-accent)', textDecoration: 'none' }}
+             >
+               View Proof ↗
+             </a>
+          )}
         </div>
 
         {/* Status-aware action */}

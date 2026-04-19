@@ -2,6 +2,7 @@ require('colors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
+const crypto = require('crypto');
 
 // Models
 const User = require('../src/models/User');
@@ -11,8 +12,8 @@ const Milestone = require('../src/models/Milestone');
 const Investment = require('../src/models/Investment');
 
 // 1. Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../.env/.env') }); // try local nested first
-dotenv.config(); // fallback
+dotenv.config({ path: path.resolve(__dirname, '../.env/.env') });
+dotenv.config();
 
 const connectDB = async () => {
   try {
@@ -20,7 +21,7 @@ const connectDB = async () => {
       throw new Error('MONGO_URI is not defined in environment variables');
     }
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 8000,
     });
     console.log(`[DB] MongoDB connected: ${conn.connection.host}`.cyan.bold);
   } catch (error) {
@@ -29,231 +30,245 @@ const connectDB = async () => {
   }
 };
 
+// ── Seed constants ─────────────────────────────────────────────────────────────
 const DUMMY_PASSWORD = 'Pass1234';
 
-const industries = ['fintech', 'healthtech', 'edtech', 'ecommerce', 'agritech', 'saas', 'cleantech', 'proptech'];
-const startupNames = [
-  'EcoWatt', 'MediLink', 'EduChain', 'FinGrow', 'AgriBoost', 
-  'CloudSync', 'Propertize', 'CyberShield', 'AILogistics', 'BioSynth'
+// profileStage  → StartupProfile.fundingStage enum: pre_seed | seed | series_a | series_b | other
+// campaignStage → Campaign.fundingStage      enum: pre-seed | seed | series-a | series-b | series-c | growth
+const STARTUPS = [
+  { name: 'EcoWatt',      industry: 'cleantech',   sector: 'Energy',       category: 'CleanTech',  profileStage: 'seed',      campaignStage: 'seed',     risk: 4, ret: 'high'    },
+  { name: 'MediLink',     industry: 'healthtech',  sector: 'Healthcare',   category: 'HealthTech', profileStage: 'seed',      campaignStage: 'seed',     risk: 5, ret: 'medium'  },
+  { name: 'EduChain',     industry: 'edtech',      sector: 'Education',    category: 'EdTech',     profileStage: 'seed',      campaignStage: 'seed',     risk: 3, ret: 'medium'  },
+  { name: 'FinGrow',      industry: 'fintech',     sector: 'Finance',      category: 'FinTech',    profileStage: 'pre_seed',  campaignStage: 'pre-seed', risk: 6, ret: 'high'    },
+  { name: 'AgriBoost',    industry: 'agritech',    sector: 'Agriculture',  category: 'AgriTech',   profileStage: 'pre_seed',  campaignStage: 'pre-seed', risk: 5, ret: 'medium'  },
+  { name: 'CloudSync',    industry: 'saas',         sector: 'Technology',   category: 'SaaS',       profileStage: 'pre_seed',  campaignStage: 'pre-seed', risk: 4, ret: 'high'    },
+  { name: 'Propertize',   industry: 'proptech',    sector: 'Real Estate',  category: 'PropTech',   profileStage: 'pre_seed',  campaignStage: 'pre-seed', risk: 6, ret: 'medium'  },
+  { name: 'CyberShield',  industry: 'saas',         sector: 'Technology',   category: 'CyberSec',  profileStage: 'series_a',  campaignStage: 'series-a', risk: 3, ret: 'high'    },
+  { name: 'AILogistics',  industry: 'saas',         sector: 'Technology',   category: 'AI & ML',   profileStage: 'series_a',  campaignStage: 'series-a', risk: 5, ret: 'moonshot' },
+  { name: 'BioSynth',     industry: 'healthtech',  sector: 'Healthcare',   category: 'BioTech',    profileStage: 'series_a',  campaignStage: 'series-a', risk: 7, ret: 'moonshot' },
 ];
 
+const MILESTONE_CONFIGS = [
+  { count: 2, percentages: [50, 50] },
+  { count: 3, percentages: [30, 40, 30] },
+  { count: 4, percentages: [25, 25, 25, 25] },
+  { count: 5, percentages: [20, 20, 20, 20, 20] },
+];
+
+// ── Main seed ──────────────────────────────────────────────────────────────────
 const seedData = async () => {
   try {
-    console.log('🌱 Starting Seed Process...'.yellow);
-
+    console.log('\n🌱 Starting Seed Process...'.yellow.bold);
     await connectDB();
 
+    // ── Clear existing data ──────────────────────────────────────────────────
     console.log('🧹 Clearing existing data...'.yellow);
-    await User.deleteMany({});
-    await StartupProfile.deleteMany({});
-    await Campaign.deleteMany({});
-    await Milestone.deleteMany({});
-    await Investment.deleteMany({});
-
+    await Promise.all([
+      User.deleteMany({}),
+      StartupProfile.deleteMany({}),
+      Campaign.deleteMany({}),
+      Milestone.deleteMany({}),
+      Investment.deleteMany({}),
+    ]);
     console.log('✅ Collections cleared.'.green);
 
-    // ────────────────────────────────────────────────────────────────────────
-    // 1. Create Admin
-    // ────────────────────────────────────────────────────────────────────────
+    // ── 1. Admin ─────────────────────────────────────────────────────────────
     const admin = await User.create({
       fullName: 'System Admin',
       email: process.env.ADMIN_EMAIL || 'admin@enigmainvest.dev',
       passwordHash: process.env.ADMIN_PASSWORD || 'Admin@1234',
       role: 'admin',
-      isEmailVerified: true
+      isEmailVerified: true,
     });
-    console.log('✅ Admin user created.'.green);
+    console.log(`✅ Admin:    ${admin.email}`.green);
 
-    // ────────────────────────────────────────────────────────────────────────
-    // 2. Create Investors
-    // ────────────────────────────────────────────────────────────────────────
+    // ── 2. Investors ─────────────────────────────────────────────────────────
     const investors = [];
     for (let i = 1; i <= 5; i++) {
-      const investor = await User.create({
+      const inv = await User.create({
         fullName: `Investor ${i}`,
         email: `investor${i}@example.com`,
         passwordHash: DUMMY_PASSWORD,
         role: 'investor',
-        isEmailVerified: true
+        isEmailVerified: true,
       });
-      investors.push(investor);
+      investors.push(inv);
     }
-    console.log(`✅ 5 Investor accounts created.`.green);
+    console.log(`✅ Investors: investor1–5@example.com / ${DUMMY_PASSWORD}`.green);
 
-    // ────────────────────────────────────────────────────────────────────────
-    // 3. Create Startups & Profiles & Campaigns & Milestones
-    // ────────────────────────────────────────────────────────────────────────
+    // ── 3. Startups + Profiles + Campaigns + Milestones ──────────────────────
     const campaignsList = [];
 
     for (let i = 0; i < 10; i++) {
+      const s = STARTUPS[i];
+
       // User
       const startupUser = await User.create({
-        fullName: `Founder ${i+1}`,
-        email: `startup${i+1}@example.com`,
+        fullName: `Founder ${i + 1}`,
+        email: `startup${i + 1}@example.com`,
         passwordHash: DUMMY_PASSWORD,
         role: 'startup',
-        isEmailVerified: true
+        isEmailVerified: true,
       });
 
       // Profile
       const startupProfile = await StartupProfile.create({
         userId: startupUser._id,
-        startupName: startupNames[i],
-        tagline: `Transforming the ${industries[i % industries.length]} space.`,
-        description: `This is a comprehensive description for ${startupNames[i]}. We are dedicated to providing cutting-edge solutions in the ${industries[i % industries.length]} industry, leveraging modern tech for scalable impact.`,
-        industry: industries[i % industries.length],
-        fundingStage: i < 3 ? 'seed' : (i < 7 ? 'pre_seed' : 'series_a'),
-        website: `https://${startupNames[i].toLowerCase()}.example.com`,
+        startupName: s.name,
+        tagline: `Transforming the ${s.industry} space — one product at a time.`,
+        description: `${s.name} is a leading innovator in the ${s.industry} industry. We leverage modern technology for scalable, high-impact solutions that drive real-world change.`,
+        industry: s.industry,
+        fundingStage: s.profileStage,
+        website: `https://${s.name.toLowerCase()}.example.com`,
         location: { city: 'Bengaluru', country: 'India' },
         foundedYear: 2020 + (i % 4),
         teamSize: 5 + i * 2,
         teamMembers: [
-          { name: `Founder ${i+1}`, role: 'CEO', bio: 'Visionary leader with 10 years of experience.' }
+          { name: `Founder ${i + 1}`, role: 'CEO', bio: 'Visionary leader with 10 years of experience.' },
         ],
         documents: [
-          { docType: 'pitch_deck', url: 'https://example.com/pitch.pdf', label: 'Pitch Deck 2026' }
+          { docType: 'pitch_deck', url: 'https://example.com/pitch.pdf', label: 'Pitch Deck 2026' },
         ],
-        isVerified: true,
-        verifiedAt: new Date()
+        isVerified: i < 8,   // first 8 verified, last 2 pending
+        verificationStatus: i < 8 ? 'approved' : 'pending',
+        verifiedAt: i < 8 ? new Date() : null,
       });
 
-      // Campaign
-      const milestoneConfigurations = [
-        { count: 2, percentages: [50, 50] },
-        { count: 3, percentages: [30, 40, 30] },
-        { count: 4, percentages: [25, 25, 25, 25] },
-        { count: 5, percentages: [20, 20, 20, 20, 20] },
-      ];
-
-      const configIndex = i % milestoneConfigurations.length;
-      const mConfig = milestoneConfigurations[configIndex];
-      const fundingGoal = 1000000 + i * 500000;
-
-      // 8 active campaigns, 2 drafts
-      const campaignStatus = i < 8 ? 'active' : 'draft';
+      // Campaign — first 8 active, last 2 draft
+      const mConfig = MILESTONE_CONFIGS[i % MILESTONE_CONFIGS.length];
+      const fundingGoal = 1_000_000 + i * 500_000;
+      const isActive = i < 8;
 
       const deadline = new Date();
-      deadline.setDate(deadline.getDate() + 30 + i * 10); // Future deadlines
+      deadline.setDate(deadline.getDate() + 30 + i * 10);
 
       const campaign = await Campaign.create({
         startupProfileId: startupProfile._id,
         userId: startupUser._id,
-        title: `${startupNames[i]} Expansion Round`,
-        summary: `Raising funds to scale operations and accelerate product development for ${startupNames[i]}.`,
-        fundingGoal: fundingGoal,
+        title: `${s.name} ${isActive ? 'Expansion' : 'Seed'} Round`,
+        summary: `Raising ₹${(fundingGoal / 100_000).toFixed(0)} Lakh to scale operations and accelerate product development for ${s.name}.`,
+        sector: s.sector,
+        category: s.category,
+        fundingStage: s.campaignStage,
+        riskScore: s.risk,
+        returnPotential: s.ret,
+        fundingGoal,
         currency: 'INR',
         minInvestment: 5000,
-        deadline: deadline,
-        status: campaignStatus,
-        campaignKey: '0x' + require('crypto').randomBytes(32).toString('hex'),
+        deadline,
+        localStatus: isActive ? 'approved' : 'draft',
+        onChainStatus: isActive ? 'active' : 'unregistered',
+        campaignKey: '0x' + crypto.randomBytes(32).toString('hex'),
         milestoneCount: mConfig.count,
         milestonePercentages: mConfig.percentages,
-        tags: [industries[i % industries.length], 'scaling', 'tech']
+        tags: [s.industry, 'scaling', 'impact'],
       });
 
-      campaignsList.push(campaign);
+      campaignsList.push({ campaign, mConfig, fundingGoal });
 
       // Milestones
       for (let m = 0; m < mConfig.count; m++) {
+        const start = new Date();
+        start.setDate(start.getDate() + m * 30);
+        const end = new Date(start);
+        end.setDate(end.getDate() + 30);
+
         await Milestone.create({
           campaignId: campaign._id,
           startupProfileId: startupProfile._id,
           userId: startupUser._id,
-          index: m,
-          title: `Milestone ${m+1}`,
-          description: `Description for phase ${m+1}. Expected to complete core targets and deliverables.`.padEnd(20, '.'), 
+          milestoneIndex: m,
+          title: `Milestone ${m + 1}: Phase ${m + 1} Delivery`,
+          description: `Complete phase ${m + 1} objectives including development, testing, and deployment. Target: achieve core KPIs and stakeholder sign-off.`,
           percentage: mConfig.percentages[m],
-          estimatedAmount: fundingGoal * mConfig.percentages[m] / 100,
-          status: 'pending'
+          targetAmount: fundingGoal * mConfig.percentages[m] / 100,
+          status: 'pending',
+          targetDate: end,
         });
       }
     }
-    console.log(`✅ 10 Startup accounts, profiles, campaigns, and milestones created.`.green);
+    console.log('✅ 10 startups + profiles + campaigns + milestones created.'.green);
 
-    // ────────────────────────────────────────────────────────────────────────
-    // 4. Create Investments (for active campaigns)
-    // ────────────────────────────────────────────────────────────────────────
+    // ── 4. Investments ────────────────────────────────────────────────────────
     let totalInvestments = 0;
-    
-    for (const campaign of campaignsList) {
-      if (campaign.status === 'active') {
-        // Add random investments
-        const numInvestments = 1 + Math.floor(Math.random() * 3); // 1 to 3 investments per campaign
-        
-        let campaignRaised = 0;
-        let campaignInvestorCount = 0;
-        const investedUsers = new Set();
 
-        for (let j = 0; j < numInvestments; j++) {
-          const investor = investors[j % investors.length];
-          const amount = 50000 + Math.floor(Math.random() * 20000); // 50k - 70k
+    for (const { campaign, fundingGoal } of campaignsList) {
+      if (campaign.onChainStatus !== 'active') continue;
 
-          await Investment.create({
-            campaignId: campaign._id,
-            startupProfileId: campaign.startupProfileId,
-            investorUserId: investor._id,
-            amount: amount,
-            currency: 'INR',
-            chain: 'stub',
-            status: 'confirmed',
-            txHash: '0x' + require('crypto').randomBytes(32).toString('hex'),
-            confirmedAt: new Date(),
-            paymentId: `pay_stub_${Math.random().toString(36).substring(7)}`,
-            verificationNote: 'Stub mode seed investment'
-          });
+      const numInvestments = 1 + Math.floor(Math.random() * 3); // 1–3 per campaign
+      let campaignRaised = 0;
+      const investedUserIds = new Set();
 
-          campaignRaised += amount;
-          if (!investedUsers.has(investor._id.toString())) {
-             campaignInvestorCount++;
-             investedUsers.add(investor._id.toString());
-          }
-          totalInvestments++;
-        }
+      for (let j = 0; j < numInvestments; j++) {
+        const investor = investors[j % investors.length];
+        const amount = 50_000 + Math.floor(Math.random() * 20_000);
 
-        // Update campaign
-        await Campaign.findByIdAndUpdate(campaign._id, {
-          currentRaised: campaignRaised,
-          investorCount: campaignInvestorCount,
-          // Let's make 1 campaign fully funded for demo
-          ...(campaignRaised >= campaign.fundingGoal ? { status: 'funded' } : {})
-        });
-
-      }
-    }
-    
-    // Force one campaign to be 'funded' fully to verify that feature
-    const firstCampaign = campaignsList[0];
-    if(firstCampaign.status === 'active') {
-        await Campaign.findByIdAndUpdate(firstCampaign._id, {
-            currentRaised: firstCampaign.fundingGoal,
-            status: 'funded',
-            investorCount: firstCampaign.investorCount > 0 ? firstCampaign.investorCount : 1
-        });
         await Investment.create({
-            campaignId: firstCampaign._id,
-            startupProfileId: firstCampaign.startupProfileId,
-            investorUserId: investors[0]._id,
-            amount: firstCampaign.fundingGoal,
-            currency: 'INR',
-            chain: 'stub',
-            status: 'confirmed',
-            txHash: '0x' + require('crypto').randomBytes(32).toString('hex'),
-            confirmedAt: new Date(),
-            verificationNote: 'Funded campaign seed'
+          campaignId: campaign._id,
+          startupProfileId: campaign.startupProfileId,
+          investorUserId: investor._id,
+          amount,
+          currency: 'INR',
+          chain: 'stub',
+          status: 'confirmed',
+          txHash: '0x' + crypto.randomBytes(32).toString('hex'),
+          confirmedAt: new Date(),
+          paymentId: `pay_stub_${crypto.randomBytes(4).toString('hex')}`,
+          verificationNote: 'Seed stub investment',
         });
+
+        campaignRaised += amount;
+        investedUserIds.add(investor._id.toString());
         totalInvestments++;
+      }
+
+      await Campaign.findByIdAndUpdate(campaign._id, {
+        currentRaised: campaignRaised,
+        investorCount: investedUserIds.size,
+      });
     }
 
-    console.log(`✅ ${totalInvestments} Investments created.`.green);
+    // Force campaign[0] to be fully funded as a demo showcase
+    const { campaign: firstCampaign, fundingGoal: firstGoal } = campaignsList[0];
+    await Campaign.findByIdAndUpdate(firstCampaign._id, {
+      currentRaised: firstGoal,
+      onChainStatus: 'funded',
+      investorCount: 3,
+    });
+    await Investment.create({
+      campaignId: firstCampaign._id,
+      startupProfileId: firstCampaign.startupProfileId,
+      investorUserId: investors[0]._id,
+      amount: firstGoal,
+      currency: 'INR',
+      chain: 'stub',
+      status: 'confirmed',
+      txHash: '0x' + crypto.randomBytes(32).toString('hex'),
+      confirmedAt: new Date(),
+      verificationNote: 'Funded campaign seed — demo showcase',
+    });
+    totalInvestments++;
 
-    console.log('\n🎉 Seeding Completed Successfully!'.magenta.bold);
-    console.log('You can now log in with the following credentials:'.cyan);
-    console.log('Startup:  startup1@example.com / Pass1234');
-    console.log('Investor: investor1@example.com / Pass1234');
-    
+    console.log(`✅ ${totalInvestments} investments created.`.green);
+
+    // ── Summary ───────────────────────────────────────────────────────────────
+    console.log('\n🎉 Seeding Completed!'.magenta.bold);
+    console.log('─'.repeat(52).grey);
+    console.log('  Role      Email                          Password'.cyan);
+    console.log('─'.repeat(52).grey);
+    console.log(`  Admin     ${'admin@enigmainvest.dev'.padEnd(30)} Admin@1234`);
+    console.log(`  Investor  ${'investor1–5@example.com'.padEnd(30)} Pass1234`);
+    console.log(`  Startup   ${'startup1–10@example.com'.padEnd(30)} Pass1234`);
+    console.log('─'.repeat(52).grey);
+
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Seeding Failed:'.red.bold, error);
+    console.error('\n❌ Seeding Failed:'.red.bold, error.message);
+    if (error.errors) {
+      Object.entries(error.errors).forEach(([field, err]) => {
+        console.error(`   • ${field}: ${err.message}`.red);
+      });
+    }
     process.exit(1);
   }
 };

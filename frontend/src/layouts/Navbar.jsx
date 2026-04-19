@@ -20,6 +20,7 @@ import useAuthStore                    from '../store/authStore';
 import { shortenAddress }              from '../utils/formatters';
 import { APP_NAME }                    from '../utils/constants';
 import NotificationBell               from '../components/NotificationBell';
+import WalletStatus                   from '../components/WalletStatus';
 
 export default function Navbar() {
   const { isLoggedIn, user, role, logout } = useAuthStore();
@@ -51,7 +52,7 @@ export default function Navbar() {
               'navbar__link' + (isActive ? ' navbar__link--active' : '')
             }
           >
-            Discover
+            🚀 Discover
           </NavLink>
         </div>
 
@@ -59,19 +60,11 @@ export default function Navbar() {
         <div className="navbar__actions">
           {isLoggedIn ? (
             <>
+              {/* Wallet Status (Web3 Account & Balance) */}
+              <WalletStatus />
+
               {/* Role badge */}
               <span className={`badge badge--${role}`}>{role}</span>
-
-              {/* Wallet address pill (if linked) */}
-              {user?.walletAddress && (
-                <span
-                  className="user-pill"
-                  title={user.walletAddress}
-                  aria-label="Linked wallet address"
-                >
-                  🔗 {shortenAddress(user.walletAddress)}
-                </span>
-              )}
 
               {/* User name pill */}
               <span className="user-pill">

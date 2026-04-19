@@ -32,12 +32,14 @@ const proofDocumentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Milestone',
       required: [true, 'Milestone reference is required'],
+      index: true,
     },
 
     campaignId: {
       type: Schema.Types.ObjectId,
       ref: 'Campaign',
       required: [true, 'Campaign reference is required'],
+      index: true,
     },
 
     uploadedBy: {

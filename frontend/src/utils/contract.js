@@ -40,21 +40,28 @@ export function getWriteContract(signer) {
 }
 
 /**
- * Converts a INR amount (human-readable number or string) to Wei (BigInt).
- * Uses ethers v6 parseEther.
+ * Converts a POL decimal amount (human-readable string/number) to wei (BigInt).
+ * e.g. toWei("1.5") → 1500000000000000000n
  *
- * @param {string|number} inr
+ * @param {string|number} pol
  * @returns {bigint}
  */
-export function inrToWei(inr) {
-  return ethers.parseEther(String(inr));
+export function toWei(pol) {
+  return ethers.parseEther(String(pol));
 }
 
 /**
- * Converts Wei (BigInt or string) to a human-readable INR string.
+ * Converts wei (BigInt or string) to a human-readable POL decimal string.
+ * e.g. fromWei("1500000000000000000") → "1.5"
+ *
  * @param {bigint|string} wei
  * @returns {string}
  */
-export function weiToINR(wei) {
+export function fromWei(wei) {
   return ethers.formatEther(wei);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// All monetary conversion helpers live in src/utils/wei.js.
+// Import toWei / fromWei from there for all on-chain amount operations.
+// ─────────────────────────────────────────────────────────────────────────────

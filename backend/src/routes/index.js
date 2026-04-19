@@ -56,9 +56,11 @@ router.use('/campaigns', campaignRoutes);
 const investmentRoutes = require('./investment.routes');
 router.use('/investments', investmentRoutes);
 
-// Payment routes
+// DEPRECATED: Razorpay off-chain payment flow.
+// Route renamed to /payments-legacy — do not use for new investments.
+// Use POST /api/v1/investments with a verified on-chain txHash instead.
 const paymentRoutes = require('./payment.routes');
-router.use('/payments', paymentRoutes);
+router.use('/payments-legacy', paymentRoutes);
 
 // Dashboard routes (aggregated views)
 // const dashboardRoutes = require('./dashboard.routes');
@@ -83,6 +85,12 @@ router.use('/milestones', proofDocumentRoutes);
 // PATCH /api/v1/notifications/:id/read
 const notificationRoutes = require('./notification.routes');
 router.use('/notifications', notificationRoutes);
+
+// Evidence file-serving routes (global, bundleId-based)
+// GET  /api/v1/evidence/files/:bundleId/:fileIndex   → stream an uploaded file
+// GET  /api/v1/evidence/files/:bundleId/summary      → stream summary.json
+const { evidenceFileRouter } = require('./milestoneEvidence.routes');
+router.use('/evidence', evidenceFileRouter);
 
 // Progress update routes
 // const progressRoutes = require('./progress.routes');

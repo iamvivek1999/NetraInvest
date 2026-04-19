@@ -28,12 +28,12 @@ const STATUS_META = {
 // ─── Campaign card ────────────────────────────────────────────────────────────
 
 function CampaignCard({ campaign }) {
-  const meta     = STATUS_META[campaign.status] || STATUS_META.draft;
+  const meta     = STATUS_META[campaign.localStatus] || STATUS_META.draft;
   const raised   = campaign.currentRaised   ?? 0;
   const goal     = campaign.fundingGoal     ?? 1;
   const pct      = Math.min(100, Math.round((raised / goal) * 100));
   const currency = campaign.currency        || 'INR';
-  const isDraft  = campaign.status === 'draft';
+  const isDraft  = campaign.localStatus === 'draft';
 
   return (
     <div style={{
@@ -155,12 +155,12 @@ export default function MyCampaigns() {
 
   const filtered = !campaigns ? [] :
     filter === 'all' ? campaigns :
-    campaigns.filter((c) => c.status === filter);
+    campaigns.filter((c) => c.localStatus === filter);
 
   const counts = FILTER_TABS.reduce((acc, t) => {
     acc[t] = t === 'all'
       ? (campaigns?.length ?? 0)
-      : (campaigns?.filter((c) => c.status === t).length ?? 0);
+      : (campaigns?.filter((c) => c.localStatus === t).length ?? 0);
     return acc;
   }, {});
 

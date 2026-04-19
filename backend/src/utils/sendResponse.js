@@ -17,23 +17,47 @@
  */
 
 /**
- * Send a standardized success response.
+ * Send a standardized API response.
  *
  * @param {Object}  res        - Express response object
  * @param {number}  statusCode - HTTP status code (default: 200)
- * @param {string}  message    - Human-readable message
- * @param {*}       data       - Response payload (optional)
- * @param {Object}  extras     - Additional top-level keys (e.g. { token })
+ * @param {string|boolean} messageOrSuccess - Human-readable message OR success boolean
+ * @param {*}       messageOrData    - Human-readable message (if 3rd was boolean) OR data payload
+ * @param {*}       dataOrExtras     - Data payload (if 3rd/4th were different) OR extras
  */
-const sendResponse = (res, statusCode = 200, message = 'Success', data = null, extras = {}) => {
+const sendResponse = (res, statusCode = 200, messageOrSuccess = 'Success', messageOrData = null, dataOrExtras = null) => {
+  let success = statusCode < 400;
+  let message = '';
+  let data = null;
+  let extras = {};
+
+  // Handle (res, statusCode, success, message, data, extras)
+  if (typeof messageOrSuccess === 'boolean') {
+    success = messageOrSuccess;
+    message = typeof messageOrData === 'string' ? messageOrData : (success ? 'Success' : 'Error');
+    data = dataOrExtras;
+    // Note: extras would be a 6th arg, but let's keep it simple or use data if it's an object
+  } 
+  // Handle (res, statusCode, message, data, extras)
+  else {
+    message = messageOrSuccess;
+    data = messageOrData;
+    extras = dataOrExtras || {};
+  }
+
   const body = {
-    success: true,
+    success,
     message,
     ...extras,
   };
 
   if (data !== null) {
-    body.data = data;
+    if (typeof data === 'object' && !Array.isArray(data) && Object.keys(extras).length === 0) {
+       // if data is object, maybe it has extras? No, let's stick to the structure.
+       body.data = data;
+    } else {
+       body.data = data;
+    }
   }
 
   return res.status(statusCode).json(body);

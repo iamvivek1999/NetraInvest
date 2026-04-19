@@ -80,9 +80,9 @@ const createMilestones = async (req, res) => {
   assertOwnership(campaign, userId);
 
   // Only allow milestone creation for draft or active campaigns
-  if (['completed', 'cancelled'].includes(campaign.status)) {
+  if (['completed', 'cancelled'].includes(campaign.onChainStatus)) {
     throw new ApiError(
-      `Cannot create milestones for a ${campaign.status} campaign.`,
+      `Cannot create milestones for a ${campaign.onChainStatus} campaign.`,
       400
     );
   }
@@ -113,21 +113,23 @@ const createMilestones = async (req, res) => {
     campaignId,
     startupProfileId: campaign.startupProfileId,
     userId,
-    index:           i,
+    milestoneIndex:  i,
     title:           input.title.trim(),
     description:     input.description.trim(),
     targetDate:      input.targetDate ? new Date(input.targetDate) : null,
     // Snapshot from campaign — stored for auditability
     percentage:      campaign.milestonePercentages[i],
-    estimatedAmount: parseFloat(
+    targetAmount: parseFloat(
       ((campaign.fundingGoal * campaign.milestonePercentages[i]) / 100).toFixed(6)
     ),
-    status: 'pending',
+    targetAmountWei: '0', // Will be updated when campaign is activated on-chain
+    reviewStatus: 'pending',
+    onChainStatus: 'unreleased',
   }));
 
   const created = await Milestone.insertMany(milestoneDocs, { ordered: true });
 
-  sendResponse(res, 201, `${created.length} milestone(s) created successfully`, {
+  sendResponse(res, 201, true, `${created.length} milestone(s) created successfully`, {
     milestones: created,
   });
 };
@@ -147,7 +149,7 @@ const getMilestones = async (req, res) => {
   await loadCampaign(campaignId);
 
   const milestones = await Milestone.find({ campaignId })
-    .sort({ index: 1 })
+    .sort({ milestoneIndex: 1 })
     .populate('approvedBy', 'fullName email');
 
   sendResponse(res, 200, 'Milestones retrieved', { milestones });
@@ -199,29 +201,29 @@ const submitProof = async (req, res) => {
   assertOwnership(campaign, userId);
 
   // Campaign must be active or funded for proof submission
-  if (!['active', 'funded'].includes(campaign.status)) {
+  if (!['active', 'funded'].includes(campaign.onChainStatus)) {
     throw new ApiError(
       `Proof can only be submitted for active or funded campaigns. ` +
-        `Current campaign status: "${campaign.status}".`,
+        `Current campaign status: "${campaign.onChainStatus}".`,
       400
     );
   }
 
   // Milestone must be pending or rejected (not submitted/approved/released)
-  if (!['pending', 'rejected'].includes(milestone.status)) {
+  if (!['pending', 'rejected'].includes(milestone.reviewStatus)) {
     throw new ApiError(
-      `Milestone is currently "${milestone.status}". ` +
+      `Milestone is currently "${milestone.reviewStatus}". ` +
         `Proof can only be submitted when status is "pending" or "rejected".`,
       400
     );
   }
 
   // Sequential check — must be the current active milestone
-  if (milestone.index !== campaign.currentMilestoneIndex) {
+  if (milestone.milestoneIndex !== campaign.currentMilestoneIndex) {
     throw new ApiError(
       `Milestones must be completed in order. ` +
         `The current active milestone is #${campaign.currentMilestoneIndex + 1} (index ${campaign.currentMilestoneIndex}). ` +
-        `This is milestone #${milestone.index + 1} (index ${milestone.index}).`,
+        `This is milestone #${milestone.milestoneIndex + 1} (index ${milestone.milestoneIndex}).`,
       400
     );
   }
@@ -232,7 +234,7 @@ const submitProof = async (req, res) => {
     milestoneId,
     {
       $set: {
-        status: 'submitted',
+        reviewStatus: 'submitted',
         rejectionReason: null, // clear any previous rejection
         rejectedAt:      null,
         proofSubmission: {
@@ -246,7 +248,7 @@ const submitProof = async (req, res) => {
     { new: true, runValidators: true }
   );
 
-  sendResponse(res, 200, 'Proof submitted successfully. Awaiting admin review.', {
+  sendResponse(res, 200, true, 'Proof submitted successfully. Awaiting admin review.', {
     milestone: updated,
   });
 
@@ -255,7 +257,7 @@ const submitProof = async (req, res) => {
     try {
       const investorIds = await Investment.distinct('investorUserId', {
         campaignId: updated.campaignId,
-        status: { $in: ['confirmed', 'unverified'] },
+        syncStatus: { $in: ['confirmed', 'unverified'] },
       });
       const msg = `Milestone "${updated.title}" in "${campaign.title}" has been updated.`;
       for (const investorId of investorIds) {
@@ -287,16 +289,16 @@ const approveMilestone = async (req, res) => {
   const { campaignId, milestoneId } = req.params;
   const { userId } = req.user;
 
-  const [, milestone] = await Promise.all([
+  const [campaign, milestone] = await Promise.all([
     loadCampaign(campaignId),
     Milestone.findOne({ _id: milestoneId, campaignId }),
   ]);
 
   if (!milestone) throw new ApiError('Milestone not found.', 404);
 
-  if (milestone.status !== 'submitted') {
+  if (milestone.reviewStatus !== 'submitted') {
     throw new ApiError(
-      `Only submitted milestones can be approved. Current status: "${milestone.status}".`,
+      `Only submitted milestones can be approved. Current status: "${milestone.reviewStatus}".`,
       400
     );
   }
@@ -305,7 +307,7 @@ const approveMilestone = async (req, res) => {
     milestoneId,
     {
       $set: {
-        status:     'approved',
+        reviewStatus: 'approved',
         approvedBy: userId,
         approvedAt: new Date(),
       },
@@ -319,6 +321,7 @@ const approveMilestone = async (req, res) => {
   sendResponse(
     res,
     200,
+    true,
     'Milestone approved. Mark as disbursed after transferring funds off-chain.',
     { milestone: updated }
   );
@@ -356,9 +359,9 @@ const markDisbursed = async (req, res) => {
 
   if (!milestone) throw new ApiError('Milestone not found.', 404);
 
-  if (milestone.status !== 'approved') {
+  if (milestone.reviewStatus !== 'approved') {
     throw new ApiError(
-      `Only approved milestones can be marked as disbursed. Current status: "${milestone.status}". ` +
+      `Only approved milestones can be marked as disbursed. Current status: "${milestone.reviewStatus}". ` +
         'Approve the milestone first.',
       400
     );
@@ -371,12 +374,12 @@ const markDisbursed = async (req, res) => {
     milestoneId,
     {
       $set: {
-        status:             'disbursed',
+        onChainStatus:      'released',
         disbursedAt:        now,
         disbursedBy:        req.user.userId,
         disbursalReference: disbursalReference || null,
         disbursalNote:      disbursalNote || null,
-        disbursedAmount:    milestone.estimatedAmount, // Since it defaults off estimated logic here
+        disbursedAmount:    milestone.targetAmount, 
       },
     },
     { new: true, runValidators: true }
@@ -388,14 +391,14 @@ const markDisbursed = async (req, res) => {
 
   await Campaign.findByIdAndUpdate(campaignId, {
     $inc: { currentMilestoneIndex: 1 },
-    ...(isFinalMilestone && { $set: { status: 'completed' } }),
+    ...(isFinalMilestone && { $set: { onChainStatus: 'completed' } }),
   });
 
   const message = isFinalMilestone
     ? 'Final milestone marked disbursed. Campaign completed.'
     : `Milestone disbursed. Milestone #${nextIndex + 1} is unlocked.`;
 
-  sendResponse(res, 200, message, {
+  sendResponse(res, 200, true, message, {
     milestone: updated,
   });
 
@@ -426,9 +429,9 @@ const rejectMilestone = async (req, res) => {
   const milestone = await Milestone.findOne({ _id: milestoneId, campaignId });
   if (!milestone) throw new ApiError('Milestone not found.', 404);
 
-  if (milestone.status !== 'submitted') {
+  if (milestone.reviewStatus !== 'submitted') {
     throw new ApiError(
-      `Only submitted milestones can be rejected. Current status: "${milestone.status}".`,
+      `Only submitted milestones can be rejected. Current status: "${milestone.reviewStatus}".`,
       400
     );
   }
@@ -439,7 +442,7 @@ const rejectMilestone = async (req, res) => {
     milestoneId,
     {
       $set: {
-        status:          'rejected',
+        reviewStatus:    'rejected',
         rejectionReason,
         rejectedAt:      new Date(),
       },
@@ -447,7 +450,7 @@ const rejectMilestone = async (req, res) => {
     { new: true, runValidators: true }
   );
 
-  sendResponse(res, 200, 'Milestone rejected. Startup has been notified to resubmit.', {
+  sendResponse(res, 200, true, 'Milestone rejected. Startup has been notified to resubmit.', {
     milestone: updated,
   });
 

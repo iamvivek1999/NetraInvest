@@ -60,8 +60,9 @@ const userSchema = new mongoose.Schema(
     // ── Blockchain ──────────────────────────────────────────────────────────
     walletAddress: {
       type: String,
+      lowercase: true,
       match: [
-        /^0x[a-fA-F0-9]{40}$/,
+        /^0x[a-fA-F0-9]{40}$/i,
         'Invalid Ethereum wallet address format',
       ],
       // Validated by partial unique index below structure
